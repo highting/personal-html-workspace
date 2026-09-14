@@ -1,0 +1,8 @@
+# RedNote Render Skill 依赖
+
+# Markdown 处理
+markdown>=3.4.0,<4.0
+PyYAML>=6.0,<7.0
+
+# 浏览器自动化（渲染图片）
+playwright>=1.40.0,<2.0

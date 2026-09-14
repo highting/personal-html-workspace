@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "Bakameow-RedNote-Render-Skill",
+  "owner": {
+    "name": "Bakameow"
+  },
+  "description": "RedNote/Xiaohongshu card rendering plugin: convert Markdown into styled image cards with 10 visual themes, optional KaTeX formulas, and automatic pagination.",
+  "plugins": [
+    {
+      "name": "rednote-render-skill",
+      "source": "./",
+      "description": "Render Markdown to RedNote/Xiaohongshu style image cards with 10 visual themes, optional KaTeX formulas, and auto-pagination based on content height.",
+      "category": "content",
+      "keywords": [
+        "xiaohongshu",
+        "rednote",
+        "redbook",
+        "card-rendering",
+        "image-generation"
+      ]
+    }
+  ]
+}

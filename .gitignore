@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+ENV/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Generated artifacts and local validation environments
+output/
+
+# Logs, temporary files, and editor backups
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+
+# Editor and dependency caches
+.idea/
+node_modules/
+npm-debug.log*
