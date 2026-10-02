@@ -2,6 +2,38 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261002-013 — 汇报缩页后残留旧导出图片
+
+- Fingerprint: `content-export:stale-pages-after-rerender`
+- Status: active
+- First seen: 2026-10-02
+- Last seen: 2026-10-02
+- Occurrences: 1
+- Scope: `scripts/render_content.py`、`scripts/publish_content.py` 的重复检查与成品汇总
+- Symptom: 同一成品目录从两页改成一页重新导出后，`qa.images` 只列一页，但旧 `page-02.png` 仍存在，会被整体复制到短路径交付。
+- Root cause: 检查器只覆盖当前页图，未清理自身上一轮生成的文件；发布函数核对当前清单后整体复制目录。
+- Wrong assumption/action: 认为新 QA 清单能保证成品目录内没有多余旧图。
+- Correct approach: 每轮检查前，仅清理约定名称的自有页图及明暗检查截图，保留独立配图和其他文件，再生成本轮结果。
+- Prevention check: 导出和交付改动必须覆盖同一目录“多页→少页”的重跑，核对根级页图和两种主题检查截图均无旧页，同时验证独立配图保留。
+- Verification: `test_rerender_with_fewer_pages_removes_previous_exports` 修复前失败、修复后通过；两页改一页后旧页图消失，`diagram.png` 保留。
+- Evidence: `scripts/render_content.py` 的生成文件清理；`tests/test_content.py`。
+
+## ERR-20261002-012 — 滚动位置检查混入自动化工具的滚动
+
+- Fingerprint: `qa:automation-scroll-contaminates-theme-position-test`
+- Status: active
+- First seen: 2026-10-02
+- Last seen: 2026-10-02
+- Occurrences: 1
+- Scope: 新长文模板的主题切换与 `tests/test_content.py`
+- Symptom: 主题切换测试将 `scrollY` 从450变化到0或89误归为主题行为；改为视口点击后，未结束的锚点平滑滚动仍使位置变化。
+- Root cause: 定位器点击会主动将控件滚入视口，且先前导航的平滑滚动尚未稳定；测试没有隔离这些位置变化。
+- Wrong assumption/action: 把定位器点击和正在执行的平滑滚动等同于用户在稳定视口中的点击。
+- Correct approach: 阅读工具栏固定在视口顶部；位置断言前先稳定滚动，在控件的真实视口坐标点击主题按钮。
+- Prevention check: 验证阅读位置不变时，导航前关闭测试中的平滑滚动或等待其完成；避免定位器额外滚动，以真实视口点击复核，并确认主题确实改变。
+- Verification: 单独视口点击从450切到深色后位置仍为450；`test_offline_learning_themes_math_navigation_and_position` 通过并核对主题记忆和离线公式。
+- Evidence: `assets/content/content.css` 的固定工具栏；`tests/test_content.py`。
+
 ## ERR-20260914-011 — 封面未直接表达核心论点
 
 - Fingerprint: `cover:explanatory-viewpoint-replaces-central-claim`

@@ -1,4 +1,4 @@
-# RedNote Render Skill 依赖
+# Content Workbench 依赖
 
 # Markdown 处理
 markdown>=3.4.0,<4.0
@@ -6,3 +6,7 @@ PyYAML>=6.0,<7.0
 
 # 浏览器自动化（渲染图片）
 playwright>=1.40.0,<2.0
+
+# 新 HTML 的中文字体子集与 WOFF2
+fonttools>=4.60,<5.0
+brotli>=1.1,<2.0

@@ -1,9 +1,13 @@
 {
-  "name": "rednote-render-skill",
-  "description": "Create concise 3:4 RedNote/Xiaohongshu images using HTML plus SVG rendered page by page to PNG, or an image generation tool. Both methods combine content images and explanatory diagrams with academic styling by default.",
-  "version": "1.1.0",
+  "name": "content-workbench",
+  "description": "Create personal learning documents, technical blogs, presentation reports, and RedNote cards. Use offline light/dark HTML for reading and reports, and preserve the original academic RedNote image workflow.",
+  "version": "2.0.0",
   "category": "content",
   "keywords": [
+    "learning",
+    "technical-blog",
+    "presentation",
+    "offline-html",
     "xiaohongshu",
     "rednote",
     "redbook",
@@ -11,8 +15,8 @@
     "image-generation",
     "social-media"
   ],
-  "homepage": "https://github.com/Bakameow/RedNote-Render-Skill",
+  "homepage": "https://github.com/highting/content-workbench",
   "author": {
-    "name": "Bakameow"
+    "name": "highting"
   }
 }

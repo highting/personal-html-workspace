@@ -1,5 +1,9 @@
 # 第三方资源
 
+## Noto Sans SC
+
+新增学习、博客和汇报HTML的中文字体来自[Google Fonts官方固定提交](https://github.com/google/fonts/tree/a85815a42757630ce188fdad368c2dfc444d4773/ofl/notosanssc)。完整字体按需缓存且不入Git，构建器将实际字形子集与OFL许可内嵌成品。版本、SHA-256及来源见[字体说明](../assets/vendor/noto-sans-sc/README.md)，原许可见[OFL.txt](../assets/vendor/noto-sans-sc/OFL.txt)。不改变原小红书字体。
+
 ## KaTeX
 
 - 版本：0.16.11。

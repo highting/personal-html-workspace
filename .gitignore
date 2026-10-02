@@ -17,6 +17,9 @@ ENV/
 # Generated artifacts and local validation environments
 output/
 
+# Reproducible, downloaded Chinese font cache
+assets/vendor/noto-sans-sc/NotoSansSC-variable.ttf
+
 # Logs, temporary files, and editor backups
 *.log
 *.tmp
