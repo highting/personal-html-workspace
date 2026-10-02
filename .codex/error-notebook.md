@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-025 — 滚动提示伸出补充内容面板
+
+- Fingerprint: `table-hint:absolute-note-without-owned-bottom-space`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 宽表格方向提示与details嵌套布局
+- Symptom: 24px字号时提示底边653.8125px，补充面板底边647.625px，提示伸出约6px。
+- Root cause: 绝对定位提示不占布局空间；沿用普通表格留白，details末块24px外边距不足以容纳提示。
+- Wrong assumption/action: 认为正文中既有留白也适用于所有嵌套面板和可调字号。
+- Correct approach: 仅为实际溢出的表格保留足够下方间距，包含其提示；方向切换只改文字，不改间距。
+- Prevention check: 表格提示同时检查普通正文和折叠面板，在最大字号核对提示底边与面板底边，并验证开启/关闭及窗口变化。
+- Verification: 嵌套边界回归修正前失败、修正后通过；24px明暗截图已查看，表格/字号/导航/续读7项测试通过。
+- Evidence: `tests/test_table_scroll.py::test_folded_table_rechecks_overflow_after_font_changes`；本轮`nested-light.png`与`nested-dark.png`。
+
 ## ERR-20261003-024 — 长代码收起预览裁切半行
 
 - Fingerprint: `code-preview:parent-em-height-and-padding-clip-partial-line`

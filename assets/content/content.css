@@ -140,6 +140,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 .prose details[open] > summary { margin-bottom: 20px; border-bottom: 1px solid var(--line); }
 .prose details > :last-child { margin-bottom: 24px; }
 .prose .table-wrap { overflow-x: auto; margin: 32px 0; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+.prose .table-block { position: relative; margin: 32px 0; }
+.prose .table-block.has-overflow { margin-bottom: 40px; }
+.prose .table-block .table-wrap { margin: 0; }
+.prose .table-scroll-hint { position: absolute; top: calc(100% + 6px); right: 0; margin: 0; color: var(--muted); font-size: .7em; line-height: 1.5; }
 .prose .table-wrap table { margin: 0; line-height: 1.75; font-variant-numeric: tabular-nums; }
 .prose .table-wrap th { font-size: .94em; color: var(--muted); letter-spacing: .02em; white-space: nowrap; }
 .prose .table-wrap td > code { white-space: nowrap; }

@@ -92,14 +92,42 @@
     }
   });
 
-  article.querySelectorAll('table').forEach(table => {
+  article.querySelectorAll('table').forEach((table, index) => {
+    const block = document.createElement('div');
+    block.className = 'table-block';
     const wrapper = document.createElement('div');
     wrapper.className = 'table-wrap';
-    wrapper.tabIndex = 0;
     wrapper.setAttribute('role', 'region');
-    wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent || '数据表格');
-    table.before(wrapper);
+    const section = headings.filter(heading => heading.compareDocumentPosition(table) & Node.DOCUMENT_POSITION_FOLLOWING).at(-1);
+    wrapper.setAttribute('aria-label', table.querySelector('caption')?.textContent || `${section?.textContent || '正文'}：数据表格`);
+    const hint = document.createElement('p');
+    hint.className = 'table-scroll-hint';
+    hint.id = uniqueId(`table-scroll-${index + 1}`);
+    const direction = document.createElement('span');
+    const keyboard = document.createElement('span');
+    keyboard.className = 'sr-only';
+    keyboard.textContent = '可用左右方向键滚动表格。';
+    hint.append(direction, keyboard);
+    table.before(block);
+    block.append(wrapper, hint);
     wrapper.append(table);
+    const updateScrollHint = () => {
+      const limit = wrapper.scrollWidth - wrapper.clientWidth;
+      const overflow = wrapper.clientWidth > 0 && limit > 1;
+      hint.hidden = !overflow;
+      block.classList.toggle('has-overflow', overflow);
+      wrapper.tabIndex = overflow ? 0 : -1;
+      if (overflow) wrapper.setAttribute('aria-describedby', hint.id);
+      else wrapper.removeAttribute('aria-describedby');
+      const left = wrapper.scrollLeft > 1, right = wrapper.scrollLeft < limit - 1;
+      direction.textContent = left && right ? '← 左右滚动查看完整表格 →' :
+        left ? '← 向左滚动查看前面的列' : '向右滚动查看完整表格 →';
+    };
+    const observer = new ResizeObserver(updateScrollHint);
+    observer.observe(wrapper);
+    observer.observe(table);
+    wrapper.addEventListener('scroll', updateScrollHint, {passive: true});
+    updateScrollHint();
   });
 
   headings.forEach(heading => {

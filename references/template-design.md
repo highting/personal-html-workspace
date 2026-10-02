@@ -26,4 +26,6 @@
 
 来源区借鉴[Material脚注](https://squidfunk.github.io/mkdocs-material/reference/footnotes/)将补充信息与主线分开的组织方式。本模板使用作者明确提供的来源块，保留出处与图示说明，不自动改写引用或增加工具提示。
 
+宽表格保持局部滚动的处理参考[W3C Reflow说明](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html)，聚焦、区域命名与键盘滚动参考[MDN overflow](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/overflow#accessibility)。本项目按真实溢出添加方向提示，不将这些局部检查称为完整无障碍认证。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。
