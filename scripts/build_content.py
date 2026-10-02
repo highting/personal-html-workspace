@@ -129,7 +129,8 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
             for index, page in enumerate(pages, 1):
                 note = re.search(r'<!--\s*notes:\s*(.*?)-->', page, re.S | re.I)
                 page = re.sub(r'<!--\s*notes:.*?-->', '', page, flags=re.S | re.I)
-                slides.append(f'<section class="slide" data-export-page data-notes="{escape(note.group(1).strip() if note else "", quote=True)}" id="slide-{index}">'
+                classes = 'slide slide-cover' if index == 1 and metadata.get('cover') is True else 'slide'
+                slides.append(f'<section class="{classes}" data-export-page data-notes="{escape(note.group(1).strip() if note else "", quote=True)}" id="slide-{index}">'
                               f'<p class="eyebrow">{escape(title)}</p><div class="slide-body">{convert(page)}</div>'
                               f'<footer class="slide-footer"><span>{escape(title)}</span><span>{index:02d} / {len(pages):02d}</span></footer></section>')
             body = ''.join(slides)

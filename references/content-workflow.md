@@ -51,6 +51,8 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene lea
 
 Markdown围栏外的独立 `---` 作为分页符，代码和公式保持完整；每页标题用 `#` 或 `##`。`<!-- notes: 备注正文 -->` 保存口头说明。复杂内容可写可信HTML片段，完整页面遵循以下结构：
 
+有独立标题页时，可在整篇front matter设置`cover: true`，仅让第一页采用较大标题和居中的简短内容组；未设置时第一页继续使用正文布局。封面同样检查510px正文安全区，长内容应调整或拆页。可信HTML可用`class="slide slide-cover"`明确选择该样式，不为每页增加独立模板。
+
 ```html
 <section class="slide" data-export-page data-notes="讲者备注">
   <p class="eyebrow">汇报主题</p>

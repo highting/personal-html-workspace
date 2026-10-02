@@ -34,4 +34,6 @@
 
 行内数学重排依据[KaTeX选项说明](https://katex.org/docs/options.html)：其默认允许在最外层关系或二元运算符后断行。本项目让短表达式整体随段落换行，较长表达式仍在受限宽度内重排，不改变渲染模式或数学记号。
 
+汇报的可选封面借鉴[Slidev的cover与default布局分工](https://sli.dev/builtin/layouts.html)：标题页强调主标题与上下文，正文页承载证据。本项目通过一个样式修饰类及显式`cover: true`选择，不安装Slidev、不自动将所有第一页视作封面。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

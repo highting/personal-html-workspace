@@ -212,6 +212,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 .slide-body h3 { font-size: 28px; margin: 24px 0 16px; }
 .slide-body h1, .slide-body h2 { font-weight: 650; }
 .slide-body h3 { font-weight: 600; }
+.slide-cover .slide-body { display: flex; flex-direction: column; justify-content: center; }
+.slide-cover .slide-body > :is(h1,h2) { font-size: 56px; line-height: 1.2; max-width: 16em; letter-spacing: -.035em; text-wrap: balance; }
+.slide-cover .slide-body > p { max-width: 38em; color: var(--muted); }
 .slide-body p { margin: 0 0 22px; }
 .slide-body li { margin-bottom: 12px; }
 .slide-body pre { margin: 22px 0; padding: 18px 22px; font-size: 20px; white-space: pre-wrap; overflow: visible; }
