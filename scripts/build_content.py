@@ -141,7 +141,7 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
     description = str(metadata.get('description', ''))
     meta = ' · '.join(str(metadata[key]) for key in ('author', 'date') if metadata.get(key))
     template = (TEMPLATES / ('report.html' if scene == 'report' else 'document.html')).read_text(encoding='utf-8')
-    font_css, font_license = font_assets(unescape(body) + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图适合窗口放大关闭正文字号减小增大点击复制代码已复制复制失败请手动选择复制章节链接展开全部收起行上次读到继续阅读忽略补充说明向左右滚动查看完整表格前面的列→←↑−#')
+    font_css, font_license = font_assets(unescape(body) + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图图解适合窗口放大关闭正文字号减小增大点击复制代码已复制复制失败请手动选择复制章节链接展开全部收起行上次读到继续阅读忽略补充说明向左右滚动查看完整表格前面的列→←↑−#')
     values = {
         'TITLE': escape(title), 'DESCRIPTION': f'<p class="description">{escape(description)}</p>' if description else '',
         'META': escape(meta), 'LABEL': LABELS[scene], 'SCENE': scene, 'THEME': theme,

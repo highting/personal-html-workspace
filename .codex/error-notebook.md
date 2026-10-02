@@ -2,6 +2,38 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-027 — 原图内联尺寸阻碍弹窗适配
+
+- Fingerprint: `image-viewer:source-inline-dimensions-override-fit`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 克隆图像的width、height与max尺寸
+- Symptom: 原SVG内联height为900px，适合窗口的图像区只有720px，图像仍保持900px而被裁切。
+- Root cause: 克隆保留原图内联尺寸，优先级高于弹窗样式；仅修改image-width变量不能控制它。
+- Wrong assumption/action: 认为正文里的图像尺寸约束会自动服从弹窗的适配规则。
+- Correct approach: 弹窗控制克隆图像的尺寸，保留原图比例；适合窗口同时限制宽高，原图节点不变。
+- Prevention check: 图像适配覆盖竖图、带固定内联尺寸的SVG/图片及缩放窗口，比较图像实际矩形与可视区域，而非只检查缩放变量。
+- Verification: 对照测得修正前image=900、frame=720，修正后两者均720；明暗、720×500及CSS200%回归通过。
+- Evidence: `tests/test_image_viewer.py`；本轮`fixed-image-check.json`与对照HTML。
+
+## ERR-20261003-026 — 放大视图丢失图注中的条件
+
+- Fingerprint: `image-viewer:image-only-clone-loses-figure-context`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 图片/SVG弹窗与figure图注
+- Symptom: Hyperball第二张图原图注含“不采用切向、小步长构图”，放大后弹窗图注数量为0。
+- Root cause: 只克隆媒体节点，没有保留figure中的图注和技术条件。
+- Wrong assumption/action: 认为图像本身能代表图文组合的完整解释。
+- Correct approach: 在弹窗保留原图注的已渲染公式、链接及条件，正文仍保留图注；无图注图像清除上一张说明。
+- Prevention check: 比较放大前后图注内容，覆盖公式与链接、引用ID去重和切换到无图注图像，并验证关闭后位置与焦点恢复。
+- Verification: 真实两篇长文在Chrome原生100/150/200%明暗弹窗检查通过；4项相关测试及实际截图复核通过。
+- Evidence: `tests/test_image_viewer.py`；`scripts/check_chrome_zoom.py`；本轮`viewer-captions`迭代记录。
+
 ## ERR-20261003-025 — 滚动提示伸出补充内容面板
 
 - Fingerprint: `table-hint:absolute-note-without-owned-bottom-space`

@@ -5,6 +5,7 @@ import base64
 import hashlib
 import json
 from pathlib import Path
+import re
 import struct
 import sys
 import tempfile
@@ -18,6 +19,9 @@ from scripts.render_content import inspect_page
 def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    for previous_image in output.glob('chrome-zoom-*.png'):
+        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:viewer-\d+-(fit|enlarged)|(?:figure|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
+            previous_image.unlink()
     result = {'scene': scene, 'method': 'Chrome Appearance / Page zoom',
               'html_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
               'passed': False, 'issues': [], 'checks': []}
@@ -132,6 +136,39 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                             detail_images.append(detail)
                                         if kind == 'table':
                                             block.evaluate('node => node.scrollLeft = 0')
+                        if scene != 'report':
+                            visuals = page.locator('.prose img, .prose figure > svg')
+                            for number, visual in enumerate(visuals.all(), 1):
+                                if not visual.is_visible() or visual.get_attribute('tabindex') != '0':
+                                    continue
+                                visual.evaluate('node => node.focus({preventScroll: true})')
+                                position = page.evaluate('scrollY')
+                                original_caption = visual.evaluate('node => node.closest("figure")?.querySelector("figcaption")?.textContent || ""')
+                                page.keyboard.press('Enter')
+                                viewer = page.locator('.image-viewer')
+                                viewer.wait_for(state='visible')
+                                if page.locator('.image-viewer-caption').text_content() != original_caption:
+                                    issues.append(f'图{number}放大后图注不一致')
+                                fits = viewer.evaluate('''node => {
+                                  const box = node.getBoundingClientRect();
+                                  const frame = node.querySelector('.image-viewer-content').getBoundingClientRect();
+                                  const image = node.querySelector('.image-viewer-content > :first-child').getBoundingClientRect();
+                                  return box.left >= -1 && box.right <= innerWidth + 1 &&
+                                    box.top >= -1 && box.bottom <= innerHeight + 1 &&
+                                    image.width <= frame.width + 1 && image.height <= frame.height + 1;
+                                }''')
+                                if not fits:
+                                    issues.append(f'图{number}适合窗口后仍被裁切')
+                                for mode, control in (('fit', None), ('enlarged', '[data-zoom="1.5"]')):
+                                    if control:
+                                        viewer.locator(control).click()
+                                    detail = f'chrome-zoom-{round(zoom * 100)}-{theme}-viewer-{number}-{mode}.png'
+                                    capture(output / detail)
+                                    detail_images.append(detail)
+                                page.keyboard.press('Escape')
+                                viewer.wait_for(state='hidden')
+                                if abs(page.evaluate('scrollY') - position) > 2:
+                                    issues.append(f'图{number}关闭后阅读位置改变')
                         result['checks'].append({'zoom': zoom, 'theme': theme, 'metrics': current,
                                                  'font_sizes': sizes, 'issues': issues, 'image': image,
                                                  'detail_images': detail_images})

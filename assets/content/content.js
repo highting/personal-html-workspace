@@ -76,15 +76,53 @@
     const viewer = document.createElement('dialog');
     viewer.className = 'image-viewer';
     viewer.setAttribute('aria-label', '查看大图');
-    viewer.innerHTML = '<div class="image-viewer-bar"><span>查看大图</span><div class="tools"><button data-zoom="1">适合窗口</button><button data-zoom="1.5">放大</button><button data-close>关闭</button></div></div><div class="image-viewer-content"></div>';
+    viewer.innerHTML = '<div class="image-viewer-bar"><span class="image-viewer-title">查看大图</span><div class="tools"><button data-zoom="1">适合窗口</button><button data-zoom="1.5">放大</button><button data-close>关闭</button></div></div><div class="image-viewer-content"></div><div class="image-viewer-caption" hidden></div>';
+    const title = viewer.querySelector('.image-viewer-title');
+    const caption = viewer.querySelector('.image-viewer-caption');
+    const uniqueId = (base, used) => {
+      let id = base, suffix = 2;
+      while (used.has(id)) id = `${base}-${suffix++}`;
+      used.add(id);
+      return id;
+    };
+    caption.id = uniqueId('image-viewer-caption', new Set([...document.querySelectorAll('[id]')].map(node => node.id)));
+    caption.setAttribute('role', 'region');
+    caption.setAttribute('aria-label', '图注');
     document.body.append(viewer);
     const content = viewer.querySelector('.image-viewer-content');
-    let opener;
+    content.setAttribute('role', 'region');
+    content.setAttribute('aria-label', '图像，可用方向键滚动');
+    let opener, ratio = 1, zoom = 1;
+    const fitViewer = () => {
+      if (!viewer.open) return;
+      const scale = Number(getComputedStyle(root).zoom) || 1;
+      viewer.style.width = Math.min(innerWidth / scale * .94, 1600) + 'px';
+      viewer.style.maxHeight = innerHeight / scale * .92 + 'px';
+      content.style.maxHeight = innerHeight / scale * .72 + 'px';
+      caption.style.maxHeight = innerHeight / scale * .4 + 'px';
+      content.style.setProperty('--image-width', '100%');
+      const width = Math.min(content.clientWidth, content.clientHeight * ratio);
+      content.style.setProperty('--image-width', zoom === 1 ? width + 'px' : zoom * 100 + '%');
+      content.tabIndex = content.scrollWidth > content.clientWidth + 1 || content.scrollHeight > content.clientHeight + 1 ? 0 : -1;
+      caption.tabIndex = caption.scrollHeight > caption.clientHeight + 1 ? 0 : -1;
+      viewer.querySelectorAll('[data-zoom]').forEach(button => {
+        button.setAttribute('aria-pressed', String(Number(button.dataset.zoom) === zoom));
+      });
+    };
+    addEventListener('resize', fitViewer);
     viewer.querySelector('[data-close]').addEventListener('click', () => viewer.close());
     viewer.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
-    viewer.addEventListener('close', () => { content.replaceChildren(); opener?.focus({preventScroll: true}); });
+    viewer.addEventListener('close', () => {
+      content.replaceChildren();
+      caption.replaceChildren();
+      caption.hidden = true;
+      viewer.removeAttribute('aria-describedby');
+      opener?.focus({preventScroll: true});
+    });
     viewer.querySelectorAll('[data-zoom]').forEach(button => button.addEventListener('click', () => {
-      content.style.setProperty('--image-width', Number(button.dataset.zoom) * 100 + '%');
+      zoom = Number(button.dataset.zoom);
+      fitViewer();
+      content.scrollTo(0, 0);
     }));
     figures.forEach(figure => {
       if (figure.closest('a')) return;
@@ -95,23 +133,50 @@
         opener = figure;
         const copy = figure.cloneNode(true);
         copy.removeAttribute('tabindex');
-        copy.removeAttribute('id');
+        copy.setAttribute('aria-label', label);
+        const box = figure.getBoundingClientRect();
+        const viewBox = figure.viewBox?.baseVal;
+        ratio = viewBox?.width && viewBox.height ? viewBox.width / viewBox.height :
+          figure.naturalWidth && figure.naturalHeight ? figure.naturalWidth / figure.naturalHeight : box.width / box.height;
+        copy.style.aspectRatio = String(ratio);
+        copy.style.width = 'var(--image-width, 100%)';
+        copy.style.height = 'auto';
+        copy.style.maxWidth = 'none';
+        copy.style.maxHeight = 'none';
+        const sourceCaption = figure.closest('figure')?.querySelector('figcaption');
+        caption.replaceChildren(...[...(sourceCaption?.childNodes || [])].map(node => node.cloneNode(true)));
+        caption.hidden = !sourceCaption;
+        if (sourceCaption) viewer.setAttribute('aria-describedby', caption.id);
+        else viewer.removeAttribute('aria-describedby');
+        title.textContent = label;
+        title.title = label;
+        viewer.setAttribute('aria-label', '查看大图：' + label);
         // 保留SVG箭头、裁剪路径和引用，同时避免复制后ID冲突。
         const ids = new Map();
-        copy.querySelectorAll('[id]').forEach(node => { ids.set(node.id, 'viewer-' + node.id); node.id = ids.get(node.id); });
-        for (const node of [copy, ...copy.querySelectorAll('*')]) {
+        if (sourceCaption?.id) ids.set(sourceCaption.id, caption.id);
+        const used = new Set([...document.querySelectorAll('[id]')].map(node => node.id));
+        const nodes = [copy, ...copy.querySelectorAll('*'), ...caption.querySelectorAll('*')];
+        nodes.filter(node => node.id).forEach(node => { ids.set(node.id, uniqueId('viewer-' + node.id, used)); node.id = ids.get(node.id); });
+        for (const node of nodes) {
           for (const attribute of [...node.attributes]) {
             let value = attribute.value;
             ids.forEach((newId, oldId) => {
               value = value.replaceAll('url(#' + oldId + ')', 'url(#' + newId + ')');
+              value = value.replaceAll('url("#' + oldId + '")', 'url("#' + newId + '")');
+              value = value.replaceAll("url('#" + oldId + "')", "url('#" + newId + "')");
               if (value === '#' + oldId) value = '#' + newId;
             });
+            if (attribute.name === 'aria-labelledby' || attribute.name === 'aria-describedby') {
+              value = value.split(/\s+/).map(id => ids.get(id) || id).join(' ');
+            }
             if (value !== attribute.value) node.setAttribute(attribute.name, value);
           }
         }
-        content.style.setProperty('--image-width', '100%');
+        zoom = 1;
         content.replaceChildren(copy);
         viewer.showModal();
+        fitViewer();
+        content.scrollTo(0, 0);
       };
       figure.addEventListener('click', open);
       figure.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });

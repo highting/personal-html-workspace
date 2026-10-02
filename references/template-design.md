@@ -30,4 +30,6 @@
 
 文字颜色按语义角色区分的思路参考[Carbon颜色tokens](https://www.carbondesignsystem.com/building-blocks/foundations/color/tokens)。本项目的深色长文正文亮度依据真实长文对照微调，标题和图内标签保留原文字色；不照搬Carbon的具体值，也不通过随意减小字重制造层级。
 
+图像放大视图保留图注的思路参考[PhotoSwipe Caption](https://photoswipe.com/caption/)，原图注同时在正文可读。本项目继续使用原生dialog，复制已渲染的公式和链接，按自身窗口与主题排版，不安装PhotoSwipe或复制其示例样式。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

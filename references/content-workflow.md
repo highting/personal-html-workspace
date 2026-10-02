@@ -23,7 +23,7 @@ python -X utf8 scripts/build_content.py "<work_entry>" --scene learning --output
 python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene learning --output-dir "<artifact_dir>"
 ```
 
-博客将两处scene改为 `blog`，与学习共用模板，以内容详略区别。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，太阳/月亮按钮保存用户选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
+博客将两处scene改为 `blog`，与学习共用模板，以内容详略区别。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，太阳/月亮按钮保存用户选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。放大视图保留原图注的条件、公式和链接，适合窗口同时按宽高计算；放大后可滚动或聚焦图像区用方向键查看，关闭恢复原位置与焦点。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
 
 调节字号时保持当前可见的阅读内容；文字按插入点定位，图面和段间留白按当前块定位。自然换行仍可能让同一行末尾的词移到下一行，但不能因整篇重排而跳到相邻段落。
 
