@@ -97,6 +97,7 @@
   if (!slides.length) {
     const headings = [...document.querySelectorAll('.prose h2, .prose h3')];
     const headingIds = new Set([...document.querySelectorAll('[id]')].map(node => node.id));
+    let chapterNumber = 0;
     headings.forEach((heading, index) => {
       if (!heading.id) {
         const base = heading.textContent.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'section';
@@ -107,22 +108,54 @@
       }
       const link = document.createElement('a');
       link.href = `#${heading.id}`;
-      link.textContent = heading.textContent;
-      if (heading.tagName === 'H3') link.className = 'subheading';
+      if (heading.tagName === 'H3') {
+        link.className = 'subheading';
+        link.textContent = heading.textContent;
+      } else {
+        const index = document.createElement('span');
+        index.className = 'toc-index';
+        index.setAttribute('aria-hidden', 'true');
+        index.textContent = String(++chapterNumber).padStart(2, '0');
+        const title = document.createElement('span');
+        title.textContent = heading.textContent;
+        link.append(index, title);
+      }
       tocLinks.append(link);
     });
+    const count = document.getElementById('toc-count');
+    if (count) { count.textContent = `${chapterNumber} 章节`; count.hidden = chapterNumber === 0; }
+    const links = [...tocLinks.children];
+    let previousCurrent;
     const updateReading = () => {
       const available = root.scrollHeight - innerHeight;
       document.getElementById('reading-progress').style.width = `${available > 0 ? scrollY / available * 100 : 100}%`;
-      let current = headings[0];
-      headings.forEach(heading => { if (heading.getClientRects().length && heading.getBoundingClientRect().top < 160) current = heading; });
-      [...tocLinks.children].forEach((link, index) => {
+      const visible = headings.filter(heading => heading.getClientRects().length);
+      let current = visible[0], chapter;
+      visible.forEach(heading => { if (heading.getBoundingClientRect().top < 160) current = heading; });
+      // 短结尾不能滚到工具栏下方，也应在文末成为当前章节。
+      if (available > 0 && scrollY >= available - 2) current = visible.at(-1);
+      for (const heading of visible) {
+        if (heading.tagName === 'H2') chapter = heading;
+        if (heading === current) break;
+      }
+      links.forEach((link, index) => {
         if (headings[index] === current) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
+        link.classList.toggle('toc-parent', current?.tagName === 'H3' && headings[index] === chapter);
       });
+      const active = links[headings.indexOf(current)];
+      if (active && current !== previousCurrent && toc.getClientRects().length) {
+        const frame = toc.getBoundingClientRect(), item = active.getBoundingClientRect();
+        if (item.top < frame.top) toc.scrollTop -= frame.top - item.top + 12;
+        else if (item.bottom > frame.bottom) toc.scrollTop += item.bottom - frame.bottom + 12;
+      }
+      previousCurrent = current;
     };
     addEventListener('scroll', updateReading, { passive: true });
+    addEventListener('resize', updateReading);
+    new ResizeObserver(updateReading).observe(document.getElementById('content'));
     document.querySelector('.prose').addEventListener('toggle', updateReading, true);
+    tocButton.addEventListener('click', () => { previousCurrent = null; updateReading(); });
     updateReading();
     return;
   }

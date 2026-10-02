@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-019 — 短结尾无法成为目录当前章节
+
+- Fingerprint: `navigation:short-last-section-never-reaches-active-threshold`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: `assets/content/content.js` 的长文目录高亮与目录内部跟随
+- Symptom: 已读到页底，目录仍选中倒数第二章；章节较多时当前项还可能位于目录可视区外。
+- Root cause: 仅依据标题越过视口固定阈值选择章节，短结尾受最大滚动距离限制，永远无法到达该阈值；选中状态没有维护目录内部可见性。
+- Wrong assumption/action: 认为每个章节标题最终都能滚过工具栏下方的判定线。
+- Correct approach: 到达文末时选择最后一个可见标题；当前项变化时只调整目录容器scrollTop，避免scrollIntoView移动正文。
+- Prevention check: 长文导航验证同时覆盖长目录、短结尾和隐藏的折叠标题；核对当前项、目录内可见性与正文位置。
+- Verification: 32章短结尾测试修复前选中章节31，修复后选中结尾且在目录内可见；真实Hyperball文末选中总结，相关7项浏览器验证通过。
+- Evidence: `tests/test_navigation.py::test_end_of_long_article_marks_last_section_and_keeps_it_in_toc`；本轮`delivery/checks/light/navigation-end.png`。
+
 ## ERR-20261003-018 — 重命名目录后跨账户Git归属检查
 
 - Fingerprint: `git:renamed-workspace-cross-account-ownership`
@@ -103,8 +119,8 @@
 - Fingerprint: `qa:automation-scroll-contaminates-theme-position-test`
 - Status: active
 - First seen: 2026-10-02
-- Last seen: 2026-10-02
-- Occurrences: 1
+- Last seen: 2026-10-03
+- Occurrences: 2
 - Scope: 新长文模板的主题切换与 `tests/test_content.py`
 - Symptom: 主题切换测试将 `scrollY` 从450变化到0或89误归为主题行为；改为视口点击后，未结束的锚点平滑滚动仍使位置变化。
 - Root cause: 定位器点击会主动将控件滚入视口，且先前导航的平滑滚动尚未稳定；测试没有隔离这些位置变化。
@@ -112,7 +128,7 @@
 - Correct approach: 阅读工具栏固定在视口顶部；位置断言前先稳定滚动，在控件的真实视口坐标点击主题按钮。
 - Prevention check: 验证阅读位置不变时，导航前关闭测试中的平滑滚动或等待其完成；避免定位器额外滚动，以真实视口点击复核，并确认主题确实改变。
 - Verification: 单独视口点击从450切到深色后位置仍为450；`test_offline_learning_themes_math_navigation_and_position` 通过并核对主题记忆和离线公式。
-- Evidence: `assets/content/content.css` 的固定工具栏；`tests/test_content.py`。
+- Evidence: `assets/content/content.css` 的固定工具栏；`tests/test_content.py`；`tests/test_navigation.py` 的文末主题切换采用实际视口坐标，复核正文位置不变。
 
 ## ERR-20260914-011 — 封面未直接表达核心论点
 

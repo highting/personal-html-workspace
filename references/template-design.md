@@ -18,4 +18,6 @@
 
 长文的代码复制、折叠与续读功能参考[NexT功能文档](https://theme-next.js.org/docs/theme-settings/miscellaneous)，章节定位参考[Blowfish](https://blowfish.page/docs/configuration/)，补充内容组织参考[Material折叠内容](https://squidfunk.github.io/mkdocs-material/reference/admonitions/)。仅借鉴阅读行为，继续使用本项目单文件HTML；不引入它们的框架、评论或访问统计。代码高亮使用[Pygments](https://pygments.org/docs/quickstart/)，在构建阶段完成。
 
+目录的层级区分和当前项跟随参考[Material导航与anchor following](https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#anchor-following)，在本模板内实现，不安装其框架。当前项跟随只调整目录内部滚动，主题切换不能移动正文阅读位置。
+
 新模板只用于学习/博客/汇报，避免将新阅读样式灌入原卡片；小红书继续保留academic的画幅与字体约定。
