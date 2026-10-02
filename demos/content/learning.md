@@ -38,7 +38,7 @@ $$
 
 ### 对应到实现
 
-```python
+```{.python title="softmax.py" data-highlight="1 3"}
 shifted = x - x.max(axis=-1, keepdims=True)
 weights = np.exp(shifted)
 probabilities = weights / weights.sum(axis=-1, keepdims=True)

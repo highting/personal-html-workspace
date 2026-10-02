@@ -16,4 +16,6 @@
 
 新增HTML采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；构建时仅内嵌本篇实际字形的WOFF2子集及许可。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。代码等宽，中文由同一离线字体回退；数学使用KaTeX字形。实际字体以浏览器核验为准。
 
-原 `main` 小红书的academic主题、字体、画幅和渲染代码保持不变。新模板只用于学习/博客/汇报，避免将新模板样式灌入原卡片。
+长文的代码复制、折叠与续读功能参考[NexT功能文档](https://theme-next.js.org/docs/theme-settings/miscellaneous)，章节定位参考[Blowfish](https://blowfish.page/docs/configuration/)，补充内容组织参考[Material折叠内容](https://squidfunk.github.io/mkdocs-material/reference/admonitions/)。仅借鉴阅读行为，继续使用本项目单文件HTML；不引入它们的框架、评论或访问统计。代码高亮使用[Pygments](https://pygments.org/docs/quickstart/)，在构建阶段完成。
+
+新模板只用于学习/博客/汇报，避免将新阅读样式灌入原卡片；小红书继续保留academic的画幅与字体约定。

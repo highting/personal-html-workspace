@@ -2,6 +2,7 @@
 
 import argparse
 import base64
+import hashlib
 from functools import lru_cache
 from html import escape, unescape
 from io import BytesIO
@@ -15,6 +16,7 @@ from fontTools.ttLib import TTFont
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.rednote_render import KATEX_DIR, convert_markdown_to_html, parse_markdown_file
+from scripts.content_markup import enhance_code_blocks, group_figure_captions
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = ROOT / 'assets/content'
@@ -134,16 +136,19 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
     else:
         body = convert(text)
         body = re.sub(r'^\s*<h1[^>]*>.*?</h1>\s*', '', body, count=1, flags=re.S)
+        body = group_figure_captions(enhance_code_blocks(body))
     body = inline_images(body, source)
     description = str(metadata.get('description', ''))
     meta = ' · '.join(str(metadata[key]) for key in ('author', 'date') if metadata.get(key))
     template = (TEMPLATES / ('report.html' if scene == 'report' else 'document.html')).read_text(encoding='utf-8')
-    font_css, font_license = font_assets(unescape(body) + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图适合窗口放大关闭正文字号减小增大点击→←↑−')
+    font_css, font_license = font_assets(unescape(body) + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图适合窗口放大关闭正文字号减小增大点击复制代码已复制复制失败请手动选择复制章节链接展开全部收起行上次读到继续阅读忽略补充说明→←↑−#')
     values = {
         'TITLE': escape(title), 'DESCRIPTION': f'<p class="description">{escape(description)}</p>' if description else '',
         'META': escape(meta), 'LABEL': LABELS[scene], 'SCENE': scene, 'THEME': theme,
+        'DOCUMENTID': hashlib.sha256(str(metadata.get('document_id', scene + ':' + title)).encode()).hexdigest()[:20],
         'CSS': (TEMPLATES / 'content.css').read_text(encoding='utf-8'),
-        'JS': (TEMPLATES / 'content.js').read_text(encoding='utf-8'), 'MATH': math_assets(), 'BODY': body,
+        'JS': (TEMPLATES / 'content.js').read_text(encoding='utf-8') + ('\n' + (TEMPLATES / 'reading.js').read_text(encoding='utf-8') if scene != 'report' else ''),
+        'MATH': math_assets(), 'BODY': body,
         'FONT': font_css, 'FONTLICENSE': font_license,
     }
     html = re.sub(r'@@([A-Z]+)@@', lambda match: values[match.group(1)], template)

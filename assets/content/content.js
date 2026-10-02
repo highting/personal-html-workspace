@@ -96,8 +96,15 @@
   const slides = [...document.querySelectorAll('[data-export-page]')];
   if (!slides.length) {
     const headings = [...document.querySelectorAll('.prose h2, .prose h3')];
+    const headingIds = new Set([...document.querySelectorAll('[id]')].map(node => node.id));
     headings.forEach((heading, index) => {
-      if (!heading.id) heading.id = `section-${index + 1}`;
+      if (!heading.id) {
+        const base = heading.textContent.normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '') || 'section';
+        let id = base, suffix = 2;
+        while (headingIds.has(id)) id = `${base}-${suffix++}`;
+        heading.id = id;
+        headingIds.add(id);
+      }
       const link = document.createElement('a');
       link.href = `#${heading.id}`;
       link.textContent = heading.textContent;
@@ -108,13 +115,14 @@
       const available = root.scrollHeight - innerHeight;
       document.getElementById('reading-progress').style.width = `${available > 0 ? scrollY / available * 100 : 100}%`;
       let current = headings[0];
-      headings.forEach(heading => { if (heading.getBoundingClientRect().top < 160) current = heading; });
+      headings.forEach(heading => { if (heading.getClientRects().length && heading.getBoundingClientRect().top < 160) current = heading; });
       [...tocLinks.children].forEach((link, index) => {
         if (headings[index] === current) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
       });
     };
     addEventListener('scroll', updateReading, { passive: true });
+    document.querySelector('.prose').addEventListener('toggle', updateReading, true);
     updateReading();
     return;
   }

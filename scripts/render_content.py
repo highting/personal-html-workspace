@@ -69,6 +69,8 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
         browser = playwright.chromium.launch(**options)
         context = browser.new_context(viewport={'width': 1440, 'height': 1000}, offline=True)
         page = context.new_page()
+        # 每轮检查从独立阅读状态开始，避免上一主题的截图滚动变成续读提示。
+        page.add_init_script('try { localStorage.clear(); } catch (_) {}')
         resource_failures, script_errors = [], []
         page.on('requestfailed', lambda request: resource_failures.append(request.url))
         page.on('pageerror', lambda error: script_errors.append(str(error)))
@@ -79,6 +81,8 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
             page.goto(destination.as_uri(), wait_until='load')
             page.evaluate('document.fonts.ready')
             page.evaluate('''async () => { await Promise.all([...document.images].map(image => image.decode().catch(() => {}))); }''')
+            if scene != 'report' and page.evaluate('typeof window.contentReadingReady !== "undefined"'):
+                page.wait_for_function('window.contentReadingReady === true')
             page.evaluate('theme => window.setContentTheme(theme)', selected_theme)
             page.locator('#theme-toggle').click()
             switched = page.evaluate('document.documentElement.dataset.theme')
@@ -129,6 +133,10 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
                         shutil.copy2(image, published)
                         result['images'].append({'file': image.name, 'sha256': file_hash(published)})
             else:
+                issues.extend(inspect_page(page, scene))
+                # 默认折叠状态已保留在首屏；完整检查还须覆盖补充内容和长代码。
+                page.locator('.prose details').evaluate_all('nodes => nodes.forEach(node => node.open = true)')
+                page.locator('.code-expand[aria-expanded="false"]').evaluate_all('nodes => nodes.forEach(node => node.click())')
                 issues.extend(inspect_page(page, scene))
                 headings = page.locator('.prose h2')
                 for index in range(headings.count()):

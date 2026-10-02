@@ -25,6 +25,14 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene lea
 
 博客将两处scene改为 `blog`，与学习共用模板，以内容详略区别。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，太阳/月亮按钮保存用户选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
 
+代码围栏可写为 `` ```{.python title="example.py" data-highlight="2 4-6"} ``，分别指定语言、文件名和重点行；普通 `` ```python `` 同样可用。代码在构建时由Pygments高亮，阅读时不联网；复制保留完整代码，超过20行提供展开按钮。无法访问剪贴板时明确提示，不显示虚假成功。
+
+补充内容用 `<details markdown="1">` 包裹，第一项写 `<summary>补充内容标题</summary>`，中间留空行后写Markdown，最后关闭 `</details>`。核心条件与关键结论留在展开的主线中，不为展示功能强行折叠。检查器会展开补充内容与长代码后检查，默认状态另保留首屏截图。
+
+章节标题自动获得稳定定位链接，悬停或键盘聚焦时显示复制按钮。链接打开优先定位目标并展开其所在补充内容。阅读位置保存在当前浏览器中，再次打开由读者点击“继续阅读”；不会自动跳转。可在front matter指定稳定的 `document_id`，默认按场景与标题区分；同名不同文章应使用不同ID。浏览器禁用本地存储时仍可阅读，文件链接只用于本机定位。
+
+独立Markdown图片后紧跟以“图1”等开头的斜体图注时，构建器将两者组合为figure；一般文字不自动当图注。原图保持原貌，自绘SVG使用主题变量。
+
 首次构建前显式执行 `python -X utf8 scripts/download_content_fonts.py`，下载并校验固定版本Noto Sans SC（思源黑体系列）缓存。构建器用FontTools/Brotli按实际字符制作WOFF2子集，中文正文、标题、SVG、代码中文和备注可离线显示；字体及OFL许可内嵌成品，完整缓存不入Git。来源见[字体说明](../assets/vendor/noto-sans-sc/README.md)。仍需核对实际中文字形与字体，而不只看CSS声明。
 
 不引入React/Next/Astro后台；正文片段可按内容调整排版，模板不是固定图数或章节数的约束。来源链接允许联网跳转，但阅读不依赖联网。不要在成品追加制作记录或机器检查表。

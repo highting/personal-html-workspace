@@ -10,7 +10,7 @@
 @@FONTLICENSE@@
 @@MATH@@
 </head>
-<body class="scene-@@SCENE@@">
+<body class="scene-@@SCENE@@" data-document-id="@@DOCUMENTID@@">
 <a class="skip-link" href="#content">跳到正文</a>
 <header class="toolbar" data-export-ui>
   <div class="font-control" role="group" aria-label="正文字号"><button id="font-smaller" aria-label="减小字号">A−</button><output id="font-size" aria-live="polite">18px</output><button id="font-larger" aria-label="增大字号">A+</button></div>
@@ -22,6 +22,8 @@
   <aside id="toc" class="toc" aria-label="章节目录" data-export-ui><p class="toc-label">本文目录</p><nav id="toc-links"></nav></aside>
   <main id="content">
     <header class="article-header"><p class="eyebrow">@@LABEL@@</p><h1>@@TITLE@@</h1>@@DESCRIPTION@@<p class="article-meta">@@META@@</p></header>
+    <div id="resume-banner" class="resume-banner" hidden><div><span>上次读到</span><strong id="resume-title"></strong></div><button id="resume-reading">继续阅读</button><button id="dismiss-reading" aria-label="忽略上次阅读位置">忽略</button></div>
+    <p id="reading-status" class="sr-only" role="status"></p>
     <article class="prose">@@BODY@@</article>
     <footer class="article-footer"><a href="#content">回到开头 ↑</a><span>@@TITLE@@</span></footer>
   </main>

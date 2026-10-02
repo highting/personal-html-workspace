@@ -2,6 +2,38 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-016 — 自动阅读标记与作者ID冲突
+
+- Fingerprint: `reading:generated-id-collides-with-author-id`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: `assets/content/reading.js` 的折叠块、代码展开定位与续读
+- Symptom: 正文已有同名ID时，恢复折叠状态会找到标题而非details，代码按钮也可能指向错误元素。
+- Root cause: 自动标记只使用固定前缀和序号，未与文档已有ID去重。
+- Wrong assumption/action: 假定模板内部前缀不会被可信HTML正文使用。
+- Correct approach: 根据已有ID分配唯一标记；补充块优先按summary生成稳定名称，重复时追加后缀。
+- Prevention check: 带作者自定义ID的正文必须验证全页ID唯一，且展开控件与续读指向正确元素。
+- Verification: `test_generated_ids_do_not_shadow_author_ids`及44项回归通过。
+- Evidence: `assets/content/reading.js`；`tests/test_reading.py`。
+
+## ERR-20261003-017 — 章节定位重复计算顶部留白
+
+- Fingerprint: `reading:double-anchor-scroll-offset`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 长文的章节链接、目录高亮与续读标题
+- Symptom: 目录跳转后标题停在视口200px处，续读提示仍显示上一个小节。
+- Root cause: 根元素100px的scroll-padding与目标标题100px的scroll-margin叠加，而当前章节判断阈值为140px。
+- Wrong assumption/action: 在已有固定工具栏避让规则上又为标题添加同样的偏移。
+- Correct approach: 统一由根元素scroll-padding提供避让，删除目标标题的重复设置。
+- Prevention check: 核对真实文章目录跳转后的目标位置和当前章节；续读标题也应对应目标章节，不能只检查hash变化。
+- Verification: Hyperball阅读版跳转“方法对照”小节后续读标题正确，恢复位置距视口顶部100px；明暗QA重跑通过。
+- Evidence: `assets/content/content.css`；本次工作目录的`delivery/checks/resume.png`。
+
 ## ERR-20261002-015 — 汇报舞台缩放后偏移并被裁切
 
 - Fingerprint: `report:intrinsic-grid-size-before-transform`

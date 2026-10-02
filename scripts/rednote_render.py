@@ -243,6 +243,8 @@ def convert_markdown_to_html(md_content: str, math_mode: str = 'off') -> str:
     html = markdown.markdown(
         md_content,
         extensions=['extra', 'codehilite', 'tables', 'nl2br'],
+        # 卡片保持原代码输出；长文构建器单独完成语义高亮与工具栏。
+        extension_configs={'codehilite': {'use_pygments': False}},
     )
     for token, formula in math_blocks:
         html = html.replace(token, escape(formula, quote=False))

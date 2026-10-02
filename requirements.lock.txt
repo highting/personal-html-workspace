@@ -8,3 +8,4 @@ pyee==13.0.1
 typing_extensions==4.16.0
 fonttools==4.66.1
 brotli==1.2.0
+Pygments==2.21.0
