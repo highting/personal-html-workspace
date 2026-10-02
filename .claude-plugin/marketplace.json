@@ -1,13 +1,13 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "content-workbench",
+  "name": "personal-html-workspace",
   "owner": {
     "name": "highting"
   },
-  "description": "Content workbench for personal learning, blogs, technical reports, and RedNote cards.",
+  "description": "Personal HTML workspace for learning, blogs, technical reports, and RedNote cards.",
   "plugins": [
     {
-      "name": "content-workbench",
+      "name": "personal-html-workspace",
       "source": "./",
       "description": "Create offline light/dark learning, blog and presentation HTML while retaining the original academic RedNote card renderer.",
       "category": "content",

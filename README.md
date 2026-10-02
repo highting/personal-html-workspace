@@ -1,4 +1,4 @@
-# Content Workbench
+# Personal HTML Workspace
 
 个人学习、博客、技术汇报和小红书卡片的内容制作工作区。以 `highting/rednote-skill` 的原 `main` 为基础，参考 `feat/html-content-workflow` 的四场景划分；保留原小红书制图效果，新增长文与汇报的离线 HTML 明暗模板。
 
@@ -59,10 +59,10 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 ```bash
 # 添加 marketplace
-/plugin marketplace add highting/content-workbench
+/plugin marketplace add highting/personal-html-workspace
 
 # 安装插件
-/plugin install content-workbench@content-workbench
+/plugin install personal-html-workspace@personal-html-workspace
 ```
 
 安装后运行 `/reload-plugins` 即可使用。
@@ -70,8 +70,8 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 ### 手动安装
 
 ```bash
-git clone https://github.com/highting/content-workbench.git
-cd content-workbench
+git clone https://github.com/highting/personal-html-workspace.git
+cd personal-html-workspace
 python -m pip install --user -i https://mirrors.cloud.tencent.com/pypi/simple -r requirements.lock.txt
 python -m playwright install chromium-headless-shell
 # 首次使用新学习/博客/汇报模板及相关测试时下载中文字体缓存
@@ -150,7 +150,7 @@ python scripts/rednote_render.py content.md -t retro -o ./output
 ## 项目结构
 
 ```
-content-workbench/
+personal-html-workspace/
 ├── AGENTS.md                   # 后续会话的四场景约定
 ├── inputs/                     # 新材料：分类/主题/正文与附件
 ├── prompts/                    # 公共规则与四场景任务规则
@@ -197,7 +197,7 @@ content-workbench/
 ├── tests/
 │   └── test_renderer.py           # 解析、分页块和 HTML 生成回归测试
 ├── skills/
-│   └── content-workbench/
+│   └── personal-html-workspace/
 │       └── SKILL.md               # 插件入口，引用根目录规范
 └── scripts/
     ├── prepare_content.py     # 四场景工作副本与任务规则
@@ -226,7 +226,7 @@ content-workbench/
 
 ## License
 
-新仓库保留原 `main` 的提交历史；原 `rednote-skill` 仓库继续保留。技能与插件名为 `content-workbench`。小红书渲染脚本和原主题未改动。
+新仓库保留原 `main` 的提交历史；原 `rednote-skill` 仓库继续保留。技能与插件名为 `personal-html-workspace`。小红书渲染脚本和原主题未改动。
 
 MIT License © 2026 Bakameow
 

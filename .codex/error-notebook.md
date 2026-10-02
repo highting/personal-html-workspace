@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261002-014 — 管道 Python 中的 rg 默认检索 stdin
+
+- Fingerprint: `inspection:rg-inherits-piped-stdin`
+- Status: active
+- First seen: 2026-10-02
+- Last seen: 2026-10-02
+- Occurrences: 1
+- Scope: PowerShell here-string 启动Python后调用 `subprocess.run(['rg', ...])` 的跨文件改名检索
+- Symptom: 外层rg已有命中，Python子进程的相同模式却返回1且没有文件清单，改名在写入前停止。
+- Root cause: 子进程继承了传入Python代码的非交互stdin；没有显式搜索路径时，rg选择stdin而不是工作区。
+- Wrong assumption/action: 认为当前工作目录会自动成为所有rg调用的检索范围。
+- Correct approach: 在子进程命令中显式传入 `.` 或目标目录；涉及插件元数据时同时包含隐藏文件并排除 `.git/`。
+- Prevention check: 从管道脚本调用rg时指定搜索路径；跨仓库配置改名核对隐藏的 `.claude-plugin/` 等目录，不能把空输出直接当成无匹配。
+- Verification: 显式路径与隐藏文件范围的检索返回8个命中文件，全部完成替换，插件JSON及技能入口同步改名。
+- Evidence: 本次改名脚本的rg参数；`.claude-plugin/`、`README.md`、`SKILL.md` 和 `skills/personal-html-workspace/`。
+
 ## ERR-20261002-013 — 汇报缩页后残留旧导出图片
 
 - Fingerprint: `content-export:stale-pages-after-rerender`

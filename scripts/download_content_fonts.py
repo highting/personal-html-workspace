@@ -15,7 +15,7 @@ def download_content_fonts():
     destination = FONT_DIR / 'NotoSansSC-variable.ttf'
     if destination.is_file() and hashlib.sha256(destination.read_bytes()).hexdigest() == manifest['sha256']:
         return {'output': str(destination), 'cached': True}
-    request = Request(manifest['url'], headers={'User-Agent': 'content-workbench/font-cache'})
+    request = Request(manifest['url'], headers={'User-Agent': 'personal-html-workspace/font-cache'})
     with urlopen(request, timeout=60) as response:
         data = response.read()
     if len(data) != manifest['bytes'] or hashlib.sha256(data).hexdigest() != manifest['sha256']:

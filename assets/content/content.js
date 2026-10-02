@@ -2,7 +2,7 @@
   const root = document.documentElement;
   const systemTheme = matchMedia('(prefers-color-scheme: dark)');
   let preference = root.dataset.defaultTheme || 'light';
-  try { preference = localStorage.getItem('content-workbench-theme') || preference; } catch (_) {}
+  try { preference = localStorage.getItem('personal-html-workspace-theme') || preference; } catch (_) {}
   const themeButton = document.getElementById('theme-toggle');
   window.setContentTheme = (theme, save = false) => {
     preference = theme;
@@ -10,7 +10,7 @@
     root.dataset.theme = actual;
     themeButton.setAttribute('aria-label', actual === 'dark' ? '切换到浅色主题' : '切换到深色主题');
     themeButton.title = actual === 'dark' ? '切换到浅色主题' : '切换到深色主题';
-    if (save) { try { localStorage.setItem('content-workbench-theme', theme); } catch (_) {} }
+    if (save) { try { localStorage.setItem('personal-html-workspace-theme', theme); } catch (_) {} }
   };
   setContentTheme(preference);
   themeButton.addEventListener('click', () => setContentTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true));

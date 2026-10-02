@@ -1,5 +1,5 @@
 {
-  "name": "content-workbench",
+  "name": "personal-html-workspace",
   "description": "Create personal learning documents, technical blogs, presentation reports, and RedNote cards. Use offline light/dark HTML for reading and reports, and preserve the original academic RedNote image workflow.",
   "version": "2.0.0",
   "category": "content",
@@ -15,7 +15,7 @@
     "image-generation",
     "social-media"
   ],
-  "homepage": "https://github.com/highting/content-workbench",
+  "homepage": "https://github.com/highting/personal-html-workspace",
   "author": {
     "name": "highting"
   }

@@ -1,9 +1,9 @@
 ---
-name: content-workbench
+name: personal-html-workspace
 description: Create personal learning documents, technical blogs, presentation reports, and RedNote cards from source material, with offline light/dark HTML and the original academic RedNote renderer.
 ---
 
-# Content Workbench
+# Personal HTML Workspace
 
 Follow the canonical workflow and constraints in [`../../SKILL.md`](../../SKILL.md).
 

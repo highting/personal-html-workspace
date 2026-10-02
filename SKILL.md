@@ -1,9 +1,9 @@
 ---
-name: content-workbench
+name: personal-html-workspace
 description: Turn source material into personal learning documents, technical blogs, presentation reports, or RedNote image posts. Use distinct scene workflows, offline HTML with light/dark themes, and the established academic card renderer for RedNote.
 ---
 
-# Content Workbench
+# Personal HTML Workspace
 
 按读者和使用目的选择场景，再整理正文、必要图解和交付形式。四种场景是独立任务，不能仅换标题或画幅。仓库以原 `main` 为基础，小红书渲染器、主题、字体、画幅与制作规则沿用原流程。
 
