@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-018 — 重命名目录后跨账户Git归属检查
+
+- Fingerprint: `git:renamed-workspace-cross-account-ownership`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 重命名后的本地仓库，在普通沙箱与提权命令间切换时的Git操作
+- Symptom: 普通命令可读Git状态，提权提交却报告dubious ownership。
+- Root cause: 仓库归属离线沙箱账户，而提权命令使用主账户；新路径没有被该账户信任。
+- Wrong assumption/action: 认为只读状态成功，就能保证另一执行账户下的写入命令通过归属检查。
+- Correct approach: 核对当前项目的绝对路径与归属后，仅对该次Git命令指定safe.directory，不写入全局通配信任。
+- Prevention check: 重命名工作区或切换执行账户后，先核对目标仓库；已授权的本地Git操作可用 `git -c safe.directory=<已核对的项目根目录>`，失败后立即停止后续命令。
+- Verification: 命令级精确路径设置后提交508ee79成功，工作区干净，全局Git安全配置未修改。
+- Evidence: 本轮本地Git提交命令与提交508ee79。
+
 ## ERR-20261003-016 — 自动阅读标记与作者ID冲突
 
 - Fingerprint: `reading:generated-id-collides-with-author-id`
