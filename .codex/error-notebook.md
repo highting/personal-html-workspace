@@ -2,6 +2,38 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-021 — 原生缩放截图混用CSS与DIP视口
+
+- Fingerprint: `qa:native-zoom-css-clip-applied-to-dip-surface`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: Chrome原生缩放下的自动化截图
+- Symptom: 200%时CSS视口709×451，错误截图也只有该大小，出现截断或空白；布局指标却通过。
+- Root cause: 默认截图裁剪按CSS视口或元素坐标给出clip，而原生zoom后的浏览器图面以DIP/设备像素表示。
+- Wrong assumption/action: 认为改变Chrome原生zoom后，常规页面/元素截图可以直接用CSS坐标。
+- Correct approach: 直接捕获完整浏览器表面，不传CSS clip；用视口分屏覆盖内容，并核对像素尺寸与innerWidth×DPR。
+- Prevention check: 原生zoom验收必须同时核对缩放指标、PNG尺寸和实际画面；不以无溢出的机器结果代替目视检查。
+- Verification: 200%下CSS视口709×451、DPR2，修正后完整图面1418×902；明暗图解、代码、表格、证明与报告截图已查看。
+- Evidence: `scripts/check_chrome_zoom.py`；本轮`delivery/checks/native-zoom/`。
+
+## ERR-20261003-020 — 字号重排导致当前阅读内容大幅位移
+
+- Fingerprint: `reading:font-reflow-without-content-anchor`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 长文字号控件与复杂公式/图文混排
+- Symptom: Hyperball阅读版从18px调至20px后，同一字符由视口约140px移到约527px。
+- Root cause: 只修改字号变量，依赖浏览器自动滚动锚定；复杂混排中该锚点不能稳定保持当前文字。
+- Wrong assumption/action: 只验证字号数值和无溢出，没有追踪当前阅读内容。
+- Correct approach: 修改字号前保存文字插入点；没有文字插入点时保存当前块内位置，重排后恢复其视口位置。
+- Prevention check: 在真实长文中追踪可见文字，并覆盖浏览器自动锚定关闭的情况；允许自然换行，禁止大幅跳段。
+- Verification: 最明显测点位移从386.7px降至约0.3px；真实原稿回归及完整46项测试通过。
+- Evidence: `assets/content/content.js`；`tests/test_font_position.py`；本轮`font-positions.json`。
+
 ## ERR-20261003-019 — 短结尾无法成为目录当前章节
 
 - Fingerprint: `navigation:short-last-section-never-reaches-active-threshold`

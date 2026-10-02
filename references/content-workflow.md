@@ -25,6 +25,8 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene lea
 
 博客将两处scene改为 `blog`，与学习共用模板，以内容详略区别。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，太阳/月亮按钮保存用户选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
 
+调节字号时保持当前可见的阅读内容；文字按插入点定位，图面和段间留白按当前块定位。自然换行仍可能让同一行末尾的词移到下一行，但不能因整篇重排而跳到相邻段落。
+
 代码围栏可写为 `` ```{.python title="example.py" data-highlight="2 4-6"} ``，分别指定语言、文件名和重点行；普通 `` ```python `` 同样可用。代码在构建时由Pygments高亮，阅读时不联网；复制保留完整代码，超过20行提供展开按钮。无法访问剪贴板时明确提示，不显示虚假成功。
 
 补充内容用 `<details markdown="1">` 包裹，第一项写 `<summary>补充内容标题</summary>`，中间留空行后写Markdown，最后关闭 `</details>`。核心条件与关键结论留在展开的主线中，不为展示功能强行折叠。检查器会展开补充内容与长代码后检查，默认状态另保留首屏截图。
@@ -61,6 +63,8 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene rep
 ## 检查与汇总
 
 检查器离线加载HTML，输出 `qa.json`、明暗首屏与 `checks/` 的全篇、分屏、章节或逐页截图；汇报另交所选主题 `page-01.png` 等。长文检查16/24px字号、100/150/200% CSS布局缩放，另按实际浏览器条件验证原生缩放；不把CSS缩放或DPR记录为原生浏览器操作。学习/博客/汇报不单独验收手机适配。实际查看全部内容，测试目录、主题、字号、图像放大与备注；处理 `warnings` 中的可疑制作文案。QA不能证明内容或审美已通过。
+
+已有完整桌面Chrome时，可运行 `check_chrome_zoom.py` 验证100/150/200%的原生页面缩放，传入 `--scene`、`--output-dir` 和 `--browser-executable`。脚本使用独立临时普通配置，通过Chrome外观设置的Page zoom控件操作，核对DPR、CSS视口和CSS zoom，输出 `qa-chrome-zoom.json` 与截图；不修改日常浏览器配置。Headless Shell不提供该设置界面。原生zoom下CSS视口与浏览器图面像素不同，截图直接捕获完整表面并分屏覆盖内容，不用CSS坐标裁图。键盘快捷键与其他浏览器需另行验证，记录必须写明实际方法。
 
 记录来源、主线、图解、实际检查与未验证事项到 `delivery.md`，全部完成后才将 `run.json` 的 `status` 改为 `completed`。
 

@@ -29,8 +29,46 @@
       try { localStorage.setItem('personal-html-workspace-font-size', readingSize); } catch (_) {}
     };
     setReadingSize(readingSize);
-    document.getElementById('font-smaller').addEventListener('click', () => setReadingSize(readingSize - 2));
-    document.getElementById('font-larger').addEventListener('click', () => setReadingSize(readingSize + 2));
+    const readingAnchor = () => {
+      const article = document.querySelector('.prose');
+      const left = article.getBoundingClientRect().left + 24;
+      const top = document.querySelector('.toolbar').getBoundingClientRect().bottom + 24;
+      for (let y = top; y <= top + 72; y += 24) {
+        let range;
+        if (document.caretPositionFromPoint) {
+          const caret = document.caretPositionFromPoint(left, y);
+          if (caret) { range = document.createRange(); range.setStart(caret.offsetNode, caret.offset); range.collapse(true); }
+        } else range = document.caretRangeFromPoint?.(left, y);
+        if (range?.startContainer.nodeType === Node.TEXT_NODE && article.contains(range.startContainer)) {
+          const box = range.getBoundingClientRect();
+          if (box.height) return {range, top: box.top};
+        }
+      }
+      // 图面、公式或段间留白没有文字插入点时，按当前块的相对位置保持阅读。
+      const block = [...article.children].find(node => {
+        const box = node.getBoundingClientRect();
+        return box.height && box.bottom > top && box.top < innerHeight;
+      });
+      if (block) {
+        const box = block.getBoundingClientRect();
+        const point = Math.max(top, box.top);
+        return {block, fraction: (point - box.top) / box.height, top: point};
+      }
+    };
+    const changeReadingSize = delta => {
+      const anchor = readingAnchor();
+      const previousAnchor = root.style.overflowAnchor;
+      root.style.overflowAnchor = 'none';
+      setReadingSize(readingSize + delta);
+      if (anchor) {
+        const box = anchor.range ? anchor.range.getBoundingClientRect() : anchor.block.getBoundingClientRect();
+        const top = anchor.range ? box.top : box.top + box.height * anchor.fraction;
+        scrollBy({top: top - anchor.top, behavior: 'instant'});
+      }
+      root.style.overflowAnchor = previousAnchor;
+    };
+    document.getElementById('font-smaller').addEventListener('click', () => changeReadingSize(-2));
+    document.getElementById('font-larger').addEventListener('click', () => changeReadingSize(2));
   }
 
   const figures = document.querySelectorAll('.prose img, .prose figure > svg, .slide-body img, .slide-body figure > svg');
