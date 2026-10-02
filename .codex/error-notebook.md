@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-028 — 已知正文入口未传给准备器
+
+- Fingerprint: `prepare:known-main-entry-omitted-with-supporting-markdown`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: `prepare_content`处理正文与配图说明共存的输入目录
+- Symptom: 准备器报告“无法确定唯一正文，请使用 --entry 指定”，候选为正文与配图说明两个Markdown文件。
+- Root cause: 未显式传入已经确定的正文入口，准备器无法依据目录中的多个Markdown文件唯一选择。
+- Wrong assumption/action: 已知正文文件名，却依赖唯一候选的自动选择。
+- Correct approach: 将已知正文通过`entry`或`--entry`传入，保持辅助材料随目录复制。
+- Prevention check: 输入含辅助Markdown或已知明确正文时，准备命令显式指定正文入口；不把辅助说明当正文，也不为已知入口询问用户。
+- Verification: 指定`Hyperball博客-图文版.md`后新建汇报run成功；七页实际渲染、原生缩放和源快照哈希验证通过。
+- Evidence: `output/_work/Hyperball-汇报/20261003-063225-786989-report-html/run.json`及`work/iterations/20261003-report-figures/final-check.json`。
+
 ## ERR-20261003-027 — 原图内联尺寸阻碍弹窗适配
 
 - Fingerprint: `image-viewer:source-inline-dimensions-override-fit`

@@ -20,7 +20,7 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
     for previous_image in output.glob('chrome-zoom-*.png'):
-        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:viewer-\d+-(fit|enlarged)|(?:figure|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
+        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:slide-\d+|viewer-\d+-(fit|enlarged)|(?:figure|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
             previous_image.unlink()
     result = {'scene': scene, 'method': 'Chrome Appearance / Page zoom',
               'html_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -70,6 +70,9 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         result['issues'].append(f'{zoom}: 缩放指标不符合Chrome原生缩放')
                     for theme in ('light', 'dark'):
                         page.evaluate('theme => setContentTheme(theme)', theme)
+                        if scene == 'report':
+                            page.locator('#next-slide').focus()
+                            page.keyboard.press('Home')
                         page.locator('.code-wrap[aria-pressed="true"]').evaluate_all('nodes => nodes.forEach(node => node.click())')
                         issues = inspect_page(page, scene)
                         sizes = []
@@ -100,6 +103,14 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         image = f'chrome-zoom-{round(zoom * 100)}-{theme}.png'
                         capture(output / image)
                         detail_images = []
+                        if scene == 'report':
+                            for number in range(1, page.locator('[data-export-page]').count() + 1):
+                                if number > 1:
+                                    page.locator('#next-slide').click()
+                                issues.extend(f'第{number}页: {issue}' for issue in inspect_page(page, scene))
+                                detail = f'chrome-zoom-{round(zoom * 100)}-{theme}-slide-{number:02d}.png'
+                                capture(output / detail)
+                                detail_images.append(detail)
                         if zoom == 2 and scene != 'report':
                             for kind, selector in (('figure', '.prose figure'), ('code', '.prose .code-block'),
                                                    ('code-wrapped', '.prose .code-block'),
@@ -136,9 +147,16 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                             detail_images.append(detail)
                                         if kind == 'table':
                                             block.evaluate('node => node.scrollLeft = 0')
-                        if scene != 'report':
-                            visuals = page.locator('.prose img, .prose figure > svg')
+                        if scene in ('learning', 'blog', 'report'):
+                            visuals = page.locator('.slide-body img, .slide-body figure > svg' if scene == 'report' else '.prose img, .prose figure > svg')
                             for number, visual in enumerate(visuals.all(), 1):
+                                slide_index = None
+                                if scene == 'report':
+                                    slide_index = visual.evaluate('node => [...document.querySelectorAll("[data-export-page]")].indexOf(node.closest("[data-export-page]"))')
+                                    page.locator('#next-slide').focus()
+                                    page.keyboard.press('Home')
+                                    for _ in range(slide_index):
+                                        page.locator('#next-slide').click()
                                 if not visual.is_visible() or visual.get_attribute('tabindex') != '0':
                                     continue
                                 visual.evaluate('node => node.focus({preventScroll: true})')
@@ -169,6 +187,8 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                 viewer.wait_for(state='hidden')
                                 if abs(page.evaluate('scrollY') - position) > 2:
                                     issues.append(f'图{number}关闭后阅读位置改变')
+                                if slide_index is not None and page.locator('#slide-counter').inner_text() != f'{slide_index + 1} / {page.locator("[data-export-page]").count()}':
+                                    issues.append(f'图{number}关闭后汇报页改变')
                         result['checks'].append({'zoom': zoom, 'theme': theme, 'metrics': current,
                                                  'font_sizes': sizes, 'issues': issues, 'image': image,
                                                  'detail_images': detail_images})

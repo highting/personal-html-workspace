@@ -219,6 +219,9 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 .slide-body li { margin-bottom: 12px; }
 .slide-body pre { margin: 22px 0; padding: 18px 22px; font-size: 20px; white-space: pre-wrap; overflow: visible; }
 .slide-body figure { margin: 24px 0; padding: 20px; }
+.slide-body figure.report-figure { margin: 20px 0; padding: 16px; }
+.slide-body .report-figure > svg { height: 280px; }
+.slide-body .report-figure figcaption { font-size: 18px; line-height: 1.65; margin-top: 12px; padding-top: 12px; }
 .slide-body .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
 .slide-body .metric { font-size: 72px; font-weight: 700; color: var(--accent); line-height: 1.25; }
 .slide-footer { position: absolute; left: 72px; right: 72px; bottom: 28px; border-top: 1px solid var(--line); padding-top: 14px; display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
