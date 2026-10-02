@@ -24,4 +24,6 @@
 
 长文标题区参考[AstroPaper实际文章](https://astro-paper.pages.dev/posts/astro-paper-v5/)的标题与真实元信息层级：正文不重复工具栏已有的身份标签。采用其连续阅读的组织思路，具体字号、留白和公式强调根据本项目长文实测，不照搬作者、日期或宣传组件。
 
+来源区借鉴[Material脚注](https://squidfunk.github.io/mkdocs-material/reference/footnotes/)将补充信息与主线分开的组织方式。本模板使用作者明确提供的来源块，保留出处与图示说明，不自动改写引用或增加工具提示。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

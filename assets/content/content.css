@@ -100,8 +100,15 @@ figure.media-plate figcaption { color: #586571; }
 .theme-dark, :root[data-theme="dark"] .theme-light { display: none; }
 :root[data-theme="dark"] .theme-dark { display: block; }
 figcaption { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: .85em; line-height: 1.8; }
+.prose figure:not(.media-plate) { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.prose figure:not(.media-plate) > svg { padding: 24px; border: 1px solid var(--line); border-radius: 12px; background: var(--figure-bg); }
+.prose figure:not(.media-plate) figcaption { margin-top: 14px; padding-top: 0; border-top: 0; font-size: .88em; }
 .prose figure.media-plate { padding: 16px 16px 20px; }
 .prose figure.media-plate img { border-radius: 5px; }
+.prose .article-sources { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); font-size: .9em; line-height: 1.8; color: var(--muted); }
+.prose .article-sources .sources-title { margin-bottom: 16px; font-weight: 600; color: var(--text); }
+.prose .article-sources p { margin-bottom: 14px; }
+.prose .article-sources p:last-child { margin-bottom: 0; }
 .katex { color: inherit; }
 .katex .text { font-family: KaTeX_Main, "Content Sans", sans-serif; }
 .katex-display { margin: 28px 0 !important; overflow-x: auto; overflow-y: hidden; padding: 8px 0; }

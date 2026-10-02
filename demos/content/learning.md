@@ -50,4 +50,7 @@ probabilities = weights / weights.sum(axis=-1, keepdims=True)
 
 上述说明假设输入是有限实数；包含无穷或NaN时应按实际应用另行定义行为。这里解释数值稳定性，不声称改变模型预测能力，也没有给出运行速度实验。
 
-来源：[SciPy softmax 文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.softmax.html)。
+<aside class="article-sources" aria-label="来源">
+<p class="sources-title">来源</p>
+<p><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.softmax.html">SciPy softmax 文档</a>。</p>
+</aside>

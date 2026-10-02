@@ -99,7 +99,8 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         if zoom == 2 and scene != 'report':
                             for name, selector in (('figure', '.prose figure'), ('code', '.prose .code-block'),
                                                    ('code-wrapped', '.prose .code-block'),
-                                                   ('table', '.prose .table-wrap'), ('details', '.prose details')):
+                                                   ('table', '.prose .table-wrap'), ('details', '.prose details'),
+                                                   ('sources', '.prose .article-sources')):
                                 if page.locator(selector).count():
                                     if name == 'code-wrapped':
                                         block = page.locator(selector).first
