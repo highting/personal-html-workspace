@@ -20,7 +20,7 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
     for previous_image in output.glob('chrome-zoom-*.png'):
-        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:slide-\d+|viewer-\d+-(fit|enlarged)|(?:figure|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
+        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:slide-\d+|viewer-\d+-(fit|enlarged)|(?:figure|callout|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
             previous_image.unlink()
     result = {'scene': scene, 'method': 'Chrome Appearance / Page zoom',
               'html_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -112,7 +112,7 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                 capture(output / detail)
                                 detail_images.append(detail)
                         if zoom == 2 and scene != 'report':
-                            for kind, selector in (('figure', '.prose figure'), ('code', '.prose .code-block'),
+                            for kind, selector in (('figure', '.prose figure'), ('callout', '.prose .callout'), ('code', '.prose .code-block'),
                                                    ('code-wrapped', '.prose .code-block'),
                                                    ('table', '.prose .table-wrap'), ('details', '.prose details'),
                                                    ('sources', '.prose .article-sources')):

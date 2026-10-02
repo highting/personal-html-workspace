@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-029 — Windows默认控制台编码无法输出数学字符
+
+- Fingerprint: `inspection:windows-gbk-stdout-for-math-dom`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: PowerShell管道启动Python，输出浏览器数学DOM检查结果
+- Symptom: 输出包含数学字符的HTML时出现`UnicodeEncodeError: 'gbk' codec can't encode character`。
+- Root cause: 未显式启用UTF-8，Python标准输出沿用Windows控制台编码，无法表示部分数学符号。
+- Wrong assumption/action: 文件按UTF-8读取就能保证控制台输出也使用UTF-8。
+- Correct approach: 使用`.venv/Scripts/python.exe -X utf8`运行含中文或数学字符输出的检查脚本。
+- Prevention check: Windows项目命令中，文件编码和标准输出编码分别核对；管道脚本和CLI显式使用`-X utf8`，不要为绕过打印失败改写内容。
+- Verification: 同一DOM检查用UTF-8重跑成功，输出数学节点和实际间距；随后字号边界检查成功保存完整JSON。
+- Evidence: 本轮数学DOM检查命令；Softmax运行目录`work/iterations/20261003-key-relations/fraction-bounds.json`。
+
 ## ERR-20261003-028 — 已知正文入口未传给准备器
 
 - Fingerprint: `prepare:known-main-entry-omitted-with-supporting-markdown`
