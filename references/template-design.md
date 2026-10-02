@@ -20,6 +20,8 @@
 
 目录的层级区分和当前项跟随参考[Material导航与anchor following](https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#anchor-following)，在本模板内实现，不安装其框架。当前项跟随只调整目录内部滚动，主题切换不能移动正文阅读位置。
 
+目录滚动到边界后不带动正文，采用[MDN overscroll-behavior的滚动隔离](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/overscroll-behavior)。在Chrome实际检查连续滚轮与末项可达性；该局部验证不扩大为所有浏览器兼容性结论。悬停用中性底色，当前章节才使用强调边，避免同时出现两个相似的当前项。
+
 新模板只用于学习/博客/汇报，避免将新阅读样式灌入原卡片；小红书继续保留academic的画幅与字体约定。
 
 长文标题区参考[AstroPaper实际文章](https://astro-paper.pages.dev/posts/astro-paper-v5/)的标题与真实元信息层级：正文不重复工具栏已有的身份标签。采用其连续阅读的组织思路，具体字号、留白和公式强调根据本项目长文实测，不照搬作者、日期或宣传组件。

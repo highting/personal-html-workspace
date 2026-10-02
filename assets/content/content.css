@@ -42,12 +42,13 @@ a { color: var(--accent); text-underline-offset: 4px; }
 .reading-progress { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 8; }
 .reading-progress span { display: block; height: 100%; width: 0; background: var(--accent); }
 .document-layout { display: grid; grid-template-columns: 240px minmax(0, 808px); gap: 56px; max-width: 1184px; margin: auto; padding: 64px 48px 72px; }
-.toc { align-self: start; position: sticky; top: 112px; max-height: calc(100vh - 148px); overflow: auto; font-size: 14px; }
+.toc { align-self: start; position: sticky; top: 112px; max-height: calc(100vh - 148px); overflow: auto; overscroll-behavior: contain; font-size: 14px; }
 .toc-label { color: var(--muted); font-size: 12px; font-weight: 650; letter-spacing: .08em; margin: 0 0 20px; }
 .toc nav { display: grid; gap: 4px; }
 .toc a { display: block; color: var(--muted); text-decoration: none; padding: 9px 14px; border-left: 2px solid transparent; border-radius: 0 6px 6px 0; line-height: 1.65; }
 .toc a.subheading { padding-left: 26px; font-size: 13px; }
-.toc a:hover, .toc a[aria-current="location"] { color: var(--accent); border-color: var(--accent); background: var(--surface); }
+.toc a:hover { color: var(--text); background: var(--paper); }
+.toc a[aria-current="location"] { color: var(--accent); border-color: var(--accent); background: var(--surface); }
 .toc-heading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-right: 12px; }
 .toc-heading .toc-label { margin: 0; }
 .toc-count { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
@@ -123,8 +124,10 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 .skip-link { position: fixed; top: -100px; left: 20px; z-index: 20; padding: 10px 18px; background: var(--surface); }
 .skip-link:focus { top: 10px; }
 #toc-toggle { display: inline-block; }
-.toc-hidden .document-layout { grid-template-columns: minmax(0, 808px); max-width: 904px; }
-.toc-hidden .document-layout .toc { display: none; }
+@media (min-width: 1001px) {
+  .toc-hidden .document-layout { grid-template-columns: minmax(0, 808px); max-width: 904px; }
+  .toc-hidden .document-layout .toc { display: none; }
+}
 .font-control { display: flex; align-items: center; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
 .font-control button { padding: 7px 10px; min-width: 36px; border: 0; border-radius: 20px; }
 .font-control output { min-width: 44px; text-align: center; color: var(--muted); }
@@ -239,7 +242,7 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 .exporting .slide-stage { position: relative; left: auto; top: auto; transform: none; }
 @media (max-width: 1000px) {
   .document-layout { display: block; max-width: 840px; padding: 48px 32px; }
-  .document-layout .toc { display: none; position: relative; top: auto; max-height: 50vh; margin-bottom: 36px; padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  .document-layout .toc { display: none; position: fixed; z-index: 9; left: 32px; top: 88px; width: min(320px, calc(100vw - 64px)); max-height: calc(100vh - 112px); margin: 0; padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
   .document-layout .toc.open { display: block; }
   #toc-toggle { display: inline-block; }
 }

@@ -20,7 +20,7 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
     for previous_image in output.glob('chrome-zoom-*.png'):
-        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:slide-\d+|viewer-\d+-(fit|enlarged)|(?:figure|callout|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
+        if re.fullmatch(r'chrome-zoom-(100|150|200)-(light|dark)(?:-(?:toc-(open|closed|end)|slide-\d+|viewer-\d+-(fit|enlarged)|(?:figure|callout|code(?:-wrapped)?|table|details|sources)(?:-\d+)*(?:-x-\d+)?))?\.png', previous_image.name):
             previous_image.unlink()
     result = {'scene': scene, 'method': 'Chrome Appearance / Page zoom',
               'html_sha256': hashlib.sha256(source.read_bytes()).hexdigest(),
@@ -103,6 +103,42 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         image = f'chrome-zoom-{round(zoom * 100)}-{theme}.png'
                         capture(output / image)
                         detail_images = []
+                        if scene != 'report' and page.locator('.prose h2').count():
+                            heading = page.locator('.prose h2').nth(page.locator('.prose h2').count() // 2)
+                            heading.evaluate('node => scrollTo({top: node.getBoundingClientRect().top + scrollY - 140, behavior: "instant"})')
+                            before_top = heading.evaluate('node => node.getBoundingClientRect().top')
+                            for _ in range(2):
+                                button = page.locator('#toc-toggle').bounding_box()
+                                page.mouse.click(button['x'] + button['width'] / 2, button['y'] + button['height'] / 2)
+                                expanded = page.locator('#toc-toggle').get_attribute('aria-expanded') == 'true'
+                                compact = page.evaluate('matchMedia("(max-width: 1000px)").matches')
+                                if abs(heading.evaluate('node => node.getBoundingClientRect().top') - before_top) > 5:
+                                    issues.append('目录切换改变当前阅读位置')
+                                if compact and expanded:
+                                    visible = page.locator('#toc').evaluate('node => {const r=node.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth}')
+                                    if not visible:
+                                        issues.append('打开的目录不在当前视口内')
+                                detail = f'chrome-zoom-{round(zoom * 100)}-{theme}-toc-{"open" if expanded else "closed"}.png'
+                                capture(output / detail)
+                                detail_images.append(detail)
+                                if compact and expanded:
+                                    menu = page.locator('#toc')
+                                    original_scroll = menu.evaluate('node => node.scrollTop')
+                                    box = menu.bounding_box()
+                                    position = page.evaluate('scrollY')
+                                    page.mouse.move(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+                                    for _ in range(2):
+                                        page.mouse.wheel(0, 1600)
+                                        page.wait_for_timeout(100)
+                                    if abs(page.evaluate('scrollY') - position) > 2:
+                                        issues.append('滚动目录带动正文')
+                                    last_visible = menu.evaluate('node => {const r=node.getBoundingClientRect();const last=node.querySelector("nav a:last-child").getBoundingClientRect();return last.top>=r.top&&last.bottom<=r.bottom}')
+                                    if not last_visible:
+                                        issues.append('目录末项无法滚动到可视区域')
+                                    detail = f'chrome-zoom-{round(zoom * 100)}-{theme}-toc-end.png'
+                                    capture(output / detail)
+                                    detail_images.append(detail)
+                                    menu.evaluate('(node, value) => node.scrollTop=value', original_scroll)
                         if scene == 'report':
                             for number in range(1, page.locator('[data-export-page]').count() + 1):
                                 if number > 1:

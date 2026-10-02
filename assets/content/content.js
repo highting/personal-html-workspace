@@ -17,6 +17,7 @@
   systemTheme.addEventListener('change', () => { if (preference === 'system') setContentTheme('system'); });
 
   const fontOutput = document.getElementById('font-size');
+  let preserveReadingPosition = change => change();
   if (fontOutput) {
     let readingSize = 18;
     try { readingSize = Number(localStorage.getItem('personal-html-workspace-font-size')) || 18; } catch (_) {}
@@ -55,11 +56,11 @@
         return {block, fraction: (point - box.top) / box.height, top: point};
       }
     };
-    const changeReadingSize = delta => {
+    preserveReadingPosition = change => {
       const anchor = readingAnchor();
       const previousAnchor = root.style.overflowAnchor;
       root.style.overflowAnchor = 'none';
-      setReadingSize(readingSize + delta);
+      change();
       if (anchor) {
         const box = anchor.range ? anchor.range.getBoundingClientRect() : anchor.block.getBoundingClientRect();
         const top = anchor.range ? box.top : box.top + box.height * anchor.fraction;
@@ -67,6 +68,7 @@
       }
       root.style.overflowAnchor = previousAnchor;
     };
+    const changeReadingSize = delta => preserveReadingPosition(() => setReadingSize(readingSize + delta));
     document.getElementById('font-smaller').addEventListener('click', () => changeReadingSize(-2));
     document.getElementById('font-larger').addEventListener('click', () => changeReadingSize(2));
   }
@@ -193,11 +195,24 @@
   compactLayout.addEventListener('change', updateTocState);
   tocButton.addEventListener('click', () => {
     if (isReport || compactLayout.matches) toc.classList.toggle('open');
-    else document.body.classList.toggle('toc-hidden');
+    else preserveReadingPosition(() => document.body.classList.toggle('toc-hidden'));
     updateTocState();
   });
   const slides = [...document.querySelectorAll('[data-export-page]')];
   if (!slides.length) {
+    tocLinks.addEventListener('click', event => {
+      if (compactLayout.matches && event.target.closest('a')) {
+        toc.classList.remove('open');
+        updateTocState();
+      }
+    });
+    addEventListener('keydown', event => {
+      if (event.key === 'Escape' && toc.classList.contains('open') && !document.querySelector('dialog[open]')) {
+        toc.classList.remove('open');
+        updateTocState();
+        tocButton.focus({preventScroll: true});
+      }
+    });
     const headings = [...document.querySelectorAll('.prose h2, .prose h3')];
     const headingIds = new Set([...document.querySelectorAll('[id]')].map(node => node.id));
     let chapterNumber = 0;

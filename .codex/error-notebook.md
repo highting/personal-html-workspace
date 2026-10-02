@@ -2,6 +2,54 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-032 — 中文片段链接的编码差异被误判为导航失败
+
+- Fingerprint: `qa:raw-unicode-href-compared-with-encoded-location-hash`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 中文章节导航的浏览器回归断言
+- Symptom: 章节已跳转，测试仍等待`location.hash === href`直到超时。
+- Root cause: DOM属性返回中文片段，浏览器地址返回百分号编码片段，两者字符串形式不同。
+- Wrong assumption/action: 将原始属性字符串直接与地址栏片段比较。
+- Correct approach: 比较双方解码后的片段，再检查目录状态与实际布局。
+- Prevention check: 非ASCII章节链接的测试使用一致的URL规范化方式，不用原始字符串差异判定导航失败。
+- Verification: 规范化比较后，中文章节导航、目录收起及相关4项回归通过。
+- Evidence: `tests/test_navigation.py::test_toc_toggle_keeps_current_text_and_compact_menu_is_visible`。
+
+## ERR-20261003-031 — 目录滚到底后滚轮带动正文
+
+- Fingerprint: `navigation:toc-scroll-chains-into-article`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 桌面目录的局部滚动与缩放后的浮层
+- Symptom: 菜单已到末尾，继续滚动使正文由2738px移动到4338px。
+- Root cause: 局部滚动默认可向祖先传递，菜单边界后的滚轮输入被正文接收。
+- Wrong assumption/action: 认为`overflow: auto`同时隔离正文滚动。
+- Correct approach: 目录设置`overscroll-behavior: contain`，保留菜单内部滚动。
+- Prevention check: 打开长目录后滚到末项并继续滚动，核对末项可见且正文位置不变；不只看菜单矩形或初始截图。
+- Verification: 对照中正文保持3000px；新回归连续滚轮后位置不变、末项可达，4项相关测试通过。
+- Evidence: `assets/content/content.css`；`tests/test_navigation.py`；`scripts/check_chrome_zoom.py`的`toc-end`截图和滚动检查。
+
+## ERR-20261003-030 — 文章中段打开的目录停留在页首
+
+- Fingerprint: `navigation:compact-toc-in-document-flow`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 缩小桌面窗口和原生缩放后的章节目录
+- Symptom: 按钮已展开目录，面板在视口上方约3000px，用户看不到它。
+- Root cause: 缩小视口时将目录作为相对定位内容插在文章开头，未将面板置于当前视口；桌面隐藏类还可能覆盖浮层显示。
+- Wrong assumption/action: 认为目录`display: block`就表示当前读者能看到。
+- Correct approach: 缩小视口用固定可滚动浮层，桌面隐藏规则只在宽布局生效；选择章节或Esc收起。
+- Prevention check: 在文章中段及末尾打开目录，核对视口边界、侧栏隐藏后的断点切换、末项可达和正文位置；覆盖桌面缩小窗口及原生缩放。
+- Verification: 960×667与720×500面板完整可见；中文章节选择收起、Esc返回按钮、侧栏隐藏偏好切换及阅读定位回归通过。
+- Evidence: 两篇run的`work/iterations/20261003-toc-position/positions.json`；`tests/test_navigation.py`。
+
 ## ERR-20261003-029 — Windows默认控制台编码无法输出数学字符
 
 - Fingerprint: `inspection:windows-gbk-stdout-for-math-dom`
@@ -152,15 +200,15 @@
 - Status: active
 - First seen: 2026-10-03
 - Last seen: 2026-10-03
-- Occurrences: 1
-- Scope: 长文字号控件与复杂公式/图文混排
+- Occurrences: 2
+- Scope: 长文字号、桌面目录开合与复杂公式/图文混排
 - Symptom: Hyperball阅读版从18px调至20px后，同一字符由视口约140px移到约527px。
-- Root cause: 只修改字号变量，依赖浏览器自动滚动锚定；复杂混排中该锚点不能稳定保持当前文字。
+- Root cause: 修改字号或侧栏布局后依赖浏览器自动滚动锚定；复杂混排中该锚点不能稳定保持当前文字。
 - Wrong assumption/action: 只验证字号数值和无溢出，没有追踪当前阅读内容。
-- Correct approach: 修改字号前保存文字插入点；没有文字插入点时保存当前块内位置，重排后恢复其视口位置。
-- Prevention check: 在真实长文中追踪可见文字，并覆盖浏览器自动锚定关闭的情况；允许自然换行，禁止大幅跳段。
-- Verification: 最明显测点位移从386.7px降至约0.3px；真实原稿回归及完整46项测试通过。
-- Evidence: `assets/content/content.js`；`tests/test_font_position.py`；本轮`font-positions.json`。
+- Correct approach: 字号与侧栏开合共用位置保持逻辑，变更前保存文字插入点；没有文字插入点时保存当前块内位置，重排后恢复其视口位置。
+- Prevention check: 字号与目录开合均在真实长文中追踪可见文字，并覆盖浏览器自动锚定关闭的情况；允许自然换行，禁止大幅跳段。
+- Verification: 字号测点位移从386.7px降至约0.3px；本轮Hyperball24px收起侧栏由-86.02px降至-0.02px，两篇目录开合测量及4项相关回归通过。
+- Evidence: `assets/content/content.js`；`tests/test_font_position.py`与`tests/test_navigation.py`；两篇run的`work/iterations/20261003-toc-position/positions.json`。
 
 ## ERR-20261003-019 — 短结尾无法成为当前章节
 
@@ -280,15 +328,15 @@
 - Status: active
 - First seen: 2026-10-02
 - Last seen: 2026-10-03
-- Occurrences: 2
-- Scope: 新长文模板的主题切换与 `tests/test_content.py`
+- Occurrences: 3
+- Scope: 新长文模板的主题/目录切换与阅读位置检查
 - Symptom: 主题切换测试将 `scrollY` 从450变化到0或89误归为主题行为；改为视口点击后，未结束的锚点平滑滚动仍使位置变化。
 - Root cause: 定位器点击会主动将控件滚入视口，且先前导航的平滑滚动尚未稳定；测试没有隔离这些位置变化。
 - Wrong assumption/action: 把定位器点击和正在执行的平滑滚动等同于用户在稳定视口中的点击。
 - Correct approach: 阅读工具栏固定在视口顶部；位置断言前先稳定滚动，在控件的真实视口坐标点击主题按钮。
 - Prevention check: 验证阅读位置不变时，导航前关闭测试中的平滑滚动或等待其完成；避免定位器额外滚动，以真实视口点击复核，并确认主题确实改变。
-- Verification: 单独视口点击从450切到深色后位置仍为450；`test_offline_learning_themes_math_navigation_and_position` 通过并核对主题记忆和离线公式。
-- Evidence: `assets/content/content.css` 的固定工具栏；`tests/test_content.py`；`tests/test_navigation.py` 的文末主题切换采用实际视口坐标，复核正文位置不变。
+- Verification: 主题视口点击保持450；本轮目录对照中的定位器点击产生约512px额外位移，改为视口点击后误差小于1px，目录与阅读位置4项回归通过。
+- Evidence: 固定工具栏与`tests/test_content.py`、`tests/test_navigation.py`；本轮目录测量使用真实视口坐标，诊断与最终记录保留在`toc-position`迭代目录。
 
 ## ERR-20260914-011 — 封面未直接表达核心论点
 
