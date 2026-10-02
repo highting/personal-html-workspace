@@ -1,6 +1,7 @@
 """长文的代码与图注标记；内容仍由 Markdown/可信 HTML 提供。"""
 
 from html import escape, unescape
+import hashlib
 import re
 
 from pygments import highlight
@@ -42,7 +43,8 @@ def enhance_code_blocks(body):
             rendered.append(f'<span class="{css_class}" data-line="{number}">{line}</span>{newline}')
         filename = attribute('title')
         label = f'<span class="code-filename">{escape(filename)}</span>' if filename else ''
-        return (f'<div class="code-block" data-lines="{len(lines)}">'
+        key = hashlib.sha256((language + '\0' + filename + '\0' + code).encode()).hexdigest()[:20]
+        return (f'<div class="code-block" data-lines="{len(lines)}" data-code-key="{key}">'
                 f'<div class="code-toolbar"><div><span class="code-language">{escape(language)}</span>{label}</div>'
                 '<button type="button" class="code-copy" aria-label="复制代码">复制代码</button></div>'
                 f'<pre tabindex="0"><code class="language-{escape(language)}">{"".join(rendered)}</code></pre></div>')

@@ -32,7 +32,15 @@
     }
   };
 
-  article.querySelectorAll('.code-block').forEach((block, index) => {
+  const headings = [...article.querySelectorAll('h2,h3')];
+  const codeBlocks = [...article.querySelectorAll('.code-block')];
+  const codeKeyCounts = new Map();
+  codeBlocks.forEach((block, index) => {
+    const section = headings.filter(heading => heading.compareDocumentPosition(block) & Node.DOCUMENT_POSITION_FOLLOWING).at(-1);
+    const base = `${section?.id || ''}:${block.dataset.codeKey || `code-${index + 1}`}`;
+    const occurrence = (codeKeyCounts.get(base) || 0) + 1;
+    codeKeyCounts.set(base, occurrence);
+    block.dataset.readingKey = `${base}:${occurrence}`;
     const code = block.querySelector('code');
     const pre = block.querySelector('pre');
     const button = block.querySelector('.code-copy');
@@ -94,7 +102,6 @@
     wrapper.append(table);
   });
 
-  const headings = [...article.querySelectorAll('h2,h3')];
   headings.forEach(heading => {
     heading.dataset.title = heading.textContent;
     const anchor = document.createElement('a');
@@ -146,12 +153,17 @@
     const visible = visibleHeadings();
     let current = visible[0];
     visible.forEach(heading => { if (heading.getBoundingClientRect().top <= 140) current = heading; });
+    if (root.scrollHeight > innerHeight && scrollY >= root.scrollHeight - innerHeight - 2) current = visible.at(-1);
     if (!current) return null;
     const start = current.getBoundingClientRect().top + scrollY;
     const next = visible[visible.indexOf(current) + 1];
     const end = next ? next.getBoundingClientRect().top + scrollY : root.scrollHeight;
     return {section: current.id, progress: Math.max(0, Math.min(1, (scrollY + 100 - start) / Math.max(1, end - start))),
-      openDetails: details.filter(detail => detail.open).map(detail => detail.id)};
+      openDetails: details.filter(detail => detail.open).map(detail => detail.id),
+      codeViews: codeBlocks.map(block => ({key: block.dataset.readingKey,
+        wrapped: block.classList.contains('is-wrapped'),
+        expanded: block.querySelector('.code-expand')?.getAttribute('aria-expanded') === 'true'}))
+        .filter(view => view.wrapped || view.expanded)};
   };
   const save = () => {
     if (!ready || scrollY < 180) return;
@@ -171,6 +183,12 @@
     (saved.openDetails || []).forEach(id => {
       const detail = document.getElementById(id);
       if (detail?.tagName === 'DETAILS') detail.open = true;
+    });
+    (saved.codeViews || []).forEach(view => {
+      const block = codeBlocks.find(block => block.dataset.readingKey === view.key);
+      if (!block) return;
+      if (view.wrapped && !block.classList.contains('is-wrapped')) block.querySelector('.code-wrap').click();
+      if (view.expanded && block.classList.contains('is-collapsed')) block.querySelector('.code-expand')?.click();
     });
     reveal(target);
     banner.hidden = true;

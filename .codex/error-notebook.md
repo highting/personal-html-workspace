@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-022 — 续读未恢复代码显示状态
+
+- Fingerprint: `reading:resume-location-without-code-view-state`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 代码换行、长代码展开与续读位置恢复
+- Symptom: 离开前开启换行并展开代码，续读后控件仍显示aria-pressed=false、aria-expanded=false。
+- Root cause: 只保存章节位置和details状态，没有保存会改变内容高度的代码显示状态。
+- Wrong assumption/action: 认为章节比例定位可以独立于可见内容的布局状态恢复。
+- Correct approach: 先恢复显示状态再定位；按标题上下文和代码内容识别状态，避免按顺序错套到新增代码块。
+- Prevention check: 续读验证必须覆盖换行、展开、代码插入与短结尾，核对实际可见源行而不只看scrollY。
+- Verification: 状态回归修正前失败、修正后通过；原生200%Hyperball源行10前后位置相同，相关10项验证通过。
+- Evidence: `tests/test_resume_views.py`；`assets/content/reading.js`；本轮`delivery/checks/resume-code-light.png`。
+
 ## ERR-20261003-021 — 原生缩放截图混用CSS与DIP视口
 
 - Fingerprint: `qa:native-zoom-css-clip-applied-to-dip-surface`
@@ -34,21 +50,21 @@
 - Verification: 最明显测点位移从386.7px降至约0.3px；真实原稿回归及完整46项测试通过。
 - Evidence: `assets/content/content.js`；`tests/test_font_position.py`；本轮`font-positions.json`。
 
-## ERR-20261003-019 — 短结尾无法成为目录当前章节
+## ERR-20261003-019 — 短结尾无法成为当前章节
 
 - Fingerprint: `navigation:short-last-section-never-reaches-active-threshold`
 - Status: active
 - First seen: 2026-10-03
 - Last seen: 2026-10-03
-- Occurrences: 1
-- Scope: `assets/content/content.js` 的长文目录高亮与目录内部跟随
+- Occurrences: 2
+- Scope: `assets/content/content.js` 与 `reading.js` 的长文目录高亮、续读标题与目录内部跟随
 - Symptom: 已读到页底，目录仍选中倒数第二章；章节较多时当前项还可能位于目录可视区外。
 - Root cause: 仅依据标题越过视口固定阈值选择章节，短结尾受最大滚动距离限制，永远无法到达该阈值；选中状态没有维护目录内部可见性。
 - Wrong assumption/action: 认为每个章节标题最终都能滚过工具栏下方的判定线。
 - Correct approach: 到达文末时选择最后一个可见标题；当前项变化时只调整目录容器scrollTop，避免scrollIntoView移动正文。
 - Prevention check: 长文导航验证同时覆盖长目录、短结尾和隐藏的折叠标题；核对当前项、目录内可见性与正文位置。
 - Verification: 32章短结尾测试修复前选中章节31，修复后选中结尾且在目录内可见；真实Hyperball文末选中总结，相关7项浏览器验证通过。
-- Evidence: `tests/test_navigation.py::test_end_of_long_article_marks_last_section_and_keeps_it_in_toc`；本轮`delivery/checks/light/navigation-end.png`。
+- Evidence: `tests/test_navigation.py::test_end_of_long_article_marks_last_section_and_keeps_it_in_toc`；`tests/test_resume_views.py::test_resume_prompt_names_a_short_final_section_at_page_end`；本轮`delivery/checks/light/navigation-end.png`。
 
 ## ERR-20261003-018 — 重命名目录后跨账户Git归属检查
 
