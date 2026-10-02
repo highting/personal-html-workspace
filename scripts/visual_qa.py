@@ -39,6 +39,8 @@ def inspect_palette(page):
         return rgb[0] * .2126 + rgb[1] * .7152 + rgb[2] * .0722;
       };
       return [['--text','--bg'],['--muted','--bg'],['--accent','--bg'],
+              ['--reading-text','--bg'],['--reading-text','--paper'],
+              ['--reading-text','--surface'],['--reading-text','--code-bg'],
               ['--text','--figure-bg'],['--muted','--figure-bg'],['--text','--code-bg']].map(([fg,bg]) => {
         const a = luminance(fg), b = luminance(bg);
         const ratio = (Math.max(a,b) + .05) / (Math.min(a,b) + .05);

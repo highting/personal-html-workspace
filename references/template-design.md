@@ -28,4 +28,6 @@
 
 宽表格保持局部滚动的处理参考[W3C Reflow说明](https://www.w3.org/WAI/WCAG22/Understanding/reflow.html)，聚焦、区域命名与键盘滚动参考[MDN overflow](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/overflow#accessibility)。本项目按真实溢出添加方向提示，不将这些局部检查称为完整无障碍认证。
 
+文字颜色按语义角色区分的思路参考[Carbon颜色tokens](https://www.carbondesignsystem.com/building-blocks/foundations/color/tokens)。本项目的深色长文正文亮度依据真实长文对照微调，标题和图内标签保留原文字色；不照搬Carbon的具体值，也不通过随意减小字重制造层级。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。
