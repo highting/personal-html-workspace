@@ -8,6 +8,8 @@
 | [博客稿](blog.md) | ![博客浅色](previews/blog-light.png) | ![博客深色](previews/blog-dark.png) |
 | [汇报稿](report.md) | ![汇报浅色](previews/report-light.png) | ![汇报深色](previews/report-dark.png) |
 
+[Softmax完整学习文档](softmax-longform/main.md)包含7章、4张表、2段代码和流程图，用于检查密集正文、数值列、长代码收起/换行与原生缩放。标准库代码可独立运行，教学数据不代表模型实验。数值表预览：[浅色](previews/softmax-table-light.png)、[深色](previews/softmax-table-dark.png)。
+
 按根README安装依赖并显式准备中文字体缓存，再从仓库根目录执行：
 
 ```bash

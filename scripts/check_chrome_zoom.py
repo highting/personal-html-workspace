@@ -97,13 +97,13 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         capture(output / image)
                         detail_images = []
                         if zoom == 2 and scene != 'report':
-                            for name, selector in (('figure', '.prose figure'), ('code', '.prose .code-block'),
+                            for kind, selector in (('figure', '.prose figure'), ('code', '.prose .code-block'),
                                                    ('code-wrapped', '.prose .code-block'),
                                                    ('table', '.prose .table-wrap'), ('details', '.prose details'),
                                                    ('sources', '.prose .article-sources')):
-                                if page.locator(selector).count():
-                                    if name == 'code-wrapped':
-                                        block = page.locator(selector).first
+                                for number, block in enumerate(page.locator(selector).all(), 1):
+                                    name = kind if number == 1 else f'{kind}-{number}'
+                                    if kind == 'code-wrapped':
                                         if not block.locator('.code-wrap').count() or not block.locator('.code-wrap').is_visible():
                                             continue
                                         original = block.locator('code').text_content()
@@ -115,13 +115,23 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                             issues.append('代码换行改变了原始文本')
                                     # 用完整视口分屏覆盖图块，不以CSS坐标裁剪DIP图面。
                                     (output / f'chrome-zoom-200-{theme}-{name}.png').unlink(missing_ok=True)
-                                    box = page.locator(selector).first.evaluate('node => {const r=node.getBoundingClientRect();return {top:r.top+scrollY,height:r.height}}')
+                                    box = block.evaluate('node => {const r=node.getBoundingClientRect();return {top:r.top+scrollY,height:r.height}}')
                                     step = page.evaluate('innerHeight - 120')
                                     for index, offset in enumerate(range(0, round(box['height']), max(1, round(step))), 1):
                                         page.evaluate('top => scrollTo({top, behavior: "instant"})', max(0, box['top'] + offset - 100))
-                                        detail = f'chrome-zoom-200-{theme}-{name}-{index:02d}.png'
-                                        capture(output / detail)
-                                        detail_images.append(detail)
+                                        width = block.evaluate('node => ({client: node.clientWidth, scroll: node.scrollWidth})')
+                                        lefts = (0,)
+                                        if kind == 'table' and width['scroll'] > width['client'] + 1:
+                                            lefts = range(0, width['scroll'], max(1, width['client'] - 40))
+                                        for column, left in enumerate(lefts, 1):
+                                            if kind == 'table':
+                                                block.evaluate('(node, left) => node.scrollLeft = left', left)
+                                            suffix = '' if column == 1 else f'-x-{column}'
+                                            detail = f'chrome-zoom-200-{theme}-{name}-{index:02d}{suffix}.png'
+                                            capture(output / detail)
+                                            detail_images.append(detail)
+                                        if kind == 'table':
+                                            block.evaluate('node => node.scrollLeft = 0')
                         result['checks'].append({'zoom': zoom, 'theme': theme, 'metrics': current,
                                                  'font_sizes': sizes, 'issues': issues, 'image': image,
                                                  'detail_images': detail_images})

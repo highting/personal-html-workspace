@@ -2,6 +2,38 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-024 — 长代码收起预览裁切半行
+
+- Fingerprint: `code-preview:parent-em-height-and-padding-clip-partial-line`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: `.code-block.is-collapsed`的字号、行高与裁切容器
+- Symptom: 收起预览底部露出半截源行；只按行高修正pre高度后，行17仍跨过469.9375px裁切边界。
+- Root cause: pre与code采用不同字号；pre的padding区域也允许溢出文字绘入，按父字号限制整体高度不能保证完整行边界。
+- Wrong assumption/action: 认为父容器的整倍em高度或内容高度加上下padding就等于完整代码行预览。
+- Correct approach: 代码字号放在pre，code继承；直接按code自身行高限制代码区，pre保留正常上下留白，展开时解除限制。
+- Prevention check: 预览检查追踪源行的实际矩形与裁切边界，覆盖16/18/24px及100/150/200%布局缩放；同时验证展开和复制仍保留全部文本。
+- Verification: 新完整行回归覆盖9组字号/缩放组合；6项代码与阅读测试通过，真实24行示例的默认明暗预览已查看。
+- Evidence: `tests/test_code_wrap.py::test_collapsed_preview_does_not_show_partial_lines`；`assets/content/content.css`；本轮`collapsed-final-light.png`与`collapsed-final-dark.png`。
+
+## ERR-20261003-023 — 原生缩放图块截图只覆盖首个实例
+
+- Fingerprint: `qa:native-zoom-first-instance-only`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: `scripts/check_chrome_zoom.py` 的原生200%图块截图
+- Symptom: 新长文有4张表和2段代码，原生截图只含第一张表和第一段代码；后续表头孤字与数组断行没有进入目视材料。
+- Root cause: 每类选择器只使用first定位，宽表格还只拍摄初始横向位置。
+- Wrong assumption/action: 认为同类内容的首个实例足以代表整篇长文的缩放排版。
+- Correct approach: 逐块枚举图、代码、表格与补充内容；宽表格以横向分屏补拍，保留原生图面捕获和像素尺寸核对。
+- Prevention check: 将正文图块数量与截图文件清单核对；混合内容长文必须查看后续实例及局部滚动区域，不能以QA通过推断全部内容已看完。
+- Verification: 新Softmax长文的原生检查覆盖4张表、2段代码、长代码换行及宽表格右侧；明暗截图已查看，6组原生缩放检查通过。
+- Evidence: `demos/content/softmax-longform/main.md`；本轮`Softmax-学习`的`work/before/native-zoom`与`delivery/checks/native-zoom`。
+
 ## ERR-20261003-022 — 续读未恢复代码显示状态
 
 - Fingerprint: `reading:resume-location-without-code-view-state`
