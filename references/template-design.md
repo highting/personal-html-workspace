@@ -21,3 +21,5 @@
 目录的层级区分和当前项跟随参考[Material导航与anchor following](https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#anchor-following)，在本模板内实现，不安装其框架。当前项跟随只调整目录内部滚动，主题切换不能移动正文阅读位置。
 
 新模板只用于学习/博客/汇报，避免将新阅读样式灌入原卡片；小红书继续保留academic的画幅与字体约定。
+
+代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

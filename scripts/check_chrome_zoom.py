@@ -66,6 +66,7 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         result['issues'].append(f'{zoom}: 缩放指标不符合Chrome原生缩放')
                     for theme in ('light', 'dark'):
                         page.evaluate('theme => setContentTheme(theme)', theme)
+                        page.locator('.code-wrap[aria-pressed="true"]').evaluate_all('nodes => nodes.forEach(node => node.click())')
                         issues = inspect_page(page, scene)
                         sizes = []
                         if scene != 'report':
@@ -97,8 +98,20 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                         detail_images = []
                         if zoom == 2 and scene != 'report':
                             for name, selector in (('figure', '.prose figure'), ('code', '.prose .code-block'),
+                                                   ('code-wrapped', '.prose .code-block'),
                                                    ('table', '.prose .table-wrap'), ('details', '.prose details')):
                                 if page.locator(selector).count():
+                                    if name == 'code-wrapped':
+                                        block = page.locator(selector).first
+                                        if not block.locator('.code-wrap').count() or not block.locator('.code-wrap').is_visible():
+                                            continue
+                                        original = block.locator('code').text_content()
+                                        block.locator('.code-wrap').evaluate('node => node.click()')
+                                        pre = block.locator('pre')
+                                        if pre.evaluate('node => node.scrollWidth > node.clientWidth + 1'):
+                                            issues.append('换行后代码仍横向溢出')
+                                        if block.locator('code').text_content() != original:
+                                            issues.append('代码换行改变了原始文本')
                                     # 用完整视口分屏覆盖图块，不以CSS坐标裁剪DIP图面。
                                     (output / f'chrome-zoom-200-{theme}-{name}.png').unlink(missing_ok=True)
                                     box = page.locator(selector).first.evaluate('node => {const r=node.getBoundingClientRect();return {top:r.top+scrollY,height:r.height}}')

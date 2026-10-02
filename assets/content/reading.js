@@ -34,7 +34,30 @@
 
   article.querySelectorAll('.code-block').forEach((block, index) => {
     const code = block.querySelector('code');
+    const pre = block.querySelector('pre');
     const button = block.querySelector('.code-copy');
+    const actions = document.createElement('div');
+    actions.className = 'code-actions';
+    const wrap = document.createElement('button');
+    wrap.type = 'button';
+    wrap.className = 'code-wrap';
+    wrap.textContent = '换行';
+    wrap.title = '自动换行';
+    wrap.setAttribute('aria-label', '自动换行');
+    wrap.setAttribute('aria-pressed', 'false');
+    const updateWrapControl = () => {
+      wrap.hidden = !block.classList.contains('is-wrapped') && pre.scrollWidth <= pre.clientWidth + 1;
+    };
+    wrap.addEventListener('click', () => {
+      const enabled = block.classList.toggle('is-wrapped');
+      wrap.setAttribute('aria-pressed', String(enabled));
+      pre.scrollLeft = 0;
+      updateWrapControl();
+    });
+    block.querySelector('.code-toolbar').append(actions);
+    actions.append(wrap, button);
+    new ResizeObserver(updateWrapControl).observe(pre);
+    updateWrapControl();
     button.addEventListener('click', async () => {
       const copied = await copyText(code.textContent);
       button.textContent = copied ? '已复制' : '复制失败';
@@ -42,7 +65,6 @@
       setTimeout(() => { button.textContent = '复制代码'; }, 2000);
     });
     if (Number(block.dataset.lines) > 20) {
-      const pre = block.querySelector('pre');
       pre.id = pre.id || uniqueId(`code-${index + 1}`);
       const fold = document.createElement('button');
       fold.className = 'code-expand';
