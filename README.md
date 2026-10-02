@@ -24,7 +24,7 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 用 `--scene blog` 构建博客。汇报使用 `--scene report`，在代码围栏外以独立 `---` 分页，用 `<!-- notes: 讲者备注 -->` 添加备注；导出 PNG 可选择 `--theme light` 或 `--theme dark`。完整命令与 HTML 片段协议见[四场景流程](references/content-workflow.md)，策划见[场景规则](references/content-scenes.md)。
 
-长文使用克制的字号、阅读宽度、可收起的分层目录、代码/公式排版及阅读进度；汇报支持目录直达、方向键翻页、备注和固定页导出。太阳/月亮图标切换主题。中文采用内嵌的Noto Sans SC（思源黑体系列）字形子集，分别设置正文与标题字重；CSS、JavaScript、KaTeX字体及本地图片也内嵌，生成的HTML可直接离线打开。模板源码见 `assets/content/`，原稿示例见 `demos/content/`。
+学习与博客共用阅读模板，以内容详略区分，支持16–24px字号调节、图片/SVG点击放大、目录和阅读进度；汇报使用16:9逐页演示，支持翻页、备注和固定页导出。两类HTML面向桌面，检查缩放后的布局，不另做手机适配验收。明暗主题、SVG与配图遵循[统一视觉规则](references/visual-system.md)，普通节点使用协调的中性底色。中文字体、CSS、JavaScript、KaTeX及本地图片内嵌，可离线打开。模板源码见 `assets/content/`，示例稿见 `demos/content/`。
 
 布局参考 [Nextra](https://github.com/shuding/nextra)（学习导航）、[AstroPaper](https://github.com/satnaing/astro-paper)（博客阅读）和 [Slidev](https://github.com/slidevjs/slidev)（技术演示）。当前查询约 13.9k、5.1k、48.9k 星；支持明暗主题的参考与设计记录见[模板设计](references/template-design.md)。本仓库模板独立实现，无需安装这些项目。
 
@@ -226,7 +226,7 @@ personal-html-workspace/
 
 ## License
 
-新仓库保留原 `main` 的提交历史；原 `rednote-skill` 仓库继续保留。技能与插件名为 `personal-html-workspace`。小红书渲染脚本和原主题未改动。
+新仓库保留原 `main` 的提交历史；原 `rednote-skill` 仓库继续保留。技能与插件名为 `personal-html-workspace`。小红书沿用原渲染流程，本轮按实际成品调整了academic字号与留白。
 
 MIT License © 2026 Bakameow
 

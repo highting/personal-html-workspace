@@ -12,7 +12,7 @@ python -X utf8 scripts/prepare_content.py "inputs/机器学习/Softmax" --scene 
 
 `--entry` 可指定相对主稿路径，`--mode html|images` 仅记录辅助图工具。脚本建立 `output/_work/<短名>/<时间戳>-<scene>-<mode>/` 的 `source/`、`work/`、`delivery/`，输出 `run.json` 与 `work/任务Prompt.txt`。同主题并存多个场景时用不同短名，新请求新建工作目录，同次修正复用。`source/` 是只读快照；其哈希用于交付核对。
 
-读取 `prompts/common.txt` 和所选 `prompts/scenes/<scene>.txt`，按实际读者、目标、范围与材料策划；只读取所选场景。AI整理连续正文或汇报分页，不把原稿未经策划直接转换当作已完成。
+读取 `prompts/common.txt`、所选 `prompts/scenes/<scene>.txt` 和[成品视觉规则](visual-system.md)，把prompt作为基础参考，按实际内容调整详略、顺序与布局。先生成代表性页面，实际查看后修正再完成全篇；制作说明、占位文案只留在工作记录。
 
 ## 学习与博客
 
@@ -23,7 +23,7 @@ python -X utf8 scripts/build_content.py "<work_entry>" --scene learning --output
 python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene learning --output-dir "<artifact_dir>"
 ```
 
-博客将两处scene改为 `blog`。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`；不是完整网页或未整理的Prompt。`--theme light|dark|system` 设置初始偏好，默认浅色，太阳/月亮按钮保存用户选择。桌面目录可完整收起，紧凑窗口用同一按钮开合目录。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片拒绝，需先本地化。
+博客将两处scene改为 `blog`，与学习共用模板，以内容详略区别。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，太阳/月亮按钮保存用户选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
 
 首次构建前显式执行 `python -X utf8 scripts/download_content_fonts.py`，下载并校验固定版本Noto Sans SC（思源黑体系列）缓存。构建器用FontTools/Brotli按实际字符制作WOFF2子集，中文正文、标题、SVG、代码中文和备注可离线显示；字体及OFL许可内嵌成品，完整缓存不入Git。来源见[字体说明](../assets/vendor/noto-sans-sc/README.md)。仍需核对实际中文字形与字体，而不只看CSS声明。
 
@@ -52,7 +52,7 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene rep
 
 ## 检查与汇总
 
-检查器离线加载HTML，输出 `qa.json`、`preview-light.png`、`preview-dark.png` 与 `checks/` 的章节/逐页检查截图；汇报另交所选主题 `page-01.png` 等。实际查看所有主要图文区域及汇报全部页，测试目录直达、主题切换与备注。QA只处理可测问题，不证明内容或审美已通过。
+检查器离线加载HTML，输出 `qa.json`、明暗首屏与 `checks/` 的全篇、分屏、章节或逐页截图；汇报另交所选主题 `page-01.png` 等。长文检查16/24px字号、100/150/200% CSS布局缩放，另按实际浏览器条件验证原生缩放；不把CSS缩放或DPR记录为原生浏览器操作。学习/博客/汇报不单独验收手机适配。实际查看全部内容，测试目录、主题、字号、图像放大与备注；处理 `warnings` 中的可疑制作文案。QA不能证明内容或审美已通过。
 
 记录来源、主线、图解、实际检查与未验证事项到 `delivery.md`，全部完成后才将 `run.json` 的 `status` 改为 `completed`。
 
@@ -64,6 +64,6 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 ## 小红书原流程
 
-已有 `blogs/` 继续按[原工作区](workspace.md)使用 `prepare_blog.py` → `rednote_render.py` → `publish_blog.py`，制作规则见[小红书场景](rednote-scene.md)。新 `inputs/` 可用 `prepare_content.py --scene rednote` 准备，同一原渲染器输出到 `artifact_dir`，实际查看PNG及文案并标记completed后，`publish_content.py`转交原发布函数。小红书不使用新长文模板，不要求新 `qa.json` 来替代原逐张检查。
+已有 `blogs/` 继续按[原工作区](workspace.md)使用 `prepare_blog.py` → `rednote_render.py` → `publish_blog.py`。默认画幅以 `--save-html` 保存源页后，运行 `python scripts/check_rednote.py <artifact_dir>`，检查源页、图片清单和标签实际大小并生成390px宽PNG预览；仍须逐张查看原图和预览。新 `inputs/` 可用 `prepare_content.py --scene rednote` 准备，再由 `publish_content.py`转交原发布函数。小红书不使用长文模板，检查记录不能替代目视验收。
 
 这里的“发布”只指本地成品汇总。脚本不调用AI或生图、不上传社交平台；插件安装与GitHub上传是独立操作。

@@ -6,8 +6,12 @@ import json
 from pathlib import Path
 import re
 import shutil
+import sys
 
 from playwright.sync_api import sync_playwright
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.visual_qa import inspect_palette, inspect_visuals
 
 
 def file_hash(path):
@@ -46,7 +50,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
     generated = [(output, r'page-\d+\.png')]
-    generated.extend((output / 'checks' / name, r'(?:page|section)-\d+\.png') for name in ('light', 'dark'))
+    generated.extend((output / 'checks' / name, r'(?:page|section|screen)-\d+\.png') for name in ('light', 'dark'))
     for folder, pattern in generated:
         for previous in folder.glob('*.png'):
             if re.fullmatch(pattern, previous.name):
@@ -57,7 +61,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
     if source != destination:
         shutil.copy2(source, destination)
     result = {'scene': scene, 'theme': theme, 'html_sha256': file_hash(destination),
-              'passed': False, 'issues': [], 'themes': {}, 'images': []}
+              'passed': False, 'issues': [], 'warnings': [], 'themes': {}, 'images': []}
     with sync_playwright() as playwright:
         options = {'headless': True}
         if browser_executable:
@@ -69,6 +73,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
         page.on('requestfailed', lambda request: resource_failures.append(request.url))
         page.on('pageerror', lambda error: script_errors.append(str(error)))
         for selected_theme in ('light', 'dark'):
+            page.set_viewport_size({'width': 1440, 'height': 1000})
             resource_failures.clear()
             script_errors.clear()
             page.goto(destination.as_uri(), wait_until='load')
@@ -84,7 +89,23 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
             checks = output / 'checks' / selected_theme
             checks.mkdir(parents=True, exist_ok=True)
             issues = []
+            palette = inspect_palette(page)
+            issues.extend('文字配色对比度不足: ' + item['fg'] + '/' + item['bg'] for item in palette if not item['passed'])
+            visual_checks = []
             if scene == 'report':
+                for width, height in ((1440, 1000), (960, 667), (720, 500)):
+                    page.set_viewport_size({'width': width, 'height': height})
+                    page.evaluate('window.dispatchEvent(new Event("resize"))')
+                    fits = page.evaluate('''() => {
+                      const frame = document.querySelector('.presentation').getBoundingClientRect();
+                      const stage = document.querySelector('.slide-stage').getBoundingClientRect();
+                      return stage.left >= frame.left - 2 && stage.right <= frame.right + 2 &&
+                        stage.top >= frame.top - 2 && stage.bottom <= frame.bottom + 2;
+                    }''')
+                    if not fits:
+                        issues.append(f'{width}×{height}窗口下演示舞台被裁切')
+                    page.screenshot(path=str(checks / f'window-{width}.png'))
+                page.set_viewport_size({'width': 1440, 'height': 1000})
                 count = page.locator('[data-export-page]').count()
                 if not count:
                     issues.append('没有汇报页')
@@ -100,6 +121,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
                 for index in range(count):
                     page.evaluate('index => window.activateContentExport({index})', index)
                     issues.extend(f'第 {index + 1} 页：{issue}' for issue in inspect_page(page, scene))
+                    visual_checks.append(inspect_visuals(page, '[data-export-page]:not([hidden])', minimum=18))
                     image = checks / f'page-{index + 1:02d}.png'
                     page.locator('[data-export-page]:not([hidden])').screenshot(path=str(image))
                     if selected_theme == theme:
@@ -112,13 +134,35 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
                 for index in range(headings.count()):
                     headings.nth(index).scroll_into_view_if_needed()
                     page.screenshot(path=str(checks / f'section-{index + 1:02d}.png'))
+                page.evaluate('document.documentElement.style.scrollBehavior = "auto"')
+                page.evaluate('scrollTo(0, 0)')
+                visual_checks.append(inspect_visuals(page, '.prose'))
+                page.screenshot(path=str(checks / 'full.png'), full_page=True)
+                height = page.evaluate('document.documentElement.scrollHeight')
+                for index, top in enumerate(range(0, height, 900), 1):
+                    page.evaluate('top => scrollTo(0, top)', top)
+                    page.screenshot(path=str(checks / f'screen-{index:02d}.png'))
+                # CSS布局缩放与字号分别检查；不把截图DPR当作浏览器布局缩放。
+                for zoom in (1, 1.5, 2):
+                    page.evaluate('zoom => document.documentElement.style.zoom = zoom', zoom)
+                    for size in (16, 24):
+                        page.evaluate('size => document.documentElement.style.setProperty("--reading-size", size + "px")', size)
+                        issues.extend(f'布局缩放{zoom}、字号{size}: {issue}' for issue in inspect_page(page, scene))
+                    page.evaluate('scrollTo(0, 0)')
+                    page.screenshot(path=str(checks / f'zoom-{zoom:g}.png'))
+                page.evaluate('document.documentElement.style.zoom = 1')
+                page.evaluate('document.documentElement.style.setProperty("--reading-size", "18px")')
+            for visual in visual_checks:
+                issues.extend(visual['issues'])
+                result['warnings'].extend(visual['warnings'])
             issues.extend('离线资源加载失败: ' + url for url in resource_failures)
             issues.extend('脚本错误: ' + error for error in script_errors)
-            result['themes'][selected_theme] = {'passed': not issues, 'issues': issues}
+            result['themes'][selected_theme] = {'passed': not issues, 'issues': issues, 'palette': palette, 'visual_checks': visual_checks}
             result['issues'].extend(f'{selected_theme}: {issue}' for issue in issues)
         context.close()
         browser.close()
     result['passed'] = not result['issues']
+    result['warnings'] = sorted(set(result['warnings']))
     (output / 'qa.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     if not result['passed']:
         raise ValueError('检查失败，详见 qa.json：' + '; '.join(result['issues']))

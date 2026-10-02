@@ -9,6 +9,7 @@ from scripts.build_content import build_content, split_slides
 from scripts.prepare_content import prepare_content
 from scripts.publish_content import publish_content
 from scripts.render_content import render_content
+from scripts.visual_qa import inspect_visuals
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -54,6 +55,58 @@ class ContentTests(unittest.TestCase):
 
 
 class ContentBrowserTests(unittest.TestCase):
+    def test_reading_size_and_zoomable_images_preserve_position_and_svg_references(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'image.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100"><rect width="200" height="100" fill="#EAE7DE"/></svg>', encoding='utf-8')
+            source = root / 'main.md'
+            source.write_text('# 阅读控制\n\n## 正文\n\n' + ('连续文字。' * 150) + '\n\n'
+                              '<figure><svg viewBox="0 0 600 200" aria-label="路径">'
+                              '<defs><marker id="arrow"><path d="M0 0L10 5L0 10Z"/></marker></defs>'
+                              '<path d="M30 100H550" marker-end="url(#arrow)"/>'
+                              '<text x="30" y="50" font-size="20">输入</text></svg></figure>\n\n'
+                              '![图片](image.svg)', encoding='utf-8')
+            html = build_content(source, output=root / 'index.html')
+            with sync_playwright() as playwright:
+                browser = playwright.chromium.launch()
+                page = browser.new_page(viewport={'width': 1440, 'height': 1000}, offline=True)
+                page.goto(html.as_uri())
+                page.evaluate('document.fonts.ready')
+                for _ in range(3):
+                    page.locator('#font-larger').click()
+                self.assertEqual(page.locator('#font-size').inner_text(), '24px')
+                self.assertEqual(page.locator('.prose').evaluate('n => getComputedStyle(n).fontSize'), '24px')
+                page.reload()
+                self.assertEqual(page.locator('#font-size').inner_text(), '24px')
+                for selector in ('.prose figure > svg', '.prose img'):
+                    original = page.locator(selector)
+                    original.scroll_into_view_if_needed()
+                    before = page.evaluate('scrollY')
+                    original.click()
+                    self.assertTrue(page.locator('dialog').is_visible())
+                    if selector.endswith('svg'):
+                        self.assertEqual(page.locator('dialog [marker-end]').get_attribute('marker-end'), 'url(#viewer-arrow)')
+                        self.assertEqual(page.locator('#arrow').count(), 1)
+                    page.locator('dialog [data-zoom="1.5"]').click()
+                    self.assertGreater(page.locator('.image-viewer-content').evaluate('n=>n.scrollWidth'),
+                                       page.locator('.image-viewer-content').evaluate('n=>n.clientWidth'))
+                    page.keyboard.press('Escape')
+                    self.assertFalse(page.locator('dialog').is_visible())
+                    self.assertAlmostEqual(page.evaluate('scrollY'), before, delta=2)
+                browser.close()
+
+    def test_visual_inspection_flags_tiny_labels_and_draft_copy_but_not_code(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content('<article><p>这是排版示例</p><pre><code>待补充</code></pre>'
+                             '<svg width="200" viewBox="0 0 600 200"><text x="10" y="20" font-size="18">输入</text></svg></article>')
+            result = inspect_visuals(page, 'article')
+            self.assertEqual(len(result['issues']), 1)
+            self.assertEqual(len(result['warnings']), 1)
+            self.assertAlmostEqual(result['labels'][0]['px'], 6)
+            browser.close()
+
     def test_offline_learning_themes_math_navigation_and_position(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -110,6 +163,16 @@ class ContentBrowserTests(unittest.TestCase):
                 browser = playwright.chromium.launch()
                 page = browser.new_page(viewport={'width': 1440, 'height': 1000})
                 page.goto(html.as_uri())
+                for width, height in ((960, 667), (720, 500)):
+                    page.set_viewport_size({'width': width, 'height': height})
+                    page.evaluate('window.dispatchEvent(new Event("resize"))')
+                    stage = page.locator('.slide-stage').bounding_box()
+                    frame = page.locator('.presentation').bounding_box()
+                    self.assertGreaterEqual(stage['x'], frame['x'])
+                    self.assertGreaterEqual(stage['y'], frame['y'])
+                    self.assertLessEqual(stage['x'] + stage['width'], frame['x'] + frame['width'])
+                    self.assertLessEqual(stage['y'] + stage['height'], frame['y'] + frame['height'])
+                page.set_viewport_size({'width': 1440, 'height': 1000})
                 page.keyboard.press('ArrowRight')
                 self.assertEqual(page.locator('#slide-counter').inner_text(), '2 / 4')
                 page.locator('#theme-toggle').click()

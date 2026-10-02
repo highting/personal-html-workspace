@@ -10,7 +10,7 @@
   --academic-cyan-soft: #ECFEFF;
   --academic-orange-soft: #FFF7ED;
   --academic-ink: #263238;
-  --academic-muted: #64748B;
+  --academic-muted: #586571;
   --academic-reference: #B8C1CB;
   --font-heading: 'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif;
   --font-body: 'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif;
@@ -26,8 +26,8 @@
 .card-content {
   font-family: var(--font-body);
   color: var(--academic-ink);
-  font-size: 32px;
-  line-height: 1.55;
+  font-size: 38px;
+  line-height: 1.5;
   overflow-wrap: break-word;
 }
 
@@ -42,10 +42,10 @@
   border: 0;
 }
 
-.card-content h1 { font-size: 46px; margin: 0 0 28px; }
-.card-content h2 { font-size: 38px; margin: 28px 0 20px; }
-.card-content h3 { font-size: 32px; margin: 24px 0 16px; }
-.card-content p { margin-bottom: 20px; }
+.card-content h1 { font-size: 48px; margin: 0 0 28px; }
+.card-content h2 { font-size: 44px; margin: 32px 0 24px; }
+.card-content h3 { font-size: 40px; margin: 28px 0 20px; }
+.card-content p { margin-bottom: 28px; }
 .card-content > :last-child { margin-bottom: 0; }
 .card-content strong, .card-content b { font-weight: 600; }
 .card-content em, .card-content i { color: inherit; }

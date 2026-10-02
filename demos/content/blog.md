@@ -25,4 +25,4 @@ description: 技术文章的可读性，常常取决于读者能否在当下判�
 
 正文用连续段落完成论证，目录帮助读者定位，公式和代码留出足够空间。明暗主题分别配置文字、代码和背景，保留清楚的层级；证据原图保持原貌，自绘图按语义使用主题变量。
 
-这篇文章是排版示例，观点是写作建议，不是用户实验结论。数学例子的来源见 [SciPy softmax 文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.softmax.html)。
+数学例子的来源见 [SciPy softmax 文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.softmax.html)。

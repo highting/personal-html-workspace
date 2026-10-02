@@ -12,7 +12,7 @@
 
 参考的实际功能来源：[Nextra文档主题](https://nextra.site/docs/docs-theme/built-ins)、[AstroPaper主题与布局设置](https://github.com/satnaing/astro-paper/wiki/Customization)、[AstroPaper明暗偏好](https://github.com/satnaing/astro-paper/wiki/Features)、[Slidev功能](https://github.com/slidevjs/slidev#features)、[Slidev颜色模式配置](https://sli.dev/custom/)。
 
-学习页左侧分层导航，博客主阅读栏与右侧轻目录；目录在桌面和紧凑窗口均可收起。汇报固定16:9舞台。共用CSS变量管理浅色暖米色、深色墨蓝、文字、边界、代码与解释图；图内颜色按对象语义映射，证据原图不反色。太阳/月亮图标切换主题，支持浅/深/系统初始偏好，记住选择，不重载正文或汇报。
+学习与博客共用左侧目录和连续正文模板，区别在内容详略；目录可收起，字号可调16–24px，图片和SVG可点击放大。汇报固定16:9舞台。两类HTML以桌面与缩放使用为验收范围，不另做手机适配验收。共用CSS变量管理背景、文字、代码与图解；普通图形节点使用协调的中性底色，强调色按对象语义少量使用，详见[成品视觉规则](visual-system.md)。证据原图不反色。主题切换记住选择，不重载正文或汇报。
 
 新增HTML采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；构建时仅内嵌本篇实际字形的WOFF2子集及许可。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。代码等宽，中文由同一离线字体回退；数学使用KaTeX字形。实际字体以浏览器核验为准。
 

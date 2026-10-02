@@ -16,6 +16,70 @@
   themeButton.addEventListener('click', () => setContentTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true));
   systemTheme.addEventListener('change', () => { if (preference === 'system') setContentTheme('system'); });
 
+  const fontOutput = document.getElementById('font-size');
+  if (fontOutput) {
+    let readingSize = 18;
+    try { readingSize = Number(localStorage.getItem('personal-html-workspace-font-size')) || 18; } catch (_) {}
+    const setReadingSize = size => {
+      readingSize = Math.max(16, Math.min(24, size));
+      root.style.setProperty('--reading-size', readingSize + 'px');
+      fontOutput.textContent = readingSize + 'px';
+      document.getElementById('font-smaller').disabled = readingSize === 16;
+      document.getElementById('font-larger').disabled = readingSize === 24;
+      try { localStorage.setItem('personal-html-workspace-font-size', readingSize); } catch (_) {}
+    };
+    setReadingSize(readingSize);
+    document.getElementById('font-smaller').addEventListener('click', () => setReadingSize(readingSize - 2));
+    document.getElementById('font-larger').addEventListener('click', () => setReadingSize(readingSize + 2));
+  }
+
+  const figures = document.querySelectorAll('.prose img, .prose figure > svg, .slide-body img, .slide-body figure > svg');
+  if (figures.length) {
+    const viewer = document.createElement('dialog');
+    viewer.className = 'image-viewer';
+    viewer.setAttribute('aria-label', '查看大图');
+    viewer.innerHTML = '<div class="image-viewer-bar"><span>查看大图</span><div class="tools"><button data-zoom="1">适合窗口</button><button data-zoom="1.5">放大</button><button data-close>关闭</button></div></div><div class="image-viewer-content"></div>';
+    document.body.append(viewer);
+    const content = viewer.querySelector('.image-viewer-content');
+    let opener;
+    viewer.querySelector('[data-close]').addEventListener('click', () => viewer.close());
+    viewer.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
+    viewer.addEventListener('close', () => { content.replaceChildren(); opener?.focus({preventScroll: true}); });
+    viewer.querySelectorAll('[data-zoom]').forEach(button => button.addEventListener('click', () => {
+      content.style.setProperty('--image-width', Number(button.dataset.zoom) * 100 + '%');
+    }));
+    figures.forEach(figure => {
+      if (figure.closest('a')) return;
+      figure.setAttribute('tabindex', '0');
+      const label = figure.getAttribute('aria-label') || figure.getAttribute('alt') || '图解';
+      figure.setAttribute('aria-label', label + '，点击放大');
+      const open = () => {
+        opener = figure;
+        const copy = figure.cloneNode(true);
+        copy.removeAttribute('tabindex');
+        copy.removeAttribute('id');
+        // 保留SVG箭头、裁剪路径和引用，同时避免复制后ID冲突。
+        const ids = new Map();
+        copy.querySelectorAll('[id]').forEach(node => { ids.set(node.id, 'viewer-' + node.id); node.id = ids.get(node.id); });
+        for (const node of [copy, ...copy.querySelectorAll('*')]) {
+          for (const attribute of [...node.attributes]) {
+            let value = attribute.value;
+            ids.forEach((newId, oldId) => {
+              value = value.replaceAll('url(#' + oldId + ')', 'url(#' + newId + ')');
+              if (value === '#' + oldId) value = '#' + newId;
+            });
+            if (value !== attribute.value) node.setAttribute(attribute.name, value);
+          }
+        }
+        content.style.setProperty('--image-width', '100%');
+        content.replaceChildren(copy);
+        viewer.showModal();
+      };
+      figure.addEventListener('click', open);
+      figure.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(); } });
+    });
+  }
+
   const toc = document.getElementById('toc');
   const tocLinks = document.getElementById('toc-links');
   const tocButton = document.getElementById('toc-toggle');
@@ -86,6 +150,7 @@
   previous.addEventListener('click', () => showSlide(current - 1));
   next.addEventListener('click', () => showSlide(current + 1));
   addEventListener('keydown', event => {
+    if (document.querySelector('dialog[open]')) return;
     if (event.target.closest('input, textarea, select, [contenteditable]')) return;
     if (event.key === 'ArrowRight' || event.key === 'PageDown') { event.preventDefault(); showSlide(current + 1); }
     if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); showSlide(current - 1); }

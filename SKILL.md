@@ -5,7 +5,7 @@ description: Turn source material into personal learning documents, technical bl
 
 # Personal HTML Workspace
 
-按读者和使用目的选择场景，再整理正文、必要图解和交付形式。四种场景是独立任务，不能仅换标题或画幅。仓库以原 `main` 为基础，小红书渲染器、主题、字体、画幅与制作规则沿用原流程。
+按读者和使用目的选择场景，再整理正文、必要图解和交付形式。学习和博客共用阅读模板，以内容详略适应目的；汇报用16:9逐页演示，小红书保留academic竖版图片。Prompt是基础参考，章节、图数和布局按实际生成效果调整，不为场景重复设计模板。
 
 ## 选择场景
 
@@ -29,7 +29,7 @@ description: Turn source material into personal learning documents, technical bl
 
 ## 执行入口
 
-学习、博客和汇报读取 `prompts/common.txt` 与所选 `prompts/scenes/<scene>.txt`，用 `prepare_content.py` 建立副本；AI根据材料策划并整理 Markdown 或可信 HTML 正文片段。`build_content.py` 组装自包含 HTML，`render_content.py` 检查明暗主题与离线资源，完成实际查看后用 `publish_content.py` 汇总。构建器不会替代撰稿、推导或汇报策划。
+学习、博客和汇报读取 `prompts/common.txt`、所选 `prompts/scenes/<scene>.txt` 与[成品视觉规则](references/visual-system.md)，用 `prepare_content.py` 建立副本；按材料策划 Markdown 或可信 HTML 正文片段。`build_content.py` 组装自包含 HTML，`render_content.py` 检查明暗主题、离线资源和缩放，实际查看后用 `publish_content.py` 汇总。长文与汇报不单独验收手机适配；长文支持字号调节与图像放大。小红书另用 `check_rednote.py` 检查默认画幅并生成手机预览。成品不含草稿、占位或制作说明，构建器不能替代撰稿和目视检查。
 
 小红书继续使用 `prepare_blog.py` → `rednote_render.py` → `publish_blog.py`；新 `inputs/` 也可用 `prepare_content.py --scene rednote` 准备，再调用同一原渲染器与 `publish_content.py` 的原交付路由。规则见[小红书流程](references/rednote-scene.md)，不将新阅读模板套入卡片。明暗阅读模板不会改变既有 PNG 默认效果。
 

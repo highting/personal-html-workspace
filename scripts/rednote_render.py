@@ -71,10 +71,12 @@ MI_SANS_STACK = "'MiSans', 'Microsoft YaHei', 'Source Han Sans CN', 'PingFang SC
 MATH_MODES = ('off', 'katex')
 KATEX_VERSION = '0.16.11'
 HTML_DOCUMENT_CSS = '''<style>
+    .card-container { padding: 36px; }
     .card-inner {
         --font-heading: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
         --font-body: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
         border: 0; border-radius: 0; box-shadow: none;
+        padding: 48px; min-height: calc(100% - 72px);
     }
     .cover-container { font-family: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif; }
     .card-content img { display: block; max-width: 100%; height: auto; }

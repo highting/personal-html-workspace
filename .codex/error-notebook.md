@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261002-015 — 汇报舞台缩放后偏移并被裁切
+
+- Fingerprint: `report:intrinsic-grid-size-before-transform`
+- Status: active
+- First seen: 2026-10-02
+- Last seen: 2026-10-02
+- Occurrences: 1
+- Scope: `assets/content/content.css` 的 `.presentation`、`.slide-stage`，以及 `render_content.py`
+- Symptom: 720×500窗口中演示页偏向右下方并被裁切，文档整体横向溢出检查仍通过。
+- Root cause: Grid根据1280×720舞台的未缩放固有尺寸计算轨道；transform缩小视觉内容，却没有让舞台相对可见容器正确居中。
+- Wrong assumption/action: 认为缩放因子正确、整页没有横向滚动，就能证明演示舞台完整可见。
+- Correct approach: 舞台相对演示容器绝对居中，以translate和scale组合定位；导出时恢复正常定位，保留1280×720固定页。
+- Prevention check: 同时核对舞台四边在presentation容器内，覆盖1440×1000、960×667、720×500窗口；查看缩小窗口截图，不能只检查导出PNG或scrollWidth。
+- Verification: 明暗720×500截图均显示完整居中舞台；汇报导航、备注、主题与PNG尺寸回归测试通过，三种窗口检查通过。
+- Evidence: `tests/test_content.py::test_report_navigation_notes_theme_and_png_size`；`output/流程优化-汇报/checks/light/window-720.png`；`scripts/render_content.py`。
+
 ## ERR-20261002-014 — 管道 Python 中的 rg 默认检索 stdin
 
 - Fingerprint: `inspection:rg-inherits-piped-stdin`
