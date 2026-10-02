@@ -32,4 +32,6 @@
 
 图像放大视图保留图注的思路参考[PhotoSwipe Caption](https://photoswipe.com/caption/)，原图注同时在正文可读。本项目继续使用原生dialog，复制已渲染的公式和链接，按自身窗口与主题排版，不安装PhotoSwipe或复制其示例样式。
 
+行内数学重排依据[KaTeX选项说明](https://katex.org/docs/options.html)：其默认允许在最外层关系或二元运算符后断行。本项目让短表达式整体随段落换行，较长表达式仍在受限宽度内重排，不改变渲染模式或数学记号。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

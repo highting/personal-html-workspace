@@ -115,6 +115,7 @@ figcaption { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--li
 .katex .text { font-family: KaTeX_Main, "Content Sans", sans-serif; }
 .katex-display { margin: 28px 0 !important; overflow-x: auto; overflow-y: hidden; padding: 8px 0; }
 .prose .katex-display { margin: 1.1em 0 !important; }
+.prose .katex:not(.katex-display .katex) { display: inline-block; width: max-content; max-width: 100%; vertical-align: baseline; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 44px 0; }
 .article-footer { display: flex; justify-content: space-between; gap: 24px; font-size: 13px; border-top: 1px solid var(--line); margin-top: 64px; padding-top: 24px; color: var(--muted); }
 .article-footer span { max-width: 65%; }
