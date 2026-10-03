@@ -18,7 +18,8 @@ class TableScrollTests(unittest.TestCase):
             html = build_content(source, output=root / 'index.html')
             with sync_playwright() as p:
                 browser = p.chromium.launch()
-                page = browser.new_page(viewport={'width': 800, 'height': 1000}, offline=True)
+                # 百分比栏宽下，16px可容纳、24px溢出，才能验证提示随字号变化。
+                page = browser.new_page(viewport={'width': 1200, 'height': 1000}, offline=True)
                 page.goto(html.as_uri())
                 page.wait_for_function('window.contentReadingReady')
                 hint = page.locator('.table-scroll-hint')
@@ -26,9 +27,11 @@ class TableScrollTests(unittest.TestCase):
                 page.locator('summary').click()
                 page.locator('#font-smaller').click()
                 hint.wait_for(state='hidden')
+                self.assertLessEqual(page.locator('.table-wrap').evaluate('n=>n.scrollWidth-n.clientWidth'), 1)
                 for _ in range(4):
                     page.locator('#font-larger').click()
                 hint.wait_for(state='visible')
+                self.assertGreater(page.locator('.table-wrap').evaluate('n=>n.scrollWidth-n.clientWidth'), 1)
                 self.assertLessEqual(hint.bounding_box()['y'] + hint.bounding_box()['height'],
                                      page.locator('details').bounding_box()['y'] + page.locator('details').bounding_box()['height'])
                 for _ in range(4):

@@ -5,6 +5,7 @@ import unittest
 
 from scripts.prepare_blog import prepare_blog
 from scripts.publish_blog import publish_blog
+from scripts.rednote_artifacts import QA_VERSION, load_pages, sha256, source_files
 
 
 class WorkspaceTests(unittest.TestCase):
@@ -59,6 +60,12 @@ class WorkspaceTests(unittest.TestCase):
         (artifact / '配文.txt').write_text('我把这次阅读的思路画了下来。', encoding='utf-8')
         for number in images:
             (artifact / f'card_{number}.png').write_bytes(f'page-{number}'.encode())
+            (artifact / 'html/pages').mkdir(parents=True, exist_ok=True)
+            (artifact / f'html/pages/card_{number}.html').write_text('<html>card</html>', encoding='utf-8')
+        qa = {'schema_version': QA_VERSION, 'scene': 'rednote', 'passed': True,
+              'issues': [], 'source_files': source_files(artifact),
+              'pages': [{**page, 'sha256': sha256(artifact / page['file'])} for page in load_pages(artifact)]}
+        (artifact / 'qa-rednote.json').write_text(json.dumps(qa), encoding='utf-8')
         result['status'] = 'completed'
         (Path(result['run_dir']) / 'run.json').write_text(json.dumps(result), encoding='utf-8')
 

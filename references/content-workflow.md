@@ -90,6 +90,6 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 ## 小红书原流程
 
-`inputs/` 与已有 `blogs/` 的日常新建工作目录统一用 `prepare_content.py --scene rednote` 准备，保存共同与场景Prompt，再由 `rednote_render.py` 制图、`publish_content.py` 汇总。默认画幅以 `--save-html` 保存源页后，运行 `python -X utf8 scripts/check_rednote.py <artifact_dir>`，检查源页、图片清单和标签实际大小并生成390px宽PNG预览；仍须逐张查看原图和预览。`prepare_blog.py` 与 `publish_blog.py` 仅兼容历史调用和工作目录。小红书不使用长文模板，检查记录不能替代目视验收。
+`inputs/` 与已有 `blogs/` 的日常新建工作目录统一用 `prepare_content.py --scene rednote` 准备，保存共同与场景Prompt，再由 `rednote_render.py` 制图。用 `--save-html` 保存源页；混入独立辅助图片时按[小红书验收](rednote-scene.md#检查与交付)填写最终页清单。运行 `python -X utf8 scripts/check_rednote.py <artifact_dir>`，检查连续页序、PNG解码与尺寸、HTML资源、公式及标签实际大小，生成390px宽预览。逐张查看原图和预览、完成内容审核后才标记 `completed`，再用 `publish_content.py` 汇总。发布器要求当前版本 `qa-rednote.json` 通过，核对图片、源页、资源及清单的哈希；改变后必须重新检查，缺少或过期QA不能发布。`prepare_blog.py` 与 `publish_blog.py` 兼容历史调用和工作目录，但同样执行此门槛；历史成品不自动改写，再次交付需在新工作目录重新验收。小红书不使用长文模板，检查记录不能替代目视验收。
 
 这里的“发布”只指本地成品汇总。脚本不调用AI或生图、不上传社交平台；插件安装与GitHub上传是独立操作。

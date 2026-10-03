@@ -9,6 +9,7 @@ from unittest.mock import patch
 from scripts.prepare_content import source_hash
 from scripts.publish_blog import publish_blog
 from scripts.publish_content import publish_content
+from scripts.rednote_artifacts import QA_VERSION, load_pages, sha256, source_files
 
 
 class PublishTests(unittest.TestCase):
@@ -39,6 +40,14 @@ class PublishTests(unittest.TestCase):
             (artifacts / '标题.txt').write_text('标题', encoding='utf-8')
             (artifacts / '配文.txt').write_text('配文', encoding='utf-8')
             (artifacts / 'card_1.png').write_bytes(b'card-one')
+            (artifacts / 'html/pages').mkdir(parents=True)
+            (artifacts / 'diagram.png').rename(artifacts / 'html/diagram.png')
+            (artifacts / 'html/pages/card_1.html').write_text('<html>card one</html>', encoding='utf-8')
+            rednote_qa = {'schema_version': QA_VERSION, 'scene': 'rednote', 'passed': True,
+                          'issues': [], 'source_files': source_files(artifacts),
+                          'pages': [{**page, 'sha256': sha256(artifacts / page['file'])}
+                                    for page in load_pages(artifacts)]}
+            (artifacts / 'qa-rednote.json').write_text(json.dumps(rednote_qa), encoding='utf-8')
         qa = {'passed': True, 'scene': scene, 'images': images,
               'html_sha256': hashlib.sha256((artifacts / 'index.html').read_bytes()).hexdigest()}
         (artifacts / 'qa.json').write_text(json.dumps(qa), encoding='utf-8')
@@ -175,6 +184,42 @@ class PublishTests(unittest.TestCase):
                 self.assertEqual([(run / name).read_bytes() for name in ('run.json', 'delivery.md')], records)
                 self.assert_no_backup(run)
                 self.assert_no_staging(root, run)
+
+    def test_rednote_rejects_missing_failed_and_stale_checks_without_touching_delivery(self):
+        for scene in ('legacy', 'rednote'):
+            for change in ('no-qa', 'failed', 'old-qa', 'changed', 'extra', 'stray', 'missing', 'source', 'resource', 'manifest'):
+                with self.subTest(scene=scene, change=change):
+                    root, run, artifacts, destination, publisher = self.ready(scene)
+                    old = self.old_delivery(destination)
+                    records = [(run / name).read_bytes() for name in ('run.json', 'delivery.md')]
+                    qa_path = artifacts / 'qa-rednote.json'
+                    if change == 'no-qa':
+                        qa_path.unlink()
+                    elif change in ('failed', 'old-qa'):
+                        qa = json.loads(qa_path.read_text(encoding='utf-8'))
+                        qa['passed' if change == 'failed' else 'schema_version'] = False
+                        qa_path.write_text(json.dumps(qa), encoding='utf-8')
+                    elif change == 'changed':
+                        (artifacts / 'card_1.png').write_bytes(b'changed')
+                    elif change == 'extra':
+                        (artifacts / 'card_2.png').write_bytes(b'unchecked')
+                    elif change == 'stray':
+                        (artifacts / 'extra.png').write_bytes(b'unchecked')
+                    elif change == 'missing':
+                        (artifacts / 'card_1.png').unlink()
+                    elif change == 'source':
+                        (artifacts / 'html/pages/card_1.html').write_text('changed', encoding='utf-8')
+                    elif change == 'resource':
+                        (artifacts / 'html/style.css').write_text('changed', encoding='utf-8')
+                    else:
+                        (artifacts / 'rednote-pages.json').write_text(json.dumps({'pages': load_pages(artifacts)}), encoding='utf-8')
+                    with self.assertRaises(ValueError):
+                        publisher(str(run), root)
+                    self.assertEqual(self.snapshot(destination), old)
+                    self.assertEqual([(run / name).read_bytes() for name in ('run.json', 'delivery.md')], records)
+                    self.assertFalse((artifacts / '预览.html').exists())
+                    self.assert_no_backup(run)
+                    self.assert_no_staging(root, run)
 
 
 if __name__ == '__main__':

@@ -2,6 +2,54 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-061 — 宽度改成百分比后测试仍假定表格可容纳
+
+- Fingerprint: `qa:table-fit-fixture-assumes-old-reading-width`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 学习/博客宽表格字号回归
+- Symptom: 800px窗口调至16px后等待滚动提示隐藏超时，实际容器440px而表格635px，提示行为正确。
+- Root cause: 测试样例的适配条件仍基于旧像素栏宽，没有随百分比布局同步调整。
+- Wrong assumption/action: 假定缩小字号一定消除溢出，只检查提示可见性而未核对实际宽度关系。
+- Correct approach: 样例窗口改为1200px，确保16px可容纳、24px溢出；同时断言scrollWidth与clientWidth关系。
+- Prevention check: 改变栏宽模型或默认值后，复核依赖临界尺寸的测试前提；溢出提示验证同时检查实际几何，不能为迁就旧断言修改正确功能。
+- Verification: 字号变化、嵌套面板边界和键盘滚动测试通过，全量测试通过。
+- Evidence: tests/test_table_scroll.py；archive/checks/flow-audit-20261003/table-probe.json；archive/checks/rednote-gates-20261003/tests.json。
+
+## ERR-20261003-060 — 独立图片预览沿用空白或图片文档上下文
+
+- Fingerprint: `rednote:local-image-preview-from-blank-or-image-document`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: check_rednote.py的独立图片与手机预览
+- Symptom: 仅图片封面从about:blank加载本地PNG失败；改为直接打开PNG后set_content又等待load超时。
+- Root cause: 空白页面限制本地文件加载，浏览器原生图片文档也不适合作为HTML预览的set_content宿主。
+- Wrong assumption/action: 将已导航到HTML的预览流程直接套用到没有HTML源页的图片场景。
+- Correct approach: 在checks/生成引用最终PNG的本地HTML包装页，导航该页、等待图片decode，再截图。
+- Prevention check: 独立图片预览同时覆盖仅图片封面和HTML/图片混排，不依赖前一页恰好建立file上下文；确认截图尺寸及实际图面。
+- Verification: 仅图片封面、混排、PNG解码测试通过，真实390px图片预览已查看。
+- Evidence: scripts/check_rednote.py；tests/test_rednote.py；archive/checks/rednote-gates-20261003/mixed/checks/。
+
+## ERR-20261003-059 — 小红书交付未绑定最终页验收
+
+- Fingerprint: `rednote:publication-without-checked-final-page-manifest`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 小红书检查器、混排页清单与本地交付
+- Symptom: 发布器仅依赖completed，未读取QA；独立图片没有HTML源页时被误拒，其他名称的根目录PNG可能绕过页清单进入交付。
+- Root cause: 最终页及制作类型没有统一契约，检查结果未与发布文件集合和内容绑定。
+- Wrong assumption/action: 将手动完成状态和按card_N命名的部分文件集合视为整份交付已验收。
+- Correct approach: 共用最终页清单；纯HTML自动配对、混排显式标记html/image；检查连续页序、PNG解码及尺寸，发布验证当前QA、图片和全部HTML资源及清单哈希。
+- Prevention check: 发布改动覆盖缺少/失败/旧QA、修改/增加/删除图片、任意名称残留PNG及源页/资源/清单变化；拒绝时旧入口与制作记录不变。混排不得为位图伪造HTML源页。
+- Verification: 全量测试通过；真实公式正文与独立PNG的混排QA通过，390px预览已查看。
+- Evidence: scripts/rednote_artifacts.py；tests/test_rednote.py；tests/test_publish.py；archive/checks/rednote-gates-20261003/tests.json及mixed/qa-rednote.json。
+
 ## ERR-20261003-050 — 固定配图数量替代了材料判断
 
 - Fingerprint: `content:fixed-figure-count-overrides-explanatory-need`

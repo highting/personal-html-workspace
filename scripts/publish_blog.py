@@ -5,11 +5,11 @@ from datetime import datetime
 from html import escape
 import json
 from pathlib import Path
-import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.publish_utils import replace_delivery
+from scripts.rednote_artifacts import validate_rednote_qa
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -31,10 +31,7 @@ def publish_blog(run_dir: str, project_root: Path = PROJECT_ROOT) -> dict:
         raise ValueError('交付目录必须是 output/ 下非下划线开头的单层目录')
     title = (artifacts / '标题.txt').read_text(encoding='utf-8').strip()
     caption = (artifacts / '配文.txt').read_text(encoding='utf-8').strip()
-    cards = sorted((p for p in artifacts.glob('card_*.png') if re.fullmatch(r'card_\d+\.png', p.name)),
-                   key=lambda p: int(p.stem.split('_')[1]))
-    if (artifacts / 'cover.png').is_file():
-        cards.insert(0, artifacts / 'cover.png')
+    cards = validate_rednote_qa(artifacts)
     if not title or not caption or not cards:
         raise ValueError('交付需要标题、配文和最终图片')
     paragraphs = ''.join(f'<p>{escape(p).replace(chr(10), "<br>")}</p>' for p in caption.split('\n\n'))
