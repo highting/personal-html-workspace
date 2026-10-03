@@ -2,6 +2,54 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-036 — 合并路径只在最后一个端点显示箭头
+
+- Fingerprint: `svg:compound-path-marker-end-only-on-final-vertex`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 多段流程连接使用同一个SVG path与marker-end
+- Symptom: 配色修正后的卡片中，第一条连接只有线段，第二条才显示箭头头部。
+- Root cause: marker-end只作用于整条路径数据的最终顶点，多个子路径不是多个独立箭头。
+- Wrong assumption/action: 将两段连接合并为一个path，期望每段都出现末端标记。
+- Correct approach: 两段连接分别使用path，共用marker定义与样式。
+- Prevention check: 使用marker的多箭头图逐条核对头部与方向，不把路径中多个M当成多个末端标记。
+- Verification: 拆分后原尺寸PNG及390px预览均显示两条完整箭头；源页也含两条独立连接。
+- Evidence: `demos/academic-palette.md`；本轮`共享配色-卡片`成品及`work/colors-after.json`；MDN marker-end说明。
+
+## ERR-20261003-035 — 误把HTML单独导出路径当成PNG附带源页路径
+
+- Fingerprint: `renderer:html-only-output-path-assumed-save-html-layout`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 原卡片渲染器的HTML单独导出与测试文件定位
+- Symptom: 跨渲染器测试访问`card/html/pages/card_1.html`时报文件不存在。
+- Root cause: output_format=html直接导出到指定目录，只有PNG加save_html才使用html子目录。
+- Wrong assumption/action: 假设两种导出模式的路径相同。
+- Correct approach: HTML单独导出的源页从指定目录下的pages定位。
+- Prevention check: 根据实际导出模式及函数分支确定文件位置，先核对生成清单，不从另一模式猜路径。
+- Verification: 改为`card/pages/card_1.html`后，实际SVG颜色与原卡片字体回归通过。
+- Evidence: `tests/test_palette_bridge.py`；`scripts/rednote_render.py`的HTML导出分支。
+
+## ERR-20261003-034 — 旧卡片模板缺少共享SVG配色接口
+
+- Fingerprint: `palette:academic-missing-shared-svg-variables-and-classes`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: academic卡片中的内联SVG颜色变量与diagram类
+- Symptom: 按共享规则生成的SVG节点为黑色，主路径stroke为none，文字黑在黑底上。
+- Root cause: 原模板只有academic变量和vector类，缺少共享图形颜色变量及diagram类规则。
+- Wrong assumption/action: 假定另一渲染器的SVG接口已被旧卡片模板提供。
+- Correct approach: 在academic主题映射共享图形颜色到原配色，增加严格限定于自绘类的规则，保持字体和画幅。
+- Prevention check: 跨模板复用SVG时实际生成，核对变量与类支持、节点填充、连线与文字；声明相同颜色方案不能替代接口验收。
+- Verification: 节点从rgb(0,0,0)恢复为rgb(234,231,222)，箭头由none恢复为钴蓝；字体、38px正文和底色与原版相同，原图及390px检查通过。
+- Evidence: `assets/themes/academic.css`；`tests/test_palette_bridge.py`；本轮`work/before/colors.json`及`work/colors-after.json`。
+
 ## ERR-20261003-033 — 像素核验误用未安装的图像依赖
 
 - Fingerprint: `qa:assumed-pillow-installed-for-browser-pixel-check`

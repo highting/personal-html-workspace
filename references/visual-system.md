@@ -27,6 +27,8 @@ HTML 的颜色在 `assets/content/content.css` 定义。新制 SVG 使用这些�
 
 自绘图置于 `figure`。`.diagram-fill` 为普通节点暖灰底，`.diagram-line` 为主体路径色；`.diagram-emphasis-fill` 仅用于需要强调的主体区域。对照使用 `.diagram-compare` / `.diagram-compare-fill`，第三对象使用 `.diagram-secondary` / `.diagram-secondary-fill`。箭头填充可写 `fill="var(--accent)"`。样式只作用于自绘 SVG，不能覆盖 KaTeX 内部 SVG。图中文字按最终显示大小核对，不能只看viewBox内的字号。
 
+小红书academic主题为内嵌SVG提供共享图形颜色变量与`.diagram-*`类，将主体、对照、文字等角色映射到原`--academic-*`配色，普通节点采用同一暖灰。仅共享颜色接口，原卡片字体、画幅和排版继续沿用；图形布局与字号仍须按小红书的最终显示尺寸重排，可参考`demos/academic-palette.md`。作为图片引用的SVG不能继承宿主变量或类规则，应在文件内明确设置颜色与样式；需要随网页主题切换时选择内联SVG，或明确提供两套主题资源。
+
 新制位图优先采用透明背景，或使用与网页协调的浅暖纸色图面；固定浅底图使用 `figure.media-plate`，在深色网页上保留完整浅色图面和清楚边界。需要双主题原生图时，分别制作两张并用 `.theme-light` / `.theme-dark` 切换。不得用滤镜反色原始证据图，也不得声称固定图片会自动适配主题。生图 prompt 分开写“准确上图文字”与“构造说明”，不让坐标、像素数值、草稿说明进入图片。
 
 ## 字号服从阅读尺寸与内容

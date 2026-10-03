@@ -12,6 +12,19 @@
   --academic-ink: #263238;
   --academic-muted: #586571;
   --academic-reference: #B8C1CB;
+  /* 内嵌SVG共用语义配色，原卡片的字体与版式继续沿用。 */
+  --bg: var(--academic-background);
+  --figure-bg: var(--academic-background);
+  --text: var(--academic-ink);
+  --muted: var(--academic-muted);
+  --accent: var(--academic-blue);
+  --accent-soft: var(--academic-blue-soft);
+  --secondary: var(--academic-cyan);
+  --secondary-soft: var(--academic-cyan-soft);
+  --compare: var(--academic-orange);
+  --compare-soft: var(--academic-orange-soft);
+  --node-bg: #EAE7DE;
+  --node-line: #C8C5BB;
   --font-heading: 'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif;
   --font-body: 'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif;
   --font-mono: 'SF Mono', 'Consolas', 'Liberation Mono', monospace;
@@ -152,6 +165,13 @@
   stroke-linejoin: round;
 }
 .card-content svg .geometry-mark { fill: none; stroke: var(--academic-muted); stroke-width: 2; }
+.card-content svg .diagram-fill { fill: var(--node-bg); stroke: var(--node-line); stroke-width: 1; }
+.card-content svg .diagram-line { stroke: var(--accent); }
+.card-content svg .diagram-emphasis-fill { fill: var(--accent-soft); }
+.card-content svg .diagram-compare { stroke: var(--compare); }
+.card-content svg .diagram-compare-fill { fill: var(--compare-soft); }
+.card-content svg .diagram-secondary { stroke: var(--secondary); }
+.card-content svg .diagram-secondary-fill { fill: var(--secondary-soft); }
 .card-content .figure-label {
   position: absolute;
   transform: translate(-50%, -50%);

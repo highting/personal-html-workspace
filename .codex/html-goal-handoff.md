@@ -13,6 +13,11 @@
 
 ## 当前位置
 
+- 用户在本轮明确要求提前结束当前会话，准备自行开新会话；当前Goal将暂停，不自动再开会话。新会话接到用户继续请求后恢复持续优化范围，不把阶段完成当作全目标完成。
+- 最新一轮已完成academic内联SVG配色兼容：原卡片仅有academic变量/vector类，共享SVG会变成黑底且箭头无色；现在映射共享图形颜色变量与diagram类，保留原背景、38px正文和Microsoft YaHei设置。`demos/academic-palette.md`是独立教学辅助图，数值已用标准库核对，未拷入用户博客材料。成品`output/共享配色-卡片/预览.html`，run为`output/_work/共享配色-卡片/20261003-083043-302821-rednote-html/`，原图/390px预览与3项相关回归通过。
+- 内联SVG可以使用宿主的图形颜色接口；img引用的独立SVG必须自带颜色和样式。该边界已写入common与视觉文档，不需要改构建器解析方式。独立对照在Hyperball汇报run的`work/iterations/20261003-svg-embedding/`，含checks/fixed-checks及图像；可复用，勿重复探索。
+- 错题本最新036；033由旧会话补查并单独提交，034记录卡片接口兼容、035记录HTML导出位置、036记录复合path仅有最终marker-end。此轮没有安装Pillow，已有浏览器足以做像素检查。
+
 - 用户入口`inputs/`没有第二篇长文；`blogs/`只有Hyperball及配图说明。无需重复全仓寻找材料。
 - 已新编写`demos/content/softmax-longform/main.md`作为完整学习文档：7章、4表、2代码段、1流程图。标准库代码已执行；NumPy片段按官方API核对，未安装或运行NumPy。
 - Hyperball成品：`output/Hyperball-阅读版/index.html`。对应run为`output/_work/Hyperball-阅读版/20261002-232954-821907-blog-html/`，工作稿`work/Hyperball博客-图文版.md`。
