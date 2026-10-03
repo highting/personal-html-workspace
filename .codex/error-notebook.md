@@ -2,6 +2,22 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-033 — 像素核验误用未安装的图像依赖
+
+- Fingerprint: `qa:assumed-pillow-installed-for-browser-pixel-check`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 项目虚拟环境中的SVG配色像素核验
+- Symptom: 导入`PIL`时出现`ModuleNotFoundError`，检查在生成对照材料前停止。
+- Root cause: 假定项目虚拟环境已安装Pillow，未核对实际依赖；本次简单像素检查并不需要它。
+- Wrong assumption/action: 为读取浏览器截图中的一个像素，引入未确认可用的图像库。
+- Correct approach: 使用浏览器Canvas读取已加载图像的像素，仍用Playwright保存实际截图；未安装新依赖。
+- Prevention check: 使用库前核对实际运行环境；简单浏览器图像像素核验优先利用已有浏览器能力，不因一次检查增加不必要依赖。
+- Verification: 改用Canvas后完成明暗两套内联/独立SVG对照，得到像素值和实际填充色，并查看四张截图。
+- Evidence: `output/_work/Hyperball-汇报/20261003-063225-786989-report-html/work/iterations/20261003-svg-embedding/checks.json`及同目录对照HTML和PNG。
+
 ## ERR-20261003-032 — 中文片段链接的编码差异被误判为导航失败
 
 - Fingerprint: `qa:raw-unicode-href-compared-with-encoded-location-hash`
