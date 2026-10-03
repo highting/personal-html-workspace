@@ -59,7 +59,7 @@ subtitle: "小红书笔记创作神器"
 
 使用命令：
 ```bash
-python scripts/rednote_render.py assets/example.md -t playful-geometric
+python scripts/rednote_render.py demos/legacy/example.md -t playful-geometric
 ```
 
 #小红书模板 #排版设计 #内容创作
