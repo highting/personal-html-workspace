@@ -7,6 +7,60 @@ from scripts.build_content import build_content
 
 
 class ReaderToolsTests(unittest.TestCase):
+    def test_width_slider_drag_keyboard_reset_and_saved_preference(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / 'main.md'
+            source.write_text('# 拖动阅读宽度\n\n' + '\n\n'.join(
+                f'## 章节 {n}\n\n' + '行长变化时，应留在正在阅读的这一段文字。' * 50
+                for n in range(12)), encoding='utf-8')
+            html = build_content(source, output=root / 'index.html')
+            with sync_playwright() as p:
+                browser = p.chromium.launch()
+                page = browser.new_page(viewport={'width': 1440, 'height': 1000}, offline=True)
+                page.goto(html.as_uri()); page.wait_for_function('window.contentReadingReady')
+                page.evaluate('''() => {
+                  document.documentElement.style.scrollBehavior='auto';
+                  document.documentElement.style.overflowAnchor='none';
+                  const text=document.querySelectorAll('.prose>p')[5].firstChild;
+                  window.point=document.createRange();point.setStart(text,320);point.setEnd(text,321);
+                  scrollTo(0,point.getBoundingClientRect().top+scrollY-112);
+                }''')
+                before = page.evaluate('point.getBoundingClientRect().top')
+                self.assertEqual(page.locator('.reader-dialog').count(),0)
+                self.assertTrue(page.locator('#print-article').is_visible())
+                slider = page.locator('#reading-width')
+                box = slider.bounding_box()
+                y = box['y']+box['height']/2
+                page.mouse.move(box['x']+8+(box['width']-16)*.36,y)
+                page.mouse.down()
+                page.mouse.move(box['x']+box['width']-8,y,steps=12)
+                self.assertEqual(slider.input_value(), '960')
+                self.assertEqual(page.locator('.prose>p').first.bounding_box()['width'],960)
+                self.assertLessEqual(abs(page.evaluate('point.getBoundingClientRect().top')-before),60)
+                page.mouse.up()
+                slider.focus(); page.keyboard.press('Home')
+                self.assertEqual(page.locator('.prose>p').first.bounding_box()['width'],560)
+                page.keyboard.press('ArrowRight')
+                self.assertEqual(slider.input_value(),'568')
+                self.assertEqual(slider.get_attribute('aria-valuetext'),'568 像素')
+                page.keyboard.press('Escape')
+                page.reload(); page.wait_for_function('window.contentReadingReady')
+                self.assertEqual(slider.input_value(),'568')
+                self.assertEqual(page.locator('.prose>p').first.bounding_box()['width'],568)
+                page.click('#reset-reading-width')
+                self.assertEqual(slider.input_value(),'704')
+                page.keyboard.press('Escape')
+                page.evaluate('localStorage.setItem("content-reading-width","wide")')
+                page.reload(); page.wait_for_function('window.contentReadingReady')
+                self.assertEqual(slider.input_value(),'792')
+                page.add_init_script('Object.defineProperty(window,"localStorage",{get(){throw Error("blocked")}})')
+                page.reload(); page.wait_for_function('window.contentReadingReady')
+                self.assertEqual(slider.input_value(),'704')
+                slider.focus();page.keyboard.press('End')
+                self.assertEqual(slider.input_value(),'960')
+                browser.close()
+
     def test_palettes_print_width_and_animation(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -38,9 +92,9 @@ class ReaderToolsTests(unittest.TestCase):
                 self.assertEqual(page.input_value('#palette-select'), 'ink')
                 page.click('#theme-toggle')
                 self.assertEqual(page.input_value('#palette-select'), 'warm')
-                page.click('#reader-settings')
-                page.select_option('#reading-width', 'wide')
-                self.assertEqual(page.evaluate('document.documentElement.dataset.readingWidth'), 'wide')
+                page.locator('#reading-width').focus()
+                page.keyboard.press('End')
+                self.assertEqual(page.locator('#reading-width-value').inner_text(), '960 px')
                 page.keyboard.press('Escape')
                 self.assertEqual(page.locator('#search-open').count(), 0)
                 figure = page.locator('figure[data-animation]')

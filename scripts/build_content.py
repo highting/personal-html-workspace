@@ -144,7 +144,7 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
     template = (TEMPLATES / ('report.html' if scene == 'report' else 'document.html')).read_text(encoding='utf-8')
     runtime = '\n'.join((TEMPLATES / name).read_text(encoding='utf-8') for name in
                         (['content.js', 'animation.js'] if scene == 'report' else
-                         ['content.js', 'reading.js', 'reader-tools.js', 'animation.js']))
+                         ['content.js', 'image-size.js', 'reading.js', 'reader-tools.js', 'animation.js']))
     # 控件文案和动态步骤使用同一个离线字形子集。
     body_font_text = unescape(body) + template + runtime
     font_css, font_license = font_assets(body_font_text + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图图解适合窗口放大关闭正文字号减小增大点击复制代码已复制复制失败请手动选择复制章节链接展开全部收起行上次读到继续阅读忽略补充说明向左右滚动查看完整表格前面的列→←↑−#')

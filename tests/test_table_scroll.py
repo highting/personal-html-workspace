@@ -14,7 +14,7 @@ class TableScrollTests(unittest.TestCase):
             source = root / 'main.md'
             source.write_text('# 参数\n\n## 参数解释\n\n<details><summary>更多参数</summary>'
                               '<table><tr><th>参数</th></tr><tr><td><code>configuration_' +
-                              'value_' * 12 + '</code></td></tr></table></details>', encoding='utf-8')
+                              'value_' * 11 + '</code></td></tr></table></details>', encoding='utf-8')
             html = build_content(source, output=root / 'index.html')
             with sync_playwright() as p:
                 browser = p.chromium.launch()

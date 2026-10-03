@@ -37,6 +37,7 @@
 
   const fontOutput = document.getElementById('font-size');
   let preserveReadingPosition = change => change();
+  let captureReadingPosition = () => undefined;
   if (fontOutput) {
     let readingSize = 18;
     try { readingSize = Number(localStorage.getItem('personal-html-workspace-font-size')) || 18; } catch (_) {}
@@ -52,7 +53,7 @@
     const readingAnchor = () => {
       const article = document.querySelector('.prose');
       const left = article.getBoundingClientRect().left + 24;
-      const top = document.querySelector('.toolbar').getBoundingClientRect().bottom + 24;
+      const top = Math.max(76, document.querySelector('.toolbar').getBoundingClientRect().bottom) + 24;
       for (let y = top; y <= top + 72; y += 24) {
         let range;
         if (document.caretPositionFromPoint) {
@@ -75,8 +76,8 @@
         return {block, fraction: (point - box.top) / box.height, top: point};
       }
     };
-    preserveReadingPosition = change => {
-      const anchor = readingAnchor();
+    captureReadingPosition = readingAnchor;
+    preserveReadingPosition = (change, anchor = readingAnchor()) => {
       const previousAnchor = root.style.overflowAnchor;
       root.style.overflowAnchor = 'none';
       change();
@@ -91,7 +92,8 @@
     document.getElementById('font-smaller').addEventListener('click', () => changeReadingSize(-2));
     document.getElementById('font-larger').addEventListener('click', () => changeReadingSize(2));
   }
-  window.preserveContentPosition = change => preserveReadingPosition(change);
+  window.captureContentPosition = () => captureReadingPosition();
+  window.preserveContentPosition = (change, anchor) => preserveReadingPosition(change, anchor);
 
   const figures = document.querySelectorAll('.prose img, .prose figure > svg, .slide-body img, .slide-body figure > svg');
   if (figures.length) {
@@ -213,6 +215,33 @@
   const updateTocState = () => tocButton.setAttribute('aria-expanded', String(isReport || compactLayout.matches ? toc.classList.contains('open') : !document.body.classList.contains('toc-hidden')));
   updateTocState();
   compactLayout.addEventListener('change', updateTocState);
+  const toolbar = document.getElementById('reading-toolbar');
+  if (toolbar) {
+    const syncToolbarHeight = () => root.style.setProperty('--toolbar-height', toolbar.offsetHeight + 'px');
+    new ResizeObserver(syncToolbarHeight).observe(toolbar);
+    syncToolbarHeight();
+    const collapse = document.getElementById('toolbar-collapse');
+    const reveal = document.getElementById('toolbar-reveal');
+    const setToolbarCollapsed = collapsed => {
+      toolbar.hidden = collapsed;
+      reveal.hidden = !collapsed;
+      syncToolbarHeight();
+      collapse.setAttribute('aria-expanded', String(!collapsed));
+      reveal.setAttribute('aria-expanded', String(!collapsed));
+      if (collapsed) {
+        toc.classList.remove('open');
+        updateTocState();
+      }
+    };
+    try { setToolbarCollapsed(localStorage.getItem('content-toolbar-collapsed') === 'true'); } catch (_) {}
+    const toggleToolbar = collapsed => {
+      preserveReadingPosition(() => setToolbarCollapsed(collapsed));
+      (collapsed ? reveal : collapse).focus({preventScroll: true});
+      try { localStorage.setItem('content-toolbar-collapsed', String(collapsed)); } catch (_) {}
+    };
+    collapse.addEventListener('click', () => toggleToolbar(true));
+    reveal.addEventListener('click', () => toggleToolbar(false));
+  }
   tocButton.addEventListener('click', () => {
     if (isReport || compactLayout.matches) toc.classList.toggle('open');
     else preserveReadingPosition(() => document.body.classList.toggle('toc-hidden'));
@@ -269,7 +298,8 @@
       document.getElementById('reading-progress').style.width = `${available > 0 ? scrollY / available * 100 : 100}%`;
       const visible = headings.filter(heading => heading.getClientRects().length);
       let current = visible[0], chapter;
-      visible.forEach(heading => { if (heading.getBoundingClientRect().top < 160) current = heading; });
+      const threshold = parseFloat(getComputedStyle(root).scrollPaddingTop) + 60;
+      visible.forEach(heading => { if (heading.getBoundingClientRect().top < threshold) current = heading; });
       // 短结尾不能滚到工具栏下方，也应在文末成为当前章节。
       if (available > 0 && scrollY >= available - 2) current = visible.at(-1);
       for (const heading of visible) {

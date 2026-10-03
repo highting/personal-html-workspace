@@ -177,16 +177,17 @@
   let ready = false, timer;
   history.scrollRestoration = 'manual';
   const visibleHeadings = () => headings.filter(heading => heading.getClientRects().length);
+  const topOffset = () => parseFloat(getComputedStyle(root).scrollPaddingTop);
   const position = () => {
     const visible = visibleHeadings();
     let current = visible[0];
-    visible.forEach(heading => { if (heading.getBoundingClientRect().top <= 140) current = heading; });
+    visible.forEach(heading => { if (heading.getBoundingClientRect().top <= topOffset() + 40) current = heading; });
     if (root.scrollHeight > innerHeight && scrollY >= root.scrollHeight - innerHeight - 2) current = visible.at(-1);
     if (!current) return null;
     const start = current.getBoundingClientRect().top + scrollY;
     const next = visible[visible.indexOf(current) + 1];
     const end = next ? next.getBoundingClientRect().top + scrollY : root.scrollHeight;
-    return {section: current.id, progress: Math.max(0, Math.min(1, (scrollY + 100 - start) / Math.max(1, end - start))),
+    return {section: current.id, progress: Math.max(0, Math.min(1, (scrollY + topOffset() - start) / Math.max(1, end - start))),
       openDetails: details.filter(detail => detail.open).map(detail => detail.id),
       codeViews: codeBlocks.map(block => ({key: block.dataset.readingKey,
         wrapped: block.classList.contains('is-wrapped'),
@@ -224,7 +225,7 @@
     const next = visible[visible.indexOf(target) + 1];
     const start = target.getBoundingClientRect().top + scrollY;
     const end = next ? next.getBoundingClientRect().top + scrollY : root.scrollHeight;
-    scrollTo({top: start + (end - start) * Math.max(0, Math.min(1, Number(saved.progress) || 0)) - 100, behavior: 'instant'});
+    scrollTo({top: start + (end - start) * Math.max(0, Math.min(1, Number(saved.progress) || 0)) - topOffset(), behavior: 'instant'});
   });
 
   const initializePosition = async () => {

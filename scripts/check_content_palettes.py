@@ -65,9 +65,8 @@ def check_content_palettes(source, *, scene, output_dir):
             result['issues'].extend(palette + ': ' + issue for issue in issues)
         if scene != 'report':
             page.evaluate('scrollTo(0,0)')
-            page.click('#reader-settings')
-            page.screenshot(path=str(output / 'reading-settings.png'))
-            page.keyboard.press('Escape')
+            page.locator('#reading-width').focus()
+            page.screenshot(path=str(output / 'reading-toolbar.png'))
             figure = page.locator('figure[data-animation]').first
             if figure.count():
                 figure.scroll_into_view_if_needed()

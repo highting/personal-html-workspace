@@ -99,13 +99,14 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                             }''')
                             if not fits:
                                 issues.append('演示舞台超出可见容器')
+                        reading_offset = page.evaluate('parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)')
                         page.evaluate('scrollTo({top: 0, behavior: "instant"})')
                         image = f'chrome-zoom-{round(zoom * 100)}-{theme}.png'
                         capture(output / image)
                         detail_images = []
                         if scene != 'report' and page.locator('.prose h2').count():
                             heading = page.locator('.prose h2').nth(page.locator('.prose h2').count() // 2)
-                            heading.evaluate('node => scrollTo({top: node.getBoundingClientRect().top + scrollY - 140, behavior: "instant"})')
+                            heading.evaluate('(node, offset) => scrollTo({top: node.getBoundingClientRect().top + scrollY - offset, behavior: "instant"})', reading_offset + 40)
                             before_top = heading.evaluate('node => node.getBoundingClientRect().top')
                             for _ in range(2):
                                 button = page.locator('#toc-toggle').bounding_box()
@@ -167,9 +168,9 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                     # 用完整视口分屏覆盖图块，不以CSS坐标裁剪DIP图面。
                                     (output / f'chrome-zoom-200-{theme}-{name}.png').unlink(missing_ok=True)
                                     box = block.evaluate('node => {const r=node.getBoundingClientRect();return {top:r.top+scrollY,height:r.height}}')
-                                    step = page.evaluate('innerHeight - 120')
+                                    step = page.evaluate('offset => innerHeight - offset - 20', reading_offset)
                                     for index, offset in enumerate(range(0, round(box['height']), max(1, round(step))), 1):
-                                        page.evaluate('top => scrollTo({top, behavior: "instant"})', max(0, box['top'] + offset - 100))
+                                        page.evaluate('top => scrollTo({top, behavior: "instant"})', max(0, box['top'] + offset - reading_offset))
                                         width = block.evaluate('node => ({client: node.clientWidth, scroll: node.scrollWidth})')
                                         lefts = (0,)
                                         if kind == 'table' and width['scroll'] > width['client'] + 1:
