@@ -6,7 +6,10 @@ from html import escape
 import json
 from pathlib import Path
 import re
-import shutil
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from scripts.publish_utils import replace_delivery
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -40,14 +43,7 @@ def publish_blog(run_dir: str, project_root: Path = PROJECT_ROOT) -> dict:
 <style>body{{margin:0;background:#EAE5DB;color:#263238;font:17px/1.75 "Microsoft YaHei",sans-serif}}header,main{{max-width:850px;margin:auto;padding:24px}}h1{{font-size:27px;line-height:1.5;margin:0 0 16px}}p{{margin:0 0 16px}}a{{color:#3B5BDB}}nav{{display:flex;gap:20px;margin-top:20px}}main{{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding-top:0}}figure{{margin:0}}img{{display:block;width:100%}}@media(max-width:620px){{main{{grid-template-columns:1fr;padding:0;gap:14px}}header{{padding:20px}}}}</style>
 <header><h1>{escape(title)}</h1>{paragraphs}<nav><a href="标题.txt">标题</a><a href="配文.txt">配文</a></nav></header><main>{figures}</main></html>'''
     (artifacts / '预览.html').write_text(preview, encoding='utf-8')
-    if destination.exists():
-        backup = run / 'previous-deliveries' / datetime.now().strftime('%Y%m%d-%H%M%S-%f')
-        backup.parent.mkdir(parents=True, exist_ok=True)
-        # Both resolved move targets are inside the intended output/work directories.
-        if not backup.resolve().is_relative_to(run):
-            raise ValueError('历史交付路径必须位于本次工作目录内')
-        destination.rename(backup)
-    shutil.copytree(artifacts, destination)
+    replace_delivery(artifacts, destination, run)
     manifest['published_at'] = datetime.now().astimezone().isoformat()
     manifest['publication_title'] = title
     manifest['published_images'] = [str(destination / p.name) for p in cards]

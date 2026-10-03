@@ -5,12 +5,13 @@ from datetime import datetime
 import hashlib
 import json
 from pathlib import Path
-import shutil
+import re
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.prepare_content import ROOT, SCENES, source_hash
 from scripts.publish_blog import publish_blog
+from scripts.publish_utils import replace_delivery
 
 
 def publish_content(run_dir, project_root=ROOT):
@@ -38,17 +39,18 @@ def publish_content(run_dir, project_root=ROOT):
         raise ValueError('交付需要本场景通过的检查记录')
     if hashlib.sha256((artifacts / 'index.html').read_bytes()).hexdigest() != qa['html_sha256']:
         raise ValueError('HTML 已改变，需要重新检查')
-    if manifest['scene'] == 'report' and not qa['images']:
-        raise ValueError('汇报需要逐页 PNG')
+    if manifest['scene'] == 'report':
+        if not qa['images']:
+            raise ValueError('汇报需要逐页 PNG')
+        pages = {path.name for path in artifacts.iterdir()
+                 if path.is_file() and re.fullmatch(r'page-\d+\.png', path.name)}
+        if pages != {image['file'] for image in qa['images']}:
+            raise ValueError('汇报页图与检查记录不一致，需要重新检查')
     for image in qa['images']:
         path = (artifacts / image['file']).resolve()
         if path.parent != artifacts or hashlib.sha256(path.read_bytes()).hexdigest() != image['sha256']:
             raise ValueError('交付图片与检查记录不一致')
-    if destination.exists():
-        backup = run / 'previous-deliveries' / f'{datetime.now():%Y%m%d-%H%M%S-%f}'
-        backup.parent.mkdir(parents=True, exist_ok=True)
-        destination.rename(backup)
-    shutil.copytree(artifacts, destination)
+    replace_delivery(artifacts, destination, run)
     manifest['published_at'] = datetime.now().astimezone().isoformat()
     manifest['published_html'] = str(destination / 'index.html')
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
