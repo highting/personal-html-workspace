@@ -33,9 +33,22 @@ cover: true
 
 ## 先完成真实检查，再汇总成品
 
-- 阅读实际材料，策划正文和图解。
-- 制作对应场景HTML或原小红书图片。
-- 检查字体、公式、图意、边界与交互。
-- 记录完成结果，交付到简短成品目录。
+<figure class="report-figure">
+<svg viewBox="0 0 820 200" style="height:200px" role="img" aria-label="读取材料并策划制作，实际查看与修正，再完成全篇后交付">
+<rect class="diagram-fill" x="20" y="37" width="220" height="126" rx="8"/>
+<rect class="diagram-fill" x="300" y="37" width="220" height="126" rx="8"/>
+<rect class="diagram-fill" x="580" y="37" width="220" height="126" rx="8"/>
+<path class="diagram-line" d="M250 100h40m-10-8 10 8-10 8M530 100h40m-10-8 10 8-10 8" fill="none" stroke-width="2"/>
+<text x="130" y="86" text-anchor="middle" font-size="28">策划并制作内容</text>
+<text x="130" y="123" text-anchor="middle" font-size="20">读材料 / 主线 / 图解</text>
+<text x="410" y="86" text-anchor="middle" font-size="28">查看并修正</text>
+<text x="410" y="123" text-anchor="middle" font-size="20">配色 · 字号 · 边界</text>
+<text x="690" y="86" text-anchor="middle" font-size="28">完成全篇后交付</text>
+<text x="690" y="123" text-anchor="middle" font-size="20">逐页核对 / 保留版本</text>
+</svg>
+<figcaption>核对字体、公式、图意、边界与交互，再完成全篇、保留记录并交付。</figcaption>
+</figure>
+
+检查记录与成品分开保存，读者页保留正文、图解和必要条件。
 
 <!-- notes: 明暗两套都需要看真实截图。机器检查不能证明技术论证和审美已经正确。 -->

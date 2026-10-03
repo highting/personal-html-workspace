@@ -19,6 +19,7 @@
 - Softmax成品：`output/Softmax-学习/index.html`。对应run为`output/_work/Softmax-学习/20261003-030343-927225-learning-html/`，工作稿`work/main.md`。
 - 流程汇报成品：`output/流程优化-汇报/index.html`。对应run是`output/_work/流程优化/20261002-review/final/report/`，不能由短交付名猜工作目录。其旧绝对路径已按重命名项目迁移，快照哈希核对一致。
 - 新技术汇报：`output/Hyperball-汇报/index.html`；run为`output/_work/Hyperball-汇报/20261003-063225-786989-report-html/`，工作稿`work/report.md`。七页含封面、机制图、公式、方法对照；读者可见处保留尺度不变、切向、小步长及稳态等条件。工作稿与独立材料仅在忽略的output下，不进入公共demos。
+- 公共流程汇报仍为四页，第4页现用三阶段SVG代替项目列表。简单流程用viewBox820×200和200px显示高度，主/辅标签28/20px、图注18px，保持原图形比例并减少无效空白；图外保留成品与检查材料分开的说明。全部8张明暗页、6张原生流程页及12张放大状态已独立查看，3项汇报回归通过。
 - 两篇技术内容与快照未被视觉迭代改写。各轮`delivery.md`及`work/iterations/`保存依据和对照；发布器保留上一版短路径交付。以run.json、QA哈希和当前Git为权威，不手改QA通过状态。
 
 ## 已有实现
@@ -45,6 +46,7 @@
 - 重查仅清理本工具约定命名的截图，保留独立配图。两图→一图及同前缀非工具文件保留已实际验证。
 - 原生200%详情现包含所有`.callout`；本轮记录位于两篇run的`work/iterations/20261003-key-relations/`。Windows命令输出中文或数学DOM时使用Python`-X utf8`，勿重遇GBK编码失败。字号对照用真实按钮，使控件数字与正文一致。
 - 目录记录在两篇run的`work/iterations/20261003-toc-position/`。`positions.json`明确标注before和index，不要把旧的定位器诊断当成最终位移。阅读位置操作用视口点击，中文hash比较先统一解码；新目录、字号与折叠章节4项回归通过。原生目录截图包括toc-open/closed/end，末项截图与滚轮检查证明局部滚动，不能以初始只显示部分项判为裁切。
+- 公共prompt已按实际模板收敛：明暗验收限定学习/博客/汇报，小红书继续浅暖；禁止的是当前成品的制作残留，保留主题所需的提示词或正常示例；加入目录末项、原图注以及已验证的封面/图文页用法，明确暂缓功能。四场景用临时输入实际组装，保存文本与当前prompt哈希在流程汇报run的`work/iterations/20261003-prompt-review/`；本轮未新制小红书PNG，不扩大验收结论。
 - 修改HTML后重建、重查、实际看图，再标completed并publish。配色与字体检查不等于完整无障碍认证。
 
 ## 继续方向
