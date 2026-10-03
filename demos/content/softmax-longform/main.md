@@ -57,19 +57,27 @@ $$
 
 选择 \(m=\max_j x_j\)，就让所有 \(x_i-m\) 都不大于零。平移后的指数不超过 1，其中至少有一个为 1，因此避免先计算非常大的正指数。SciPy 的 [Softmax 文档](https://docs.scipy.org/doc/scipy/reference/generated/scipy.special.softmax.html)也说明其实现通过平移避免溢出。
 
-<figure>
-<svg viewBox="0 0 760 245" role="img" aria-label="同一行输入先减去最大值，再求指数并归一化">
-<rect class="diagram-fill" x="20" y="46" width="210" height="124" rx="8"/>
-<rect class="diagram-fill" x="275" y="46" width="210" height="124" rx="8"/>
-<rect class="diagram-fill" x="530" y="46" width="210" height="124" rx="8"/>
-<path class="diagram-line" d="M239 108h27m-8-6 8 6-8 6M494 108h27m-8-6 8 6-8 6" fill="none" stroke-width="2"/>
-<text x="125" y="86" text-anchor="middle" font-size="22">同一行的输入</text>
-<text x="125" y="128" text-anchor="middle" font-size="20">1002, 1001, 1000</text>
-<text x="380" y="86" text-anchor="middle" font-size="22">减去最大值</text>
-<text x="380" y="128" text-anchor="middle" font-size="20">0, −1, −2</text>
-<text x="635" y="86" text-anchor="middle" font-size="22">求指数再归一化</text>
-<text x="635" y="128" text-anchor="middle" font-size="20">权重总和为 1</text>
-<text x="380" y="215" text-anchor="middle" font-size="20">每一行独立计算最大值和分母</text>
+<figure data-animation>
+<svg viewBox="0 0 760 440" role="img" aria-label="Softmax 的稳定计算：输入、共同平移、指数、归一化">
+<g data-step="1" data-caption="同一行输入为 1002、1001、1000，最大值为 1002。">
+<rect class="diagram-fill" x="20" y="10" width="720" height="78" rx="8"/>
+<text x="44" y="57" font-size="25">输入分数</text><text x="290" y="57" font-size="25">1002　1001　1000</text>
+</g>
+<g data-step="2" data-caption="每个元素都减去 1002，相对差值保持不变。">
+<path class="diagram-line" d="M380 91v20m-6-7 6 7 6-7" fill="none" stroke-width="2"/>
+<rect class="diagram-fill" x="20" y="116" width="720" height="78" rx="8"/>
+<text x="44" y="163" font-size="25">减去最大值</text><text x="290" y="163" font-size="25">0　　　 −1　　 −2</text>
+</g>
+<g data-step="3" data-caption="求指数，得到约 1、0.3679、0.1353；共同分母约为 1.5032。">
+<path class="diagram-line" d="M380 197v20m-6-7 6 7 6-7" fill="none" stroke-width="2"/>
+<rect class="diagram-fill" x="20" y="222" width="720" height="78" rx="8"/>
+<text x="44" y="269" font-size="25">逐元素求指数</text><text x="290" y="269" font-size="25">1　　 0.3679　0.1353</text>
+</g>
+<g data-step="4" data-caption="各指数除以共同分母，得到归一化权重；计算用完整精度，图中只显示四位小数。">
+<path class="diagram-line" d="M380 303v20m-6-7 6 7 6-7" fill="none" stroke-width="2"/>
+<rect class="diagram-fill" x="20" y="328" width="720" height="78" rx="8"/>
+<text x="44" y="375" font-size="25">除以指数总和</text><text x="290" y="375" font-size="25">0.6652　0.2447　0.0900</text>
+</g>
 </svg>
 <figcaption>图 1：减去同一行的最大值改变中间量的大小，保留实数运算中的归一化结果；矩形大小不编码数值。</figcaption>
 </figure>

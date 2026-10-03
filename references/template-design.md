@@ -1,5 +1,26 @@
 # HTML 模板设计参考
 
+## 参考范围与功能取舍（2026-10-03）
+
+范围扩到博客、文档站、交互教程和演示 HTML。参考成熟产品解决了什么阅读问题，再用本项目离线模板实现；不按功能数量验收，也不安装整个框架。
+
+| 功能 | 参考与适用原因 | 当前处理 |
+|---|---|---|
+| 目录、主题、代码复制、章节链接 | [PaperMod 功能](https://github.com/adityatelange/hugo-PaperMod/wiki/Features)、原有 Nextra/Material 参考 | 已有，继续保留 |
+| 多套阅读配色 | 用户的明暗各三套要求；共用语义颜色 | 新增顶部六套选择与浅深分别记忆 |
+| 阅读宽度 | 同一内容兼顾连续阅读与较宽代码/表格 | 新增标准/宽阔，重排保持位置 |
+| 打印与 PDF | [MDN 打印样式及生命周期](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) | 新增阅读菜单入口、白底和完整内容打印；PDF 由浏览器保存 |
+| 文内与站内搜索 | [Starlight 站内搜索](https://starlight.astro.build/guides/site-search/)解决跨页面内容发现 | 本项目单篇查找按用户要求使用浏览器 Ctrl+F；不实现重复搜索框，跨文章搜索留待有站点索引时考虑 |
+| 步骤与状态动画 | [reveal.js Auto-Animate](https://revealjs.com/auto-animate/)的状态变化表达、[MDN 减少动态效果](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion) | 新增可控 SVG 累积步骤演示，Softmax 真实例子已接入；非装饰运动 |
+| 内容选项卡 | [Material content tabs](https://squidfunk.github.io/mkdocs-material/reference/content-tabs/)适合同义实现/平台切换 | 暂不加入：现有推导需连续阅读，不宜隐藏互相依赖的内容；出现多语言同义实现再评估 |
+| 脚注、提示块、折叠补充、续读、图片放大 | 原有 Material/NexT/PhotoSwipe 参考 | 已有，按正文实际需要使用 |
+| 阅读时长、相关文章、分类、归档、RSS、SEO | PaperMod 等站点功能 | 需明确阅读速度估计或多文章发布结构；当前不捏造时长与站点信息 |
+| 评论、点赞、统计、订阅 | 需要服务端或第三方账户、隐私与发布约定 | 当前离线内容不接入 |
+
+六套主题统一覆盖界面、正文、代码及内联图；固定证据原图保持原样。采用思路并独立实现，不复制上游模板代码。
+
+## 原有参考
+
 查询日期：2026-10-02。星数是GitHub页面当时显示的近似值，会变化。
 
 | 场景 | 参考项目 | 星数 | 采用的思路 |

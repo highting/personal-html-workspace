@@ -4,14 +4,33 @@
   let preference = root.dataset.defaultTheme || 'light';
   try { preference = localStorage.getItem('personal-html-workspace-theme') || preference; } catch (_) {}
   const themeButton = document.getElementById('theme-toggle');
+  const palettes = {light: ['white', 'paper', 'warm'], dark: ['graphite', 'midnight', 'ink']};
+  const selected = {light: 'warm', dark: 'midnight'};
+  for (const mode of ['light', 'dark']) {
+    try {
+      const saved = localStorage.getItem('content-palette-' + mode);
+      if (palettes[mode].includes(saved)) selected[mode] = saved;
+    } catch (_) {}
+  }
+  const paletteSelect = document.getElementById('palette-select');
   window.setContentTheme = (theme, save = false) => {
     preference = theme;
     const actual = theme === 'system' ? (systemTheme.matches ? 'dark' : 'light') : theme;
     root.dataset.theme = actual;
+    root.dataset.palette = selected[actual];
+    if (paletteSelect) paletteSelect.value = selected[actual];
     themeButton.setAttribute('aria-label', actual === 'dark' ? '切换到浅色主题' : '切换到深色主题');
     themeButton.title = actual === 'dark' ? '切换到浅色主题' : '切换到深色主题';
     if (save) { try { localStorage.setItem('personal-html-workspace-theme', theme); } catch (_) {} }
   };
+  window.setContentPalette = (palette, save = false) => {
+    const mode = Object.keys(palettes).find(mode => palettes[mode].includes(palette));
+    if (!mode) return;
+    selected[mode] = palette;
+    if (save) { try { localStorage.setItem('content-palette-' + mode, palette); } catch (_) {} }
+    setContentTheme(mode, save);
+  };
+  paletteSelect?.addEventListener('change', () => setContentPalette(paletteSelect.value, true));
   setContentTheme(preference);
   themeButton.addEventListener('click', () => setContentTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true));
   systemTheme.addEventListener('change', () => { if (preference === 'system') setContentTheme('system'); });
@@ -72,6 +91,7 @@
     document.getElementById('font-smaller').addEventListener('click', () => changeReadingSize(-2));
     document.getElementById('font-larger').addEventListener('click', () => changeReadingSize(2));
   }
+  window.preserveContentPosition = change => preserveReadingPosition(change);
 
   const figures = document.querySelectorAll('.prose img, .prose figure > svg, .slide-body img, .slide-body figure > svg');
   if (figures.length) {
@@ -321,6 +341,7 @@
   const resizeSlides = () => root.style.setProperty('--slide-scale', String(Math.min((innerWidth - 48) / 1280, (innerHeight - 152) / 720)));
   addEventListener('resize', resizeSlides);
   window.activateContentExport = async ({ index }) => {
+    document.dispatchEvent(new Event('content-export'));
     document.body.classList.add('exporting'); showSlide(index); await document.fonts.ready;
     await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   };

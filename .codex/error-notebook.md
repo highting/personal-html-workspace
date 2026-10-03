@@ -2,6 +2,54 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-039 — 删除CSS规则时子串匹配误伤其他选择器
+
+- Fingerprint: `css:substring-rule-removal-matches-unrelated-selector`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 移除文内搜索样式
+- Symptom: 工具栏的技术博客标题变成带下划线的普通链接，位置也改变。
+- Root cause: 按包含 `mark {` 的行删除样式，同时命中 `.wordmark {`。
+- Wrong assumption/action: 将选择器子串当成完整规则边界。
+- Correct approach: 恢复 `.wordmark` 原规则，用精确补丁删除目标样式。
+- Prevention check: 删除样式按完整选择器定位，立即核对 diff 中的删除行；共享界面同时做首屏目视检查。
+- Verification: diff确认原规则恢复，重新生成四份HTML并检查工具栏位置、字形与链接样式。
+- Evidence: `assets/content/content.css`；本轮六套配色首屏截图。
+
+## ERR-20261003-038 — 多弹窗页面的测试使用不限定用途的选择器
+
+- Fingerprint: `qa:generic-dialog-locator-after-new-dialog-added`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 图像放大浏览器测试
+- Symptom: 加入阅读设置后，`locator('dialog')`触发strict mode violation。
+- Root cause: 测试把页面只有一个dialog作为隐含前提，未按被测组件定位。
+- Wrong assumption/action: 新增弹窗后仍使用通用标签检查图像弹窗。
+- Correct approach: 将图像相关定位明确限定为`.image-viewer`，保留原有位置、引用和图注断言。
+- Prevention check: 新增同类容器时检索旧测试的通用选择器，按用途收窄，不用first掩盖歧义。
+- Verification: 20项主题、导航、字号、阅读和图像相关回归通过。
+- Evidence: `tests/test_content.py`；`tests/test_image_viewer.py`。
+
+## ERR-20261003-037 — 单篇HTML重复实现浏览器查找
+
+- Fingerprint: `reading:custom-search-duplicates-browser-find`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 离线单篇长文功能选择
+- Symptom: 用户指出文内搜索没有必要，Ctrl+F即可。
+- Root cause: 将文档站的跨页面搜索需求直接套入单篇HTML。
+- Wrong assumption/action: 未先区分站内内容发现和浏览器已有的文内查找，增加重复入口及交互。
+- Correct approach: 删除自建搜索、结果列表和快捷键，沿用浏览器Ctrl+F；参考资料保留取舍原因。
+- Prevention check: 借鉴HTML模板时先核对浏览器已有能力与当前场景，只补有实际收益的功能；单篇查找不再自建。
+- Verification: 模板和运行时无搜索入口或Ctrl+K处理，相关浏览器回归通过。
+- Evidence: 用户本轮纠正；`assets/content/document.html`、`reader-tools.js`与`references/template-design.md`。
+
 ## ERR-20261003-036 — 合并路径只在最后一个端点显示箭头
 
 - Fingerprint: `svg:compound-path-marker-end-only-on-final-vertex`

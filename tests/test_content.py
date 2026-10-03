@@ -83,15 +83,15 @@ class ContentBrowserTests(unittest.TestCase):
                     original.scroll_into_view_if_needed()
                     before = page.evaluate('scrollY')
                     original.click()
-                    self.assertTrue(page.locator('dialog').is_visible())
+                    self.assertTrue(page.locator('.image-viewer').is_visible())
                     if selector.endswith('svg'):
-                        self.assertEqual(page.locator('dialog [marker-end]').get_attribute('marker-end'), 'url(#viewer-arrow)')
+                        self.assertEqual(page.locator('.image-viewer [marker-end]').get_attribute('marker-end'), 'url(#viewer-arrow)')
                         self.assertEqual(page.locator('#arrow').count(), 1)
-                    page.locator('dialog [data-zoom="1.5"]').click()
+                    page.locator('.image-viewer [data-zoom="1.5"]').click()
                     self.assertGreater(page.locator('.image-viewer-content').evaluate('n=>n.scrollWidth'),
                                        page.locator('.image-viewer-content').evaluate('n=>n.clientWidth'))
                     page.keyboard.press('Escape')
-                    self.assertFalse(page.locator('dialog').is_visible())
+                    self.assertFalse(page.locator('.image-viewer').is_visible())
                     self.assertAlmostEqual(page.evaluate('scrollY'), before, delta=2)
                 browser.close()
 
