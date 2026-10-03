@@ -1,6 +1,17 @@
 # Personal HTML Workspace
 
-个人学习、博客、技术汇报和小红书卡片的内容制作工作区。以 `highting/rednote-skill` 的原 `main` 为基础，参考 `feat/html-content-workflow` 的四场景划分；保留原小红书制图效果，新增长文与汇报的离线 HTML 明暗模板。
+个人学习、博客、技术汇报和小红书卡片的内容制作工作区。日常制作复用当前模板与约束；公共模板修改单独提出。材料入口、分类、命名和版本以[工作区约定](references/workspace.md)为准。
+
+本地内容入口：[项目总览](output/index.html)。按正式成品、示例成品、工作版本、历史归档、运行环境和公共工具分类，可直接打开成品与所在目录；该页面和本地产物一样不纳入 Git。
+
+## 以后怎样制作
+
+1. 把新笔记拖进 `inputs/待分类/`。单文件直接放入，带配图和附件时拖整个文件夹；不用预先分类。
+2. 在本项目会话中说：“处理新材料，做成学习长文。”也可选择博客、汇报、小红书中的一种或多种。代理负责归类到 `inputs/<内容分类>/<主题>/` 并复用当前模板。拖入不会自动唤起会话，无需使用 Web UI、填写配置或运行脚本。
+3. 完成后打开 `output/Softmax-学习/index.html`；其他场景分别在 `Softmax-博客`、`Softmax-汇报`、`Softmax-小红书`。小红书打开 `预览.html`。分类总览由代理在交付时同步，发布脚本不会自动更新。
+4. 以后直接说“修改 Softmax-学习 的第二节”，或“我更新了原稿，请重新生成”。新版本检查后替换相同入口，旧成品保留在 `output/_work/` 的本次记录中。
+
+已有 `blogs/` 原稿和成品路径继续可用，无需迁移。也可以提供文件、粘贴笔记或给出本地路径，并要求代理先收进项目再制作。重名、多个版本和详细目录职责见[工作区约定](references/workspace.md)。
 
 | 场景 | 内容组织 | 默认成品 |
 |---|---|---|
@@ -11,7 +22,7 @@
 
 ## 学习、博客与汇报
 
-将材料放入 `inputs/<分类>/<主题>/`，现有 `blogs/` 也可使用。直接说“把这个主题整理成学习长文”“写成技术博客”或“做成技术汇报”；场景之间分别策划，不只转换画幅。AI先阅读、策划并整理内容，脚本负责排版与检查。
+材料通常先拖入 `inputs/待分类/`，代理归类后使用 `inputs/<分类>/<主题>/`，现有 `blogs/` 也可使用。直接说“把这个主题整理成学习长文”“写成技术博客”或“做成技术汇报”；场景之间分别策划，不只转换画幅。AI先阅读、策划并整理内容，脚本负责排版与检查。
 
 ```bash
 python -X utf8 scripts/prepare_content.py "inputs/机器学习/Softmax" --scene learning --name Softmax-学习
@@ -24,7 +35,7 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 用 `--scene blog` 构建博客。汇报使用 `--scene report`，在代码围栏外以独立 `---` 分页，用 `<!-- notes: 讲者备注 -->` 添加备注；导出 PNG 可选择 `--theme light` 或 `--theme dark`。完整命令与 HTML 片段协议见[四场景流程](references/content-workflow.md)，策划见[场景规则](references/content-scenes.md)。
 
-学习与博客共用阅读模板，以内容详略区分，支持16–24px字号调节、图片/SVG点击放大、目录和阅读进度；汇报使用16:9逐页演示，支持翻页、备注和固定页导出。两类HTML面向桌面，检查缩放后的布局，不另做手机适配验收。明暗主题、SVG与配图遵循[统一视觉规则](references/visual-system.md)，普通节点使用协调的中性底色。中文字体、CSS、JavaScript、KaTeX及本地图片内嵌，可离线打开。模板源码见 `assets/content/`，示例稿见 `demos/content/`。
+学习与博客共用阅读模板，内容分别按概念依赖和论点—证据组织，详略服从读者目的，支持16–24px字号调节、图片/SVG点击放大、目录和阅读进度；汇报使用16:9逐页演示，支持翻页、备注和固定页导出。两类HTML面向桌面，检查缩放后的布局，不另做手机适配验收。明暗主题、SVG与配图遵循[统一视觉规则](references/visual-system.md)，普通节点使用协调的中性底色。中文字体、CSS、JavaScript、KaTeX及本地图片内嵌，可离线打开。模板源码见 `assets/content/`，示例稿见 `demos/content/`。
 
 布局参考 [Nextra](https://github.com/shuding/nextra)（学习导航）、[AstroPaper](https://github.com/satnaing/astro-paper)（博客阅读）和 [Slidev](https://github.com/slidevjs/slidev)（技术演示）。当前查询约 13.9k、5.1k、48.9k 星；支持明暗主题的参考与设计记录见[模板设计](references/template-design.md)。本仓库模板独立实现，无需安装这些项目。
 
@@ -32,15 +43,15 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 ## 小红书日常入口
 
-将完整博客文件夹拖到 `blogs/<分类>/`，保留正文和配图的相对路径。例如 `blogs/机器学习/Hyperball/main.md`，再在本项目会话中说：
+小红书新材料也先拖入 `inputs/待分类/`，保留正文与配图的相对路径，再说“处理新材料，做成小红书图文”。已有主题可以点名：
 
-> 把 blogs/机器学习/Hyperball 用 HTML 模式生成，按项目规则输出。
+> 把 inputs/机器学习/Hyperball 做成小红书图文，正文用 HTML 排成图片，辅助图用 HTML＋SVG，输出到 Hyperball-小红书。
 
 或说“把 Hyperball 用图片模式生成小红书图文”。博客名唯一时可以省略分类；没有指定模式时默认 HTML。已建 `机器学习`、`论文阅读`、`工程实践`、`待分类`，可以自行新增分类。
 
-成品统一放在 `output/<短名>/`，例如 `output/Hyperball/`：最终图片、`标题.txt`、`配文.txt`、`预览.html` 都在同一层，HTML 源页在 `html/`。中间材料与版本记录单独放在 `output/_work/`，不需要进入工作目录寻找配文。拖入后需发送生成要求，不会后台自动执行。
+新成品放在 `output/<主题短名>-小红书/`：最终图片、`标题.txt`、`配文.txt`、`预览.html` 都在同一层，HTML 源页在 `html/`。中间材料与版本记录放在 `output/_work/`。已有 `output/Hyperball/` 等入口改版时沿用原路径，不自动改名。
 
-目录规则、版本说明和更多 prompt 见[工作区说明](references/workspace.md)。根目录 `AGENTS.md` 让后续本项目会话沿用这些约定；`scripts/prepare_blog.py` 准备目录与副本，`scripts/publish_blog.py` 在检查后汇总成品并保留旧交付。
+根目录 `AGENTS.md` 让后续本项目会话沿用约定。日常新建工作目录统一用 `prepare_content.py --scene rednote` 准备，兼容 `inputs/` 和已有 `blogs/` 并保存任务Prompt，通过 `publish_content.py` 汇总；`prepare_blog.py` 与 `publish_blog.py` 仅兼容历史调用和工作目录。准备时显式传 `--name`，更新时保留旧交付，详见[工作区约定](references/workspace.md)。
 
 ## 两种模式
 
@@ -96,30 +107,32 @@ Python 包安装到当前用户环境，浏览器使用系统用户共享缓存�
 
 ---
 
-## 小红书使用方法
+## 小红书渲染器接口
+
+日常制作使用上面的[小红书日常入口](#小红书日常入口)：先用 `prepare_content.py --scene rednote` 建立工作目录，再将整理好的工作稿交给渲染器，验收后用 `publish_content.py` 汇总。以下是底层渲染命令，用于本次工作目录或独立示例检查，不替代准备、内容审核与交付流程。
 
 ```bash
 python scripts/rednote_render.py <markdown_file> [options]
 ```
 
 ```bash
-# 默认：academic 主题，HTML＋SVG 分页后导出 PNG
-python scripts/rednote_render.py content.md
+# 本次工作稿：academic 主题，导出 PNG 并保留 HTML 源页
+python -X utf8 scripts/rednote_render.py "<work_entry>" --math katex --save-html -o "<artifact_dir>"
 
 # 切换主题
 python scripts/rednote_render.py content.md -t neo-brutalism
 
 # academic 主题：技术图仍输出小红书封面和正文卡片，示例已启用 KaTeX
-python scripts/rednote_render.py demos/academic.md -t academic -o output/geometry
+python scripts/rednote_render.py demos/academic.md -t academic -o output/_work/renderer-examples/geometry
 
 # academic 主题的对应对比图
-python scripts/rednote_render.py demos/academic-comparison.md -t academic -o output/comparison
+python scripts/rednote_render.py demos/academic-comparison.md -t academic -o output/_work/renderer-examples/comparison
 
 # 交付 PNG，同时保留 HTML 制作源文件
-python scripts/rednote_render.py demos/academic.md --save-html -o output/geometry
+python scripts/rednote_render.py demos/academic.md --save-html -o output/_work/renderer-examples/geometry
 
-# 自定义尺寸和输出目录
-python scripts/rednote_render.py content.md -t retro -o ./output
+# 显式选择其他主题时，仍使用本次成品暂存目录
+python scripts/rednote_render.py "<work_entry>" -t retro -o "<artifact_dir>"
 ```
 
 默认输出 `cover.png`（有封面标题时）和 `card_N.png`。所有主题共用固定画幅检查；内容过高时重排，不自动输出超长图。`--save-html` 同时在 `html/` 保存制作源文件和必要资源；仅用 `--format html` 检查中间源文件，不算完成配图。渲染脚本不调用 ImageGen。不同请求使用独立目录，不自动清理旧文件。
@@ -154,9 +167,10 @@ personal-html-workspace/
 ├── AGENTS.md                   # 后续会话的四场景约定
 ├── inputs/                     # 新材料：分类/主题/正文与附件
 ├── prompts/                    # 公共规则与四场景任务规则
-├── blogs/                      # 拖入博客：分类/博客名/正文与附件
+├── blogs/                      # 已有原稿兼容入口，新材料统一进 inputs/
 ├── output/
-│   ├── <短名>/                 # 成品：图片、标题.txt、配文.txt、预览.html
+│   ├── index.html              # 本地分类总览
+│   ├── <主题短名>-<场景>/       # 正式成品：学习/博客/汇报/小红书
 │   ├── _work/                  # 独立工作目录、版本和检查记录
 │   └── _archive/               # 整理前的产物与检查材料
 ├── SKILL.md                    # 技能定义
@@ -166,9 +180,10 @@ personal-html-workspace/
 ├── references/
 │   ├── content-workflow.md     # 四场景准备、构建、检查与交付
 │   ├── content-scenes.md       # 内容组织与场景验收
+│   ├── visual-system.md        # 配色、字号、图解与交互规则
 │   ├── template-design.md      # 高星项目参考与明暗模板设计
 │   ├── rednote-scene.md        # 原 main 小红书制作规则
-│   ├── workspace.md            # 小红书博客投放、输出路由与版本
+│   ├── workspace.md            # 统一材料入口、分类、命名与版本
 │   ├── params.md               # 完整参数参考
 │   ├── html-mode.md            # 分页 HTML 与 SVG 工作流
 │   ├── content-plan.md         # 两种模式共用的图文组织与选点
@@ -177,10 +192,7 @@ personal-html-workspace/
 │   └── third-party.md          # 资源来源和许可
 ├── assets/
 │   ├── content/                # 新长文与汇报的离线明暗模板
-│   ├── cover.html              # 封面参考模板
-│   ├── card.html               # 卡片参考模板
-│   ├── styles.css              # 参考模板公共样式
-│   ├── example.md              # 示例 Markdown
+│   ├── legacy/                 # 早期封面、卡片与样式参考，当前渲染器不加载
 │   ├── themes/                 # 各主题 CSS 文件
 │   │   ├── default.css
 │   │   ├── playful-geometric.css
@@ -194,8 +206,8 @@ personal-html-workspace/
 │   │   └── academic.css
 │   └── vendor/
 │       └── katex/              # KaTeX 0.16.11 本地运行资源与许可
-├── tests/
-│   └── test_renderer.py           # 解析、分页块和 HTML 生成回归测试
+├── demos/                      # 当前卡片、长文与汇报示例；legacy/ 为早期示例
+├── tests/                      # 渲染、工作区、阅读交互、导航与配色回归
 ├── skills/
 │   └── personal-html-workspace/
 │       └── SKILL.md               # 插件入口，引用根目录规范
@@ -204,9 +216,15 @@ personal-html-workspace/
     ├── build_content.py       # 学习/博客/汇报的自包含明暗 HTML
     ├── render_content.py      # 明暗检查、离线检查与汇报逐页 PNG
     ├── publish_content.py     # 四场景短路径汇总与版本保留
+    ├── download_content_fonts.py # 下载离线中文字体缓存
+    ├── check_content_palettes.py # 六套配色检查
+    ├── check_chrome_zoom.py   # Chrome 原生缩放检查
+    ├── check_rednote.py       # 小红书源页检查与手机预览
+    ├── content_markup.py     # 长文代码与图注标记
+    ├── visual_qa.py           # 共享字号与制作残留检查
     ├── prepare_blog.py        # 准备小红书交付入口、原稿快照和工作副本
     ├── publish_blog.py        # 汇总图片、标题与配文并保留旧交付
-    └── rednote_render.py       # 渲染脚本
+    └── rednote_render.py      # 小红书卡片渲染
 ```
 
 ---

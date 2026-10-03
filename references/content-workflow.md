@@ -4,13 +4,13 @@
 
 ## 准备材料
 
-材料放 `inputs/<分类>/<主题>/` 或原 `blogs/`，保留附件相对路径；原稿只读。优先识别 `main.md`、`article.md`、`index.md`，其他格式按实际内容用对应工具读取，转换稿放 `work/`。
+用户将新材料拖入 `inputs/待分类/` 后，在会话中发出制作要求；代理先归类到 `inputs/<内容分类>/<主题>/`，不改正文或破坏附件相对路径，再运行准备脚本。已有分类和 `blogs/` 原地兼容，制作时原稿只读。分类、成品命名和版本按[工作区约定](workspace.md)。优先识别 `main.md`、`article.md`、`index.md`，已知正文显式传 `--entry`；其他格式用对应工具读取，转换稿放 `work/`。
 
 ```bash
 python -X utf8 scripts/prepare_content.py "inputs/机器学习/Softmax" --scene learning --name Softmax-学习
 ```
 
-`--entry` 可指定相对主稿路径，`--mode html|images` 仅记录辅助图工具。脚本建立 `output/_work/<短名>/<时间戳>-<scene>-<mode>/` 的 `source/`、`work/`、`delivery/`，输出 `run.json` 与 `work/任务Prompt.txt`。同主题并存多个场景时用不同短名，新请求新建工作目录，同次修正复用。`source/` 是只读快照；其哈希用于交付核对。
+`--entry` 指定相对主稿路径，`--mode html|images` 仅记录辅助图工具。新成品用 `<主题短名>-<场景>`，始终显式传 `--name`，并核对已有目标的来源、场景，防止入口互相覆盖。脚本建立 `output/_work/<成品名>/<时间戳>-<scene>-<mode>/` 的 `source/`、`work/`、`delivery/`，输出 `run.json` 与 `work/任务Prompt.txt`。新请求或已交付后的改版新建工作目录，同次修正复用。`source/` 是只读快照；其哈希用于交付核对。
 
 读取 `prompts/common.txt`、所选 `prompts/scenes/<scene>.txt` 和[成品视觉规则](visual-system.md)，把prompt作为基础参考，按实际内容调整详略、顺序与布局。先生成代表性页面，实际查看后修正再完成全篇；制作说明、占位文案只留在工作记录。
 
@@ -23,11 +23,11 @@ python -X utf8 scripts/build_content.py "<work_entry>" --scene learning --output
 python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene learning --output-dir "<artifact_dir>"
 ```
 
-博客将两处scene改为 `blog`，与学习共用模板，以内容详略区别。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，顶部配色选择器提供浅深各三套，太阳/月亮按钮切换并记住两种模式各自的选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。放大视图保留原图注的条件、公式和链接，适合窗口同时按宽高计算；放大后可滚动或聚焦图像区用方向键查看，关闭恢复原位置与焦点。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
+博客将两处scene改为 `blog`，与学习共用模板，按论点与证据组织内容，详略服从读者目的。构建器可接收可信 `.html` 正文片段，直接放入 `.prose`。`--theme light|dark|system` 设置初始偏好，顶部配色选择器提供浅深各三套，太阳/月亮按钮切换并记住两种模式各自的选择；字号可调16–24px，图片和SVG支持点击/Enter放大、Esc关闭。放大视图保留原图注的条件、公式和链接，适合窗口同时按宽高计算；放大后可滚动或聚焦图像区用方向键查看，关闭恢复原位置与焦点。目录可收起。CSS/JS、KaTeX和数学字体内嵌，本地 `<img src>` 转为data URI；网络图片需先本地化。
 
-“阅读”设置可切换标准/宽阔正文宽度，以及打开打印对话框保存 PDF。浏览器 `Ctrl+F` / `⌘+F` 负责文内查找，不另外实现搜索。打印使用白底，完整展开补充内容和代码，保留动画完整步骤，结束后恢复折叠状态。
+顶部工具栏直接提供字号、正文宽度滑条（560–960px，默认704px）、恢复默认宽度、打印、目录、配色和明暗切换，不再使用阅读设置弹窗。宽度滑条拖动即时重排，整次拖动保持同一阅读锚点并记住数值；支持键盘方向键，窄窗口自动适应可用空间。打印按钮可打开浏览器对话框保存 PDF。浏览器 `Ctrl+F` / `⌘+F` 负责文内查找，不另外实现搜索。打印使用白底，完整展开补充内容和代码，保留动画完整步骤，结束后恢复折叠状态。
 
-调节字号、正文宽度或收起桌面侧栏时保持当前可见的阅读内容；文字按插入点定位，图面和段间留白按当前块定位。自然换行仍可能让同一行末尾的词移到下一行，但不能因整篇重排而跳到相邻段落。缩小桌面视口或浏览器放大后，目录以当前视口中的可滚动浮层打开，不把面板插回文章开头；选择章节后收起，Esc收起并将焦点返回目录按钮。
+调节字号、正文宽度、收起桌面侧栏或开合顶部工具栏时保持当前可见的阅读内容；文字按插入点定位，图面和段间留白按当前块定位。工具栏右侧上箭头可隐藏整栏，右上角固定的下箭头可恢复；按钮常态只显示小图标，悬停说明和无障碍标签保留用途；记住手动选择，隐藏控件不进入Tab顺序，开合后焦点落在可见的对应按钮。自然换行仍可能让同一行末尾的词移到下一行，但不能因整篇重排而跳到相邻段落。缩小桌面视口或浏览器放大后，目录以当前视口中的可滚动浮层打开，不把面板插回文章开头；选择章节后收起，Esc收起并将焦点返回目录按钮；收起工具栏同时关闭目录浮层。
 
 代码围栏可写为 `` ```{.python title="example.py" data-highlight="2 4-6"} ``，分别指定语言、文件名和重点行；普通 `` ```python `` 同样可用。代码在构建时由Pygments高亮，阅读时不联网；复制保留完整代码，超过20行提供展开按钮。无法访问剪贴板时明确提示，不显示虚假成功。
 
@@ -41,7 +41,7 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene lea
 
 点击“继续阅读”时先恢复已展开的补充内容、代码换行与长代码展开状态，再按章节及章内位置定位。代码显示状态按所在标题、语言、文件名和源文本识别；代码内容改变时不套用旧状态。普通打开或章节链接仍采用默认代码布局，显示状态不会自动改成上次的选择。
 
-独立Markdown图片后紧跟以“图1”等开头的斜体图注时，构建器将两者组合为figure；一般文字不自动当图注。原图保持原貌，自绘SVG使用主题变量。适合步骤演示时可按[视觉规则](visual-system.md#用动画解释变化)添加可控动画；默认完整静态图，打印/导出不截取随机中间态。
+长文图片和SVG可拖动右下角手柄，在正文栏内等比例调整大小；方向键微调，Home/End到最小/最大，双击手柄或点击恢复按钮回到原大小。每张图片的大小在当前浏览器中记住，图注不随图片缩窄，点击图片仍打开大图。独立Markdown图片后紧跟以“图1”等开头的斜体图注时，构建器将两者组合为figure；一般文字不自动当图注。原图保持原貌，自绘SVG使用主题变量。适合步骤演示时可按[视觉规则](visual-system.md#用动画解释变化)添加可控动画；默认完整静态图，打印/导出不截取随机中间态。
 
 长文需要集中列出处时，可在工作稿写`<aside class="article-sources" aria-label="来源">`，内含`<p class="sources-title">来源</p>`及带链接的出处段落，最后关闭`</aside>`。它使用次要字号与正常字形，不加入正文目录；来源和图示说明由实际材料提供，模板不自动生成。关键论断的引用仍放在论断附近。
 
@@ -78,18 +78,18 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene rep
 
 已有完整桌面Chrome时，可运行 `check_chrome_zoom.py` 验证100/150/200%的原生页面缩放，传入 `--scene`、`--output-dir` 和 `--browser-executable`。脚本使用独立临时普通配置，通过Chrome外观设置的Page zoom控件操作，核对DPR、CSS视口和CSS zoom，输出 `qa-chrome-zoom.json` 与截图；不修改日常浏览器配置。Headless Shell不提供该设置界面。原生zoom下CSS视口与浏览器图面像素不同，截图直接捕获完整表面并分屏覆盖内容，不用CSS坐标裁图。键盘快捷键与其他浏览器需另行验证，记录必须写明实际方法。
 
-记录来源、主线、图解、实际检查与未验证事项到 `delivery.md`，全部完成后才将 `run.json` 的 `status` 改为 `completed`。
+在 `delivery.md` 分开记录内容审核与呈现验收：改稿结合代表性改前/改后段落；首次制作依据原材料、所选范围和代表性成稿，说明覆盖与取舍、知识组织、关键解释及图解是否支持读者应形成的判断，不制造前后对照。呈现验收记录实际视觉、交互和机器检查。保留来源与未验证事项，不能用截图或QA通过替代内容判断；全部完成后才将 `run.json` 的 `status` 改为 `completed`。
 
-六套配色另运行 `check_content_palettes.py <artifact_dir>/index.html --scene <scene> --output-dir <artifact_dir>/checks/palettes`。它逐套检查语义文字对比度、桌面三档窗口的控件与内容边界，并保存首屏、图表/代码或逐页画面；长文另保存阅读设置、打印样式和动画步骤。原生缩放仍使用上述独立检查，不能将六套窗口检查记作六套原生缩放检查。实际查看正文、各配色代表画面和动画状态后交付。
+六套配色另运行 `check_content_palettes.py <artifact_dir>/index.html --scene <scene> --output-dir <artifact_dir>/checks/palettes`。它逐套检查语义文字对比度、桌面三档窗口的控件与内容边界，并保存首屏、图表/代码或逐页画面；长文另保存外置阅读工具栏、打印样式和动画步骤。原生缩放仍使用上述独立检查，不能将六套窗口检查记作六套原生缩放检查。实际查看正文、各配色代表画面和动画状态后交付。
 
 ```bash
 python -X utf8 scripts/publish_content.py "<run_dir>"
 ```
 
-学习/博客/汇报要求本场景QA通过，核对HTML与导出PNG哈希以及未修改的源快照。HTML/PNG修改后重新检查，不能手改通过结果。短路径更新到 `output/<短名>/`，旧交付保留在本次工作目录；回复优先链接 `index.html` 与所选场景成品。
+学习/博客/汇报要求本场景QA通过，核对HTML与导出PNG哈希以及未修改的源快照。HTML/PNG修改后重新检查，不能手改通过结果。短路径更新到 `output/<成品名>/`，旧交付保留在本次工作目录；失败时不替换已有成品。代理随后同步 `output/index.html` 中对应的内容分类、主题和场景条目并核对链接，发布脚本不会自动更新总览。回复优先链接成品 `index.html`。
 
 ## 小红书原流程
 
-已有 `blogs/` 继续按[原工作区](workspace.md)使用 `prepare_blog.py` → `rednote_render.py` → `publish_blog.py`。默认画幅以 `--save-html` 保存源页后，运行 `python scripts/check_rednote.py <artifact_dir>`，检查源页、图片清单和标签实际大小并生成390px宽PNG预览；仍须逐张查看原图和预览。新 `inputs/` 可用 `prepare_content.py --scene rednote` 准备，再由 `publish_content.py`转交原发布函数。小红书不使用长文模板，检查记录不能替代目视验收。
+`inputs/` 与已有 `blogs/` 的日常新建工作目录统一用 `prepare_content.py --scene rednote` 准备，保存共同与场景Prompt，再由 `rednote_render.py` 制图、`publish_content.py` 汇总。默认画幅以 `--save-html` 保存源页后，运行 `python -X utf8 scripts/check_rednote.py <artifact_dir>`，检查源页、图片清单和标签实际大小并生成390px宽PNG预览；仍须逐张查看原图和预览。`prepare_blog.py` 与 `publish_blog.py` 仅兼容历史调用和工作目录。小红书不使用长文模板，检查记录不能替代目视验收。
 
 这里的“发布”只指本地成品汇总。脚本不调用AI或生图、不上传社交平台；插件安装与GitHub上传是独立操作。

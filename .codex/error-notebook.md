@@ -2,6 +2,182 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+## ERR-20261003-050 — 固定配图数量替代了材料判断
+
+- Fingerprint: `content:fixed-figure-count-overrides-explanatory-need`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 共同Prompt与小红书配图选点流程
+- Symptom: 旧规则要求长文配图默认两张、局部概念默认一张；用户明确配图数量应由材料自适应决定。
+- Root cause: 将方便执行的数量预设当成内容规划规则，未先判断理解障碍、解释价值与重复程度。
+- Wrong assumption/action: 用固定图数代替逐篇材料的配图取舍。
+- Correct approach: 删除默认数和最低数量，由材料决定是否配图及拆合方式；用户明确指定数量时遵从请求。
+- Prevention check: 修改生成规则时检查是否残留无材料依据的数量要求；验证样本应说明图解作用，不能为凑数配图或以图多评价质量。
+- Verification: 共同Prompt与选点流程已统一；四场景新主题试稿分别采用一幅、零幅、一幅、零幅辅助图，并有实际内容审核和呈现记录。
+- Evidence: `prompts/common.txt:3`；`references/content-plan.md`；`output/_work/四场景Prompt复核/20261003-130229/delivery.md`。
+
+## ERR-20261003-049 — 外层脚本转义吞掉新增LaTeX反斜杠
+
+- Fingerprint: `authoring:latex-backslashes-consumed-by-outer-script-string`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 通过JavaScript工具参数生成Python与Markdown段落
+- Symptom: 新增段落出现普通括号、缺失反斜杠，frac与tan还混入控制字符。
+- Root cause: 只在内层Python使用raw字符串，外层JavaScript字符串已先解释LaTeX转义。
+- Wrong assumption/action: 认为内层raw标记能保护外层字符串传输。
+- Correct approach: 将LaTeX段落按保留原文的补丁单独保存，再由Python读取；重新核对工作稿、控制字符、公式DOM和明暗截图。
+- Prevention check: 跨语言生成数学正文时逐层核对转义；写入后检查公式分隔符、反斜杠与非预期控制字符，再构建，不只检查命令退出码。
+- Verification: 修正后新增公式KaTeX无错误；精确半径、转角公式在明暗全文和200%原生截图均实际核对。
+- Evidence: Hyperball本轮work/Hyperball博客-图文版.md；delivery/checks/light/screen-11.png；checks/native-zoom的details-2截图
+
+## ERR-20261003-048 — 内容质量复核不能由页面QA代替
+
+- Fingerprint: `content:quality-review-confused-with-rendering-checks`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 内容生成prompt、两篇正文改稿与delivery.md
+- Symptom: 用户指出质量还包含解释、知识组织、语言、覆盖和配图；旧稿存在步骤与样本混淆、核心比较只有局部例子。
+- Root cause: 复核偏重可截图和可机器检查的呈现，没有沿读者应形成的判断核对正文证据。
+- Wrong assumption/action: 把呈现通过当成内容已得到充分复核，或把既有要求未落实一律变成新增规则。
+- Correct approach: 完整阅读原材料与成稿，区分引导不足、落实缺口和写作取舍；以实质段落改稿、数值与来源核对完成内容审核，呈现另记。
+- Prevention check: 先检验文章主题范围内的依赖和核心解释，抽查例子是否支持核心判断；规则已有时直接返修正文，不扩成固定清单。
+- Verification: 两篇本轮新稿完成全文审核、数值核算及真实渲染；改前/改后和边界分别记录。
+- Evidence: 两篇20261003-122841工作版本的work/content-review.md；prompts/common.txt；references/content-workflow.md
+
+## ERR-20261003-047 — 发布复制失败使旧入口变成不完整的新版本
+
+- Fingerprint: `publish:move-old-entry-before-copy-without-rollback`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: `publish_content.py`与`publish_blog.py`的本地短路径交付
+- Symptom: 临时仓库中注入复制中途失败后，旧入口只剩新HTML，旧版的嵌套文件已离开入口；首次发布失败也残留半成品目录。
+- Root cause: 先移动旧入口再直接向入口复制，复制失败没有恢复；成功路径被误当成可靠替换流程。
+- Wrong assumption/action: 认为旧版在备份目录中就满足“失败保留原入口”。
+- Correct approach: 两条路径共用发布函数，先在入口同层完整暂存，再留存旧版并重命名切换；切换失败恢复旧入口，失败不写成功记录。恢复也失败时明确报告旧版保留路径。
+- Prevention check: 用临时目录注入复制中途、旧版移动与新版安装故障，覆盖首次发布和成功更新；逐文件比对旧入口、备份及run.json/delivery.md字节，检查暂存清理与备份路径范围。
+- Verification: 新增5项测试覆盖22组场景，结合12项既有非浏览器测试和1项缩页导出测试共18项通过；真实成品未用于故障注入。
+- Evidence: `scripts/publish_utils.py::replace_delivery`；`tests/test_publish.py`。
+
+## ERR-20261003-046 — 截图脚本的固定顶部偏移不适应两行工具栏
+
+- Fingerprint: `qa:fixed-capture-offset-under-wrapped-toolbar`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: Chrome原生缩放下的图块分屏截图
+- Symptom: 工具栏换为两行后，按100px固定偏移截取的图面上边缘被遮住。
+- Root cause: 截图脚本沿用单行工具栏的固定避让距离，没有读取页面实际scroll-padding。
+- Wrong assumption/action: 假定工具栏高度不会随控件布局变化。
+- Correct approach: 章节定位与分屏步长均使用页面实际顶部避让值，保持截图中的内容完整覆盖。
+- Prevention check: 工具栏高度或换行方式改变后，同步核对截图定位与步长，不只更新页面自身的锚点逻辑。
+- Verification: 原生100/150/200%重跑通过，200%图块与代码工具栏的完整上边界已目视复核。
+- Evidence: `scripts/check_chrome_zoom.py`；本轮两篇`delivery/checks/native-zoom/`。
+
+## ERR-20261003-045 — 图片手柄的像素坐标在缩放瞬间伸出页面
+
+- Fingerprint: `image-size:absolute-pixel-handle-stale-during-reflow`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 图片拖动手柄与CSS缩放、窗口重排
+- Symptom: 1440px窗口切到CSS150%缩放时，手柄瞬间到达1884px；等待观察器更新后才恢复。
+- Root cause: 手柄左坐标缓存为像素值，窗口变化时先沿用旧图宽，ResizeObserver稍后才修正。
+- Wrong assumption/action: 认为布局观察器的后续回调足以保证重排过程不越界。
+- Correct approach: 水平位置改为相对容器右边界的比例，重排时由CSS同步适配；观察器只更新实际图面位置。
+- Prevention check: 可拖动图片的附属控件必须立即检查窗口与CSS缩放切换，不用延时等待掩盖瞬时横向滚动。
+- Verification: 1440/960/720px与三档CSS缩放即时边界回归通过；28项相关测试及真实两篇缩放检查通过。
+- Evidence: `tests/test_toolbar.py`；`output/_work/版式优化/20261003-reading-ui/work/probe_layout.py`；`assets/content/image-size.js`。
+
+## ERR-20261003-044 — 连续拖动宽度滑条时反复选择阅读锚点
+
+- Fingerprint: `reading:reanchor-on-every-range-input-accumulates-drift`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 外置正文宽度滑条的连续input事件
+- Symptom: 鼠标一次连续拖动后，同一文字累计位移约170px。
+- Root cause: 每次input都重新选取视口顶部的文字锚点，重排导致选中的字符不断变化，累计偏移。
+- Wrong assumption/action: 将单次字号变更的位置保持方式直接套用到连续手势。
+- Correct approach: pointerdown保存一次阅读锚点，整次拖动复用，结束或取消时清除；键盘单步仍按当前阅读位置处理。
+- Prevention check: 宽度滑条必须用多步真实鼠标拖动追踪同一文字，不能只验证程序设置终值或单次change。
+- Verification: 12步鼠标拖动的文字位移回归通过，恢复默认、偏好保存、键盘和工具栏相关检查通过。
+- Evidence: `tests/test_reader_tools.py::test_width_slider_drag_keyboard_reset_and_saved_preference`；`assets/content/content.js`与`reader-tools.js`。
+
+## ERR-20261003-043 — 默认宽图破坏了用户要求的统一内容栏
+
+- Fingerprint: `typography:automatic-media-outset-breaks-column-alignment`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 长文正文、图解、图注、表格和代码的栏宽
+- Symptom: 用户指出图片比文字宽，图文衔接显得不协调。
+- Root cause: 借鉴Distill时把媒体自动加宽184px应用到全部图表，没有保留用户偏好的统一左右边界。
+- Wrong assumption/action: 将宽图视为默认视觉提升，而没有按本项目的阅读习惯收敛。
+- Correct approach: 所有正文内容默认同栏；单张图片由读者在栏内等比例拖动，图注仍按正文宽度排布。
+- Prevention check: 默认核对文字、图面、图注、表格和代码的左右边界；不要再次自动引入更宽媒体栏，除非用户明确要求。
+- Verification: 默认图文宽度差小于1px；真实两篇明暗图解拖动/放大/恢复检查通过，图注内容与宽度保持。
+- Evidence: 用户本轮图文截图；`tests/test_toolbar.py::test_media_matches_text_measure_and_zoom_bounds`；本轮`work/resizing.json`。
+
+## ERR-20261003-042 — 减少装饰时删除了用户需要的章节分隔
+
+- Fingerprint: `typography:removing-section-rules-weakens-boundaries`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 长文二级标题的章节分隔
+- Symptom: 用户指出章节界限不明确，要求加回分隔线。
+- Root cause: 借鉴简洁页面时，把减少装饰直接落实成删除全部主章节横线。
+- Wrong assumption/action: 假定留白和字重已足够满足该项目的章节识别需求。
+- Correct approach: 主章节保留细分隔线和上下留白，小节仍靠标题层级区分。
+- Prevention check: 本项目长文主章节默认保留分隔线；借鉴模板时不要以风格偏好覆盖已明确的阅读标记。
+- Verification: 两篇明暗全文截图已查看，各主章节边界可见；最新8项滑条、工具栏、字号与导航回归通过。
+- Evidence: 用户本轮纠正；`assets/content/content.css`；本轮宽度滑条工作目录的明暗全文截图。
+
+## ERR-20261003-041 — 导语均衡换行造成视觉上的半栏错位
+
+- Fingerprint: `typography:balanced-description-lines-break-text-column`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 标题、导语、续读提示和正文的文字栏对齐
+- Symptom: 用户提供Softmax截图，导语每行明显短于正文，标题下文字看起来没有对齐。
+- Root cause: 导语使用text-wrap:balance压短实际行长，同时标题区和续读提示沿用更宽的图表舞台。
+- Wrong assumption/action: 只检查容器未溢出，没有比较导语实际换行和各文字区域的左右边界。
+- Correct approach: 导语自然换行，标题区、导语、续读提示和正文共用文字栏宽度；图表也按后续ERR-20261003-043统一到同一栏宽。
+- Prevention check: 标题区排版检查同时核对实际行长与各块左右边界；中文导语不以均衡换行压成半栏，不能将无溢出视为对齐正确。
+- Verification: 两篇明暗首屏已查看，四类文字块左右边界差小于1px；560/960px滑条两端及原生缩放通过。
+- Evidence: 用户本轮Softmax截图；`assets/content/content.css`；`output/_work/版式优化/20261003-width-slider/work/review/alignment.json`。
+
+## ERR-20261003-040 — 工具栏新增控件后在叠加缩放下横向溢出
+
+- Fingerprint: `toolbar:single-flex-row-overflows-after-new-control`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 长文工具栏增加手动折叠入口
+- Symptom: 720px窗口叠加CSS200%布局缩放时，工具栏右边达到916px。
+- Root cause: 工具栏依赖固定单行和仅在600px媒体查询内的换行；CSS缩放后的可用空间更小，却没有命中该视口断点。
+- Wrong assumption/action: 用视口断点替代工具栏自身的内容换行能力。
+- Correct approach: 长文工具栏始终允许flex换行，使用最小高度及自适应高度，保持默认桌面单行。
+- Prevention check: 增加常驻控件后同时核对最小窗口与CSS缩放组合的左右边界；不能只测1440px或只检查原生缩放。
+- Verification: 1440/960/720px与CSS100/150/200%九组组合无文档横向溢出，展开入口可达；25项相关测试及两篇原生缩放验证通过。
+- Evidence: `tests/test_toolbar.py::test_wide_media_keeps_text_measure_and_zoom_bounds`；本轮`output/_work/版式优化/20261003-distill/work/diagnose.py`测量。
+
 ## ERR-20261003-039 — 删除CSS规则时子串匹配误伤其他选择器
 
 - Fingerprint: `css:substring-rule-removal-matches-unrelated-selector`
@@ -423,16 +599,16 @@
 - Fingerprint: `content-export:stale-pages-after-rerender`
 - Status: active
 - First seen: 2026-10-02
-- Last seen: 2026-10-02
-- Occurrences: 1
+- Last seen: 2026-10-03
+- Occurrences: 2
 - Scope: `scripts/render_content.py`、`scripts/publish_content.py` 的重复检查与成品汇总
 - Symptom: 同一成品目录从两页改成一页重新导出后，`qa.images` 只列一页，但旧 `page-02.png` 仍存在，会被整体复制到短路径交付。
 - Root cause: 检查器只覆盖当前页图，未清理自身上一轮生成的文件；发布函数核对当前清单后整体复制目录。
 - Wrong assumption/action: 认为新 QA 清单能保证成品目录内没有多余旧图。
-- Correct approach: 每轮检查前，仅清理约定名称的自有页图及明暗检查截图，保留独立配图和其他文件，再生成本轮结果。
-- Prevention check: 导出和交付改动必须覆盖同一目录“多页→少页”的重跑，核对根级页图和两种主题检查截图均无旧页，同时验证独立配图保留。
-- Verification: `test_rerender_with_fewer_pages_removes_previous_exports` 修复前失败、修复后通过；两页改一页后旧页图消失，`diagram.png` 保留。
-- Evidence: `scripts/render_content.py` 的生成文件清理；`tests/test_content.py`。
+- Correct approach: 每轮检查前仅清理约定名称的自有页图及明暗检查截图；发布时再核对根级`page-\d+\.png`文件集合与QA导出清单完全一致，并继续核对哈希。独立配图和其他文件保留。
+- Prevention check: 导出和交付改动覆盖同一目录“多页→少页”的重跑，以及发布前额外加入、删除、修改页图；核对清单与哈希，确认独立配图和checks/保留。
+- Verification: 原缩页导出回归再次通过；本轮额外页图在修复前被发布，修复后多余、缺失、内容变化三种页图均被拒绝，旧入口与发布记录字节不变；合法辅助图与checks/保留。
+- Evidence: `scripts/render_content.py`、`scripts/publish_content.py`；`tests/test_content.py`与`tests/test_publish.py::PublishTests.test_report_rejects_extra_missing_and_changed_pages`。
 
 ## ERR-20261002-012 — 滚动位置检查混入自动化工具的滚动
 
@@ -440,15 +616,15 @@
 - Status: active
 - First seen: 2026-10-02
 - Last seen: 2026-10-03
-- Occurrences: 3
+- Occurrences: 4
 - Scope: 新长文模板的主题/目录切换与阅读位置检查
 - Symptom: 主题切换测试将 `scrollY` 从450变化到0或89误归为主题行为；改为视口点击后，未结束的锚点平滑滚动仍使位置变化。
 - Root cause: 定位器点击会主动将控件滚入视口，且先前导航的平滑滚动尚未稳定；测试没有隔离这些位置变化。
 - Wrong assumption/action: 把定位器点击和正在执行的平滑滚动等同于用户在稳定视口中的点击。
 - Correct approach: 阅读工具栏固定在视口顶部；位置断言前先稳定滚动，在控件的真实视口坐标点击主题按钮。
 - Prevention check: 验证阅读位置不变时，导航前关闭测试中的平滑滚动或等待其完成；避免定位器额外滚动，以真实视口点击复核，并确认主题确实改变。
-- Verification: 主题视口点击保持450；本轮目录对照中的定位器点击产生约512px额外位移，改为视口点击后误差小于1px，目录与阅读位置4项回归通过。
-- Evidence: 固定工具栏与`tests/test_content.py`、`tests/test_navigation.py`；本轮目录测量使用真实视口坐标，诊断与最终记录保留在`toc-position`迭代目录。
+- Verification: 主题视口点击保持450；目录对照中的定位器点击曾产生约512px额外位移。工具栏折叠测试在720px窗口中，打开目录的定位器点击又引入262px位移；改为真实视口点击后开合位置误差小于2px，25项相关回归通过。
+- Evidence: `tests/test_content.py`、`tests/test_navigation.py`、`tests/test_toolbar.py`；原`toc-position`迭代与本轮`output/_work/版式优化/20261003-distill/work/diagnose.py`。
 
 ## ERR-20260914-011 — 封面未直接表达核心论点
 

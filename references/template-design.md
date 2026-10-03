@@ -8,8 +8,8 @@
 |---|---|---|
 | 目录、主题、代码复制、章节链接 | [PaperMod 功能](https://github.com/adityatelange/hugo-PaperMod/wiki/Features)、原有 Nextra/Material 参考 | 已有，继续保留 |
 | 多套阅读配色 | 用户的明暗各三套要求；共用语义颜色 | 新增顶部六套选择与浅深分别记忆 |
-| 阅读宽度 | 同一内容兼顾连续阅读与较宽代码/表格 | 新增标准/宽阔，重排保持位置 |
-| 打印与 PDF | [MDN 打印样式及生命周期](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) | 新增阅读菜单入口、白底和完整内容打印；PDF 由浏览器保存 |
+| 阅读宽度 | [Distill布局](https://distill.pub/guide/#layouts)作为阅读节奏参考；按用户反馈统一本文的内容栏宽 | 顶部直接提供560–960px滑条，默认704px；正文、图表、代码同栏，单张图片可在栏内等比例拖动；重排保持位置 |
+| 打印与 PDF | [MDN 打印样式及生命周期](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) | 顶部工具栏直接提供打印按钮，白底和完整内容打印；PDF 由浏览器保存 |
 | 文内与站内搜索 | [Starlight 站内搜索](https://starlight.astro.build/guides/site-search/)解决跨页面内容发现 | 本项目单篇查找按用户要求使用浏览器 Ctrl+F；不实现重复搜索框，跨文章搜索留待有站点索引时考虑 |
 | 步骤与状态动画 | [reveal.js Auto-Animate](https://revealjs.com/auto-animate/)的状态变化表达、[MDN 减少动态效果](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion) | 新增可控 SVG 累积步骤演示，Softmax 真实例子已接入；非装饰运动 |
 | 内容选项卡 | [Material content tabs](https://squidfunk.github.io/mkdocs-material/reference/content-tabs/)适合同义实现/平台切换 | 暂不加入：现有推导需连续阅读，不宜隐藏互相依赖的内容；出现多语言同义实现再评估 |
@@ -33,7 +33,7 @@
 
 参考的实际功能来源：[Nextra文档主题](https://nextra.site/docs/docs-theme/built-ins)、[AstroPaper主题与布局设置](https://github.com/satnaing/astro-paper/wiki/Customization)、[AstroPaper明暗偏好](https://github.com/satnaing/astro-paper/wiki/Features)、[Slidev功能](https://github.com/slidevjs/slidev#features)、[Slidev颜色模式配置](https://sli.dev/custom/)。
 
-学习与博客共用左侧目录和连续正文模板，区别在内容详略；目录可收起，字号可调16–24px，图片和SVG可点击放大。汇报固定16:9舞台。两类HTML以桌面与缩放使用为验收范围，不另做手机适配验收。共用CSS变量管理背景、文字、代码与图解；普通图形节点使用协调的中性底色，强调色按对象语义少量使用，详见[成品视觉规则](visual-system.md)。证据原图不反色。主题切换记住选择，不重载正文或汇报。
+学习与博客共用左侧目录和连续正文模板，内容分别按概念依赖和论点—证据组织，详略服从读者目的；目录可收起，字号可调16–24px，图片和SVG可点击放大。长文顶部工具栏用小型上箭头收起、固定下箭头展开，悬停和无障碍标签说明用途；记住选择，开合保持当前阅读位置；缩小窗口及缩放时控件可换行。汇报固定16:9舞台。两类HTML以桌面与缩放使用为验收范围，不另做手机适配验收。共用CSS变量管理背景、文字、代码与图解；普通图形节点使用协调的中性底色，强调色按对象语义少量使用，详见[成品视觉规则](visual-system.md)。证据原图不反色。主题切换记住选择，不重载正文或汇报。
 
 新增HTML采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；构建时仅内嵌本篇实际字形的WOFF2子集及许可。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。代码等宽，中文由同一离线字体回退；数学使用KaTeX字形。实际字体以浏览器核验为准。
 
@@ -45,7 +45,7 @@
 
 新模板只用于学习/博客/汇报，避免将新阅读样式灌入原卡片；小红书继续保留academic的画幅与字体约定。
 
-长文标题区参考[AstroPaper实际文章](https://astro-paper.pages.dev/posts/astro-paper-v5/)的标题与真实元信息层级：正文不重复工具栏已有的身份标签。采用其连续阅读的组织思路，具体字号、留白和公式强调根据本项目长文实测，不照搬作者、日期或宣传组件。
+长文标题区参考[AstroPaper实际文章](https://astro-paper.pages.dev/posts/astro-paper-v5/)的标题与真实元信息层级：正文不重复工具栏已有的身份标签。2026-10-03实际截图对照了AstroPaper、[Distill](https://distill.pub/guide/)和[Tufte CSS](https://edwardtufte.github.io/tufte-css/)：采用Distill的标题与连续阅读组织、Tufte的图文紧邻和轻装饰、AstroPaper的克制界面；按用户后续反馈，正文与图片统一栏宽，取消自动宽图，常用阅读控件直接放在顶部。主章节按用户要求保留细分隔线与留白，小节靠标题层级衔接；表格和补充内容减少外框；标题保持原中文字体，不移植上游字体、旁注系统或框架。具体字号、留白和公式强调根据本项目长文实测，不照搬作者、日期或宣传组件。
 
 来源区借鉴[Material脚注](https://squidfunk.github.io/mkdocs-material/reference/footnotes/)将补充信息与主线分开的组织方式。本模板使用作者明确提供的来源块，保留出处与图示说明，不自动改写引用或增加工具提示。
 
