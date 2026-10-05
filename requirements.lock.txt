@@ -1,5 +1,5 @@
-# 已验证环境：Windows x64 / Python 3.13.14，2026-09-06。
-# requirements.txt 保留兼容范围；此文件用于复现本次测试的完整依赖版本。
+# Windows x64：原验证 Python 3.13.14；2026-10-03 核对项目 Python 3.12.14 环境版本一致。
+# requirements.txt 保留兼容范围；换机优先安装此文件，安装步骤见 README.md。
 Markdown==3.10.3
 PyYAML==6.0.3
 playwright==1.62.0

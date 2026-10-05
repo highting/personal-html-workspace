@@ -21,6 +21,11 @@
     for (let i = 0; i < source.length; i++) hash = (hash * 31 + source.charCodeAt(i)) | 0;
     const key = index + ':' + (hash >>> 0).toString(36);
     const original = ['width', 'height', 'max-width'].map(name => [name, media.style.getPropertyValue(name), media.style.getPropertyPriority(name)]);
+    const svgWidth = media.tagName.toLowerCase() === 'svg' ? media.viewBox.baseVal.width : 0;
+    const limitSvgWidth = () => {
+      if (svgWidth) media.style.maxWidth = 'min(100%, ' + svgWidth + 'px)';
+    };
+    limitSvgWidth();
     const label = (media.getAttribute('aria-label') || media.getAttribute('alt') || '图片').replace(/，点击放大$/, '');
     const handle = document.createElement('span');
     handle.className = 'image-resize-handle';
@@ -46,6 +51,7 @@
       const frame = container.getBoundingClientRect(), box = media.getBoundingClientRect();
       const scale = frame.width / container.offsetWidth;
       if (!scale) return;
+      container.style.setProperty('--caption-width', box.width / scale + 'px');
       const right = Math.max(0, 100 - (box.right - frame.left) / frame.width * 100);
       handle.style.right = right + '%';
       handle.style.top = (box.bottom - frame.top) / scale - 24 + 'px';
@@ -60,7 +66,7 @@
     };
     const setSize = value => {
       percent = Math.max(40, Math.min(100, Math.round(value)));
-      media.style.width = percent + '%';
+      media.style.width = svgWidth ? 'min(' + percent + '%, ' + svgWidth * percent / 100 + 'px)' : percent + '%';
       media.style.height = 'auto';
       media.style.maxWidth = '100%';
       updateState();
@@ -70,6 +76,7 @@
         if (value) media.style.setProperty(name, value, priority);
         else media.style.removeProperty(name);
       });
+      limitSvgWidth();
       percent = 100;
       delete saved[key];
       persist();
@@ -91,12 +98,13 @@
       const box = media.getBoundingClientRect();
       drag = {id: event.pointerId, x: event.clientX, y: event.clientY, width: box.width, height: box.height,
         available: (container.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)) * container.getBoundingClientRect().width / container.offsetWidth, percent};
+      if (svgWidth) drag.available = Math.min(drag.available, svgWidth * container.getBoundingClientRect().width / container.offsetWidth);
       handle.setPointerCapture(event.pointerId);
       container.classList.add('is-resizing');
     });
     handle.addEventListener('pointermove', event => {
       if (!drag || event.pointerId !== drag.id) return;
-      const dx = event.clientX - drag.x;
+      const dx = (event.clientX - drag.x) * 2;
       const dy = (event.clientY - drag.y) * drag.width / drag.height;
       const delta = Math.abs(dx) >= Math.abs(dy) ? dx : dy;
       setSize((drag.width + delta) / drag.available * 100);

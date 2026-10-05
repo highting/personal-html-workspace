@@ -36,13 +36,13 @@ PNG 和 HTML 都校验固定画幅；过高块及可检测的横向溢出会报�
 python -X utf8 scripts/rednote_render.py cards.md
 
 # 几何图示例，同时保留制作源文件
-python -X utf8 scripts/rednote_render.py demos/academic.md --save-html -o output/geometry
+python -X utf8 scripts/rednote_render.py demos/academic.md --save-html -o archive/demo-renders/geometry
 
 # 对应比较示例
-python -X utf8 scripts/rednote_render.py demos/academic-comparison.md -o output/comparison
+python -X utf8 scripts/rednote_render.py demos/academic-comparison.md -o archive/demo-renders/comparison
 
 # 显式指定旧主题时仍可使用
-python -X utf8 scripts/rednote_render.py cards.md -t sketch -o output/sketch
+python -X utf8 scripts/rednote_render.py cards.md -t sketch -o archive/demo-renders/sketch
 ```
 
 ## 渲染稿

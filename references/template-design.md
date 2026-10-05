@@ -8,7 +8,7 @@
 |---|---|---|
 | 目录、主题、代码复制、章节链接 | [PaperMod 功能](https://github.com/adityatelange/hugo-PaperMod/wiki/Features)、原有 Nextra/Material 参考 | 已有，继续保留 |
 | 多套阅读配色 | 用户的明暗各三套要求；共用语义颜色 | 新增顶部六套选择与浅深分别记忆 |
-| 阅读宽度 | [Distill布局](https://distill.pub/guide/#layouts)作为阅读节奏参考；按用户反馈统一本文的内容栏宽 | 顶部直接提供560–960px滑条，默认704px；正文、图表、代码同栏，单张图片可在栏内等比例拖动；重排保持位置 |
+| 阅读宽度 | [Distill布局](https://distill.pub/guide/#layouts)作为阅读节奏参考；按用户反馈统一本文的内容栏宽 | 顶部提供占页面40%–80%的滑条，默认60%，按百分比记忆且无固定像素上限；正文、图表、代码同栏；目录与正文留出间距，空间不足时展开目录让正文临时让位，关闭后恢复所选宽度；目录右边缘可拖动并记忆宽度，重排保持位置 |
 | 打印与 PDF | [MDN 打印样式及生命周期](https://developer.mozilla.org/en-US/docs/Web/CSS/Guides/Media_queries/Printing) | 顶部工具栏直接提供打印按钮，白底和完整内容打印；PDF 由浏览器保存 |
 | 文内与站内搜索 | [Starlight 站内搜索](https://starlight.astro.build/guides/site-search/)解决跨页面内容发现 | 本项目单篇查找按用户要求使用浏览器 Ctrl+F；不实现重复搜索框，跨文章搜索留待有站点索引时考虑 |
 | 步骤与状态动画 | [reveal.js Auto-Animate](https://revealjs.com/auto-animate/)的状态变化表达、[MDN 减少动态效果](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@media/prefers-reduced-motion) | 新增可控 SVG 累积步骤演示，Softmax 真实例子已接入；非装饰运动 |
@@ -33,9 +33,9 @@
 
 参考的实际功能来源：[Nextra文档主题](https://nextra.site/docs/docs-theme/built-ins)、[AstroPaper主题与布局设置](https://github.com/satnaing/astro-paper/wiki/Customization)、[AstroPaper明暗偏好](https://github.com/satnaing/astro-paper/wiki/Features)、[Slidev功能](https://github.com/slidevjs/slidev#features)、[Slidev颜色模式配置](https://sli.dev/custom/)。
 
-学习与博客共用左侧目录和连续正文模板，内容分别按概念依赖和论点—证据组织，详略服从读者目的；目录可收起，字号可调16–24px，图片和SVG可点击放大。长文顶部工具栏用小型上箭头收起、固定下箭头展开，悬停和无障碍标签说明用途；记住选择，开合保持当前阅读位置；缩小窗口及缩放时控件可换行。汇报固定16:9舞台。两类HTML以桌面与缩放使用为验收范围，不另做手机适配验收。共用CSS变量管理背景、文字、代码与图解；普通图形节点使用协调的中性底色，强调色按对象语义少量使用，详见[成品视觉规则](visual-system.md)。证据原图不反色。主题切换记住选择，不重载正文或汇报。
+学习与博客共用左侧目录和连续正文模板，内容分别按概念依赖和论点—证据组织，详略服从读者目的；目录可收起，字号可调10–24px，图片和SVG可点击放大。长文顶部工具栏用小型上箭头收起、固定下箭头展开，悬停和无障碍标签说明用途；记住选择，开合保持当前阅读位置；缩小窗口及缩放时控件可换行。汇报固定16:9舞台。两类HTML以桌面与缩放使用为验收范围，不另做手机适配验收。共用CSS变量管理背景、文字、代码与图解；普通图形节点使用协调的中性底色，强调色按对象语义少量使用，详见[成品视觉规则](visual-system.md)。证据原图不反色。主题切换记住选择，不重载正文或汇报。
 
-新增HTML采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；构建时仅内嵌本篇实际字形的WOFF2子集及许可。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。代码等宽，中文由同一离线字体回退；数学使用KaTeX字形。实际字体以浏览器核验为准。
+新增HTML默认采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；构建时仅内嵌本篇实际字形的WOFF2子集及许可。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。学习/博客提供可搜索的字体下拉框：默认字体、系统界面字体、浏览器配置的无衬线/衬线/等宽类别，以及读者主动授权后由浏览器返回的本机字体；按字体家族合并字重，名称与返回的全名均可搜索。只记住所选字体，不缓存整台电脑的字体列表。切换保持当前阅读位置；工具栏、代码、KaTeX公式和固定布局的SVG图中文字保持原字体。读取失败、返回空列表或接口不支持时明确提示，保留基础选项；不承诺所有浏览器均支持枚举。接口依据[Chrome Local Font Access说明](https://developer.chrome.com/docs/capabilities/web-apis/local-fonts)及[接口规范](https://wicg.github.io/local-font-access/)。汇报与小红书不增加字体切换。实际字体以浏览器核验为准。
 
 长文的代码复制、折叠与续读功能参考[NexT功能文档](https://theme-next.js.org/docs/theme-settings/miscellaneous)，章节定位参考[Blowfish](https://blowfish.page/docs/configuration/)，补充内容组织参考[Material折叠内容](https://squidfunk.github.io/mkdocs-material/reference/admonitions/)。仅借鉴阅读行为，继续使用本项目单文件HTML；不引入它们的框架、评论或访问统计。代码高亮使用[Pygments](https://pygments.org/docs/quickstart/)，在构建阶段完成。
 

@@ -2,7 +2,7 @@
 
 个人学习、博客、技术汇报和小红书卡片的内容制作工作区。日常制作复用当前模板与约束；公共模板修改单独提出。材料入口、分类、命名和版本以[工作区约定](references/workspace.md)为准。
 
-本地内容入口：[项目总览](output/index.html)。按正式成品、示例成品、工作版本、历史归档、运行环境和公共工具分类，可直接打开成品与所在目录；该页面和本地产物一样不纳入 Git。
+本地内容入口为 `output/index.html`。正式成品留在 `output/`；历史工作版本、检查截图、示例渲染和旧文件统一存入 `archive/`。两者均不纳入 Git；新克隆的仓库不附带本机成品和归档。
 
 ## 以后怎样制作
 
@@ -22,6 +22,8 @@
 
 ## 学习、博客与汇报
 
+当前 Prompt 的读取入口见 [prompts/README.md](prompts/README.md)：共同规则保存在 `prompts/common.txt`，各场景规则保存在 `prompts/scenes/`。正常路线是“读取存储的 Prompt 与原稿 → 在 `output/_work/` 准备和制作 → 验收 → 更新 `output/<成品名>/`”；`work/任务Prompt.txt` 是本次规则与路径的快照，`archive/` 只用于历史归档，日常制作不依赖它。
+
 材料通常先拖入 `inputs/待分类/`，代理归类后使用 `inputs/<分类>/<主题>/`，现有 `blogs/` 也可使用。直接说“把这个主题整理成学习长文”“写成技术博客”或“做成技术汇报”；场景之间分别策划，不只转换画幅。AI先阅读、策划并整理内容，脚本负责排版与检查。
 
 ```bash
@@ -39,7 +41,7 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 布局参考 [Nextra](https://github.com/shuding/nextra)（学习导航）、[AstroPaper](https://github.com/satnaing/astro-paper)（博客阅读）和 [Slidev](https://github.com/slidevjs/slidev)（技术演示）。当前查询约 13.9k、5.1k、48.9k 星；支持明暗主题的参考与设计记录见[模板设计](references/template-design.md)。本仓库模板独立实现，无需安装这些项目。
 
-可直接查看[三场景明暗截图与示例稿](demos/content/README.md)。
+可查看[四场景示例源稿与生成方法](demos/content/README.md)。生成截图保留在本地 `archive/demo-renders/`。
 
 ## 小红书日常入口
 
@@ -60,13 +62,13 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 | [HTML 模式](references/html-mode.md) | 连续正文用 HTML，辅助解释图用 HTML＋SVG | 正文与辅助图 PNG、发布摘要及源文件 |
 | [生图模式](references/image-mode.md) | 正文仍用 HTML，辅助解释图用 ImageGen | 正文与辅助图 PNG、发布摘要及源文件 |
 
-两种模式共用[图文组织规则](references/content-plan.md)：正文图片承载文章主线，辅助解释图穿插解释关系。发布标题和封面标题不使用第一人称，直接表达主题或核心论点；配文采用作者第一人称，轻松自然、只作摘要。两套比较共用正文页与配文，只更换非正文视觉。字体沿用项目设置，参考图默认只用于字号和间距。仅请求辅助图或一图流时遵从该范围；原稿保留，不要求默认逐字搬运。
+两种模式共用[图文组织规则](references/content-plan.md)：先选小主题，用少量通俗文字在图片内讲清机制，辅助解释图穿插解释关系；可省难推导，保留理由与条件，不默认搬运长文全部内容。发布标题和封面标题不使用第一人称，直接表达主题或核心论点；配文采用作者第一人称，轻松自然、只作摘要。两套比较共用正文页与配文，只更换非正文视觉。字体沿用项目设置，参考图默认只用于字号和间距。仅请求辅助图时遵从该范围；原稿保留。
 
-调用示例：“正文用 HTML 排成图片，辅助图用 HTML＋SVG，配文写摘要”；“正文页用 HTML，辅助图分别做 HTML＋SVG 和生图两套，让我比较”；“不用 ImageGen，把这个主题做成一张 3:4 一图流”。
+调用示例：“正文用 HTML 排成图片，辅助图用 HTML＋SVG，配文写摘要”；“正文页用 HTML，辅助图分别做 HTML＋SVG 和生图两套，让我比较”；“把这份精简后的文档做成小红书图文，不用 ImageGen”。
 
 ## 安装
 
-### Claude Code Plugin（推荐）
+### Claude Code Plugin
 
 ```bash
 # 添加 marketplace
@@ -76,22 +78,55 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 /plugin install personal-html-workspace@personal-html-workspace
 ```
 
-安装后运行 `/reload-plugins` 即可使用。
+安装后运行 `/reload-plugins` 加载技能。插件提供制作规则和脚本；Python 包、浏览器与字体仍需按下面的步骤准备。日常材料与成品建议在克隆的项目工作区中管理。
 
-### 手动安装
+### 换电脑使用
+
+准备 Git、Python 3.12 或 3.13（含 pip、venv），以及能在本项目目录中读取 `AGENTS.md` 和 `SKILL.md` 的代理工具。已在 Windows x64 的 Python 3.12.14、3.13.14 环境使用当前锁定依赖；macOS/Linux 的路径用法见下文，尚未逐平台验证。脚本本身不调用模型，内容整理与可选生图需要当前代理提供相应能力；纯 HTML 制作不要求生图工具、Node.js 或 npm。
 
 ```bash
 git clone https://github.com/highting/personal-html-workspace.git
 cd personal-html-workspace
-python -m pip install --user -i https://mirrors.cloud.tencent.com/pypi/simple -r requirements.lock.txt
-python -m playwright install chromium-headless-shell
-# 首次使用新学习/博客/汇报模板及相关测试时下载中文字体缓存
-python -X utf8 scripts/download_content_fonts.py
+python -m venv .venv
 ```
 
-Python 包安装到当前用户环境，浏览器使用系统用户共享缓存。浏览器的大陆镜像配置、官方回退、MiSans 安装与已验证版本见 [环境说明](references/environment.md)。已有虚拟环境时省略 `--user`。
+Windows PowerShell 下执行（无需激活虚拟环境）：
 
-安装后运行 `python -X utf8 -m unittest discover -s tests -v` 执行回归测试，包含真实浏览器和离线公式检查。
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.lock.txt
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe -m playwright install chromium-headless-shell
+.\.venv\Scripts\python.exe -X utf8 scripts/download_content_fonts.py
+```
+
+macOS/Linux 创建环境时通常使用 `python3 -m venv .venv`，后续使用 `.venv/bin/python`：
+
+```bash
+.venv/bin/python -m pip install -r requirements.lock.txt
+.venv/bin/python -m pip check
+.venv/bin/python -m playwright install chromium-headless-shell
+.venv/bin/python -X utf8 scripts/download_content_fonts.py
+```
+
+Linux 若提示缺少浏览器系统库，执行 `.venv/bin/python -m playwright install-deps chromium`，该步骤可能需要管理员权限。首次安装需联网下载 Python 包、Playwright 浏览器和约 17 MB 的固定版本中文字体；下载源、镜像与字体要求见[环境说明](references/environment.md)。字体下载脚本会核对 SHA-256。之后可用本地材料离线构建 HTML；来源网页访问和 AI 服务另计。
+
+后文命令中的 `python` 均指这个虚拟环境的解释器；可替换为上述完整相对路径，或激活 `.venv` 后执行。不要复制另一台电脑的 `.venv` 或浏览器缓存。
+
+新机器可先运行以下检查；Windows 将 `.venv/bin/python` 替换为 `.\.venv\Scripts\python.exe`：
+
+```bash
+.venv/bin/python -X utf8 scripts/build_content.py demos/content/learning.md --scene learning --output archive/demo-renders/learning/index.html
+.venv/bin/python -X utf8 scripts/render_content.py archive/demo-renders/learning/index.html --scene learning --output-dir archive/demo-renders/learning
+```
+
+打开生成的 `archive/demo-renders/learning/index.html`，查看中文、公式、明暗切换和目录。机器检查通过不代替实际查看；全部回归可运行 `python -X utf8 -m unittest discover -s tests -v`。环境准备好后，在仓库根目录开始会话，按前面的材料投放与制作流程使用即可，无需把本仓库另装成个人技能。
+
+### Git 分发范围
+
+- 随仓库保留：制作脚本、公共模板、Prompt、流程文档、示例源稿、测试、依赖锁文件、KaTeX 资源，以及中文字体的下载清单与许可。新增的 `inputs/`、`blogs/` 原稿和附件需实际加入提交才会到远端。
+- 不随 Git 分发：`.venv/`、浏览器缓存、下载的完整中文字体、`output/` 成品和 `archive/` 归档。新克隆没有本地总览与历史成品，首次交付时按工作区规则生成；需要迁移旧成品或归档时另行复制或备份。
+- 新机器从原稿重新准备任务。历史 `run.json` 含原机器绝对路径，不能复制后直接继续发布；需要继承旧工作稿时，重新 prepare 并按[工作区约定](references/workspace.md)记录来源。
+- 学习、博客、汇报的中文字体和本地资源内嵌在成品 HTML 中，成品可独立移动。小红书沿用系统字体；另一台电脑需准备相同字体才能尽量保持字形和分页，详见[字体要求](references/environment.md#字体与公式)。
 
 ---
 
@@ -103,7 +138,7 @@ Python 包安装到当前用户环境，浏览器使用系统用户共享缓存�
 - **academic 主题**：浅暖米色卡片（`#F7F4ED`），钴蓝／青蓝／琥珀橙，轻量几何和短标签；HTML 渲染中文优先微软雅黑，生图按 prompt 使用宋体／serif
 - **Playwright 渲染**：高质量 HTML → PNG 输出
 - **保留制作源文件**：可随 PNG 保存分页 HTML 与离线数学资源，便于后续修改和复现
-- **独立生图流程**：按目的选择内容图片、辅助解释图和一图流
+- **独立生图流程**：正文仍由 HTML 排版，辅助解释图等非正文视觉使用 ImageGen
 
 ---
 
@@ -123,13 +158,13 @@ python -X utf8 scripts/rednote_render.py "<work_entry>" --math katex --save-html
 python scripts/rednote_render.py content.md -t neo-brutalism
 
 # academic 主题：技术图仍输出小红书封面和正文卡片，示例已启用 KaTeX
-python scripts/rednote_render.py demos/academic.md -t academic -o output/_work/renderer-examples/geometry
+python scripts/rednote_render.py demos/academic.md -t academic -o archive/demo-renders/geometry
 
 # academic 主题的对应对比图
-python scripts/rednote_render.py demos/academic-comparison.md -t academic -o output/_work/renderer-examples/comparison
+python scripts/rednote_render.py demos/academic-comparison.md -t academic -o archive/demo-renders/comparison
 
 # 交付 PNG，同时保留 HTML 制作源文件
-python scripts/rednote_render.py demos/academic.md --save-html -o output/_work/renderer-examples/geometry
+python scripts/rednote_render.py demos/academic.md --save-html -o archive/demo-renders/geometry
 
 # 显式选择其他主题时，仍使用本次成品暂存目录
 python scripts/rednote_render.py "<work_entry>" -t retro -o "<artifact_dir>"
@@ -139,10 +174,10 @@ python scripts/rednote_render.py "<work_entry>" -t retro -o "<artifact_dir>"
 
 技术图示例：
 
-| 示例 | 解释目标 | PNG |
-|---|---|---|
-| [向量几何](demos/academic.md) | 用直角三角形解释切向更新为何增加范数 | [查看卡片](demos/academic/card_1.png) |
-| [对应对比](demos/academic-comparison.md) | 对比直接更新与归一化，区分临时端点和最终状态 | [查看卡片](demos/academic-comparison/card_1.png) |
+| 示例 | 解释目标 |
+|---|---|
+| [向量几何](demos/academic.md) | 用直角三角形解释切向更新为何增加范数 |
+| [对应对比](demos/academic-comparison.md) | 对比直接更新与归一化，区分临时端点和最终状态 |
 
 两例依据欧氏向量加法、勾股定理与径向归一化构造，作为 `academic` 主题的卡片示例，不代表论文实验。假设非零权重、非零切向步长；向量角度、比例与投影关系保持真实。公式说明留在正文，图中只保留必要关系。
 
@@ -171,8 +206,17 @@ personal-html-workspace/
 ├── output/
 │   ├── index.html              # 本地分类总览
 │   ├── <主题短名>-<场景>/       # 正式成品：学习/博客/汇报/小红书
-│   ├── _work/                  # 独立工作目录、版本和检查记录
-│   └── _archive/               # 整理前的产物与检查材料
+│   └── _work/                  # 当前制作中的工作目录
+├── archive/                    # 本地统一归档，整目录排除 Git
+│   ├── work/                   # 已封存工作版本、来源快照与检查证据
+│   ├── checks/                 # 从正式入口移出的 QA 与检查截图
+│   ├── examples/               # 示例成品
+│   ├── demo-renders/           # 从 demos 移出的生成图片
+│   ├── legacy/                 # 早期模板与示例
+│   ├── handoffs/               # 历史交接
+│   ├── environments/           # 停用的本机验证环境
+│   ├── history/、legacy-runs/  # 原有归档与早期制作记录
+│   └── manifest.json           # 相对路径迁移清单与文件哈希
 ├── SKILL.md                    # 技能定义
 ├── README.md
 ├── requirements.txt            # Python 依赖
@@ -187,12 +231,11 @@ personal-html-workspace/
 │   ├── params.md               # 完整参数参考
 │   ├── html-mode.md            # 分页 HTML 与 SVG 工作流
 │   ├── content-plan.md         # 两种模式共用的图文组织与选点
-│   ├── image-mode.md           # 内容图片、辅助解释图和一图流
+│   ├── image-mode.md           # 正文 HTML 与非正文生图
 │   ├── environment.md          # 大陆镜像安装与验证
 │   └── third-party.md          # 资源来源和许可
 ├── assets/
 │   ├── content/                # 新长文与汇报的离线明暗模板
-│   ├── legacy/                 # 早期封面、卡片与样式参考，当前渲染器不加载
 │   ├── themes/                 # 各主题 CSS 文件
 │   │   ├── default.css
 │   │   ├── playful-geometric.css
@@ -206,7 +249,7 @@ personal-html-workspace/
 │   │   └── academic.css
 │   └── vendor/
 │       └── katex/              # KaTeX 0.16.11 本地运行资源与许可
-├── demos/                      # 当前卡片、长文与汇报示例；legacy/ 为早期示例
+├── demos/                      # 可复用示例源稿，不放生成截图
 ├── tests/                      # 渲染、工作区、阅读交互、导航与配色回归
 ├── skills/
 │   └── personal-html-workspace/
@@ -232,7 +275,7 @@ personal-html-workspace/
 ## 小红书注意事项
 
 - 默认画布为 1080×1440 CSS px（本地沿用的小红书 3:4 比例）；PNG 物理像素乘以 `dpr`
-- 固定画幅放不下时重新分组并增页，不缩字、裁内容或用超长图交付
+- 总量过大先删重复与非必需旁支，必要解释仍放不下再重新分组增页，不缩字、截断因果或用超长图交付
 - 生成后仍需查看实际图片，检查几何关系、文字重叠和遮挡；自动检查不能判断图意是否准确
 - 字体使用系统已安装版本；默认 HTML＋SVG 渲染的 PNG 优先 `Microsoft YaHei`；生图指定宋体／serif 并检查实际结果
 - KaTeX 资源随项目提供，公式渲染不依赖运行时网络

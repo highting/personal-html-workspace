@@ -16,6 +16,12 @@ ENV/
 
 # Generated artifacts and local validation environments
 output/
+archive/
+
+# Generated demo images belong in archive/, not beside reusable source examples
+demos/**/card_*.png
+demos/**/cover.png
+demos/content/previews/
 
 # Reproducible, downloaded Chinese font cache
 assets/vendor/noto-sans-sc/NotoSansSC-variable.ttf

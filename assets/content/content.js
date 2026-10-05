@@ -42,10 +42,10 @@
     let readingSize = 18;
     try { readingSize = Number(localStorage.getItem('personal-html-workspace-font-size')) || 18; } catch (_) {}
     const setReadingSize = size => {
-      readingSize = Math.max(16, Math.min(24, size));
+      readingSize = Math.max(10, Math.min(24, size));
       root.style.setProperty('--reading-size', readingSize + 'px');
       fontOutput.textContent = readingSize + 'px';
-      document.getElementById('font-smaller').disabled = readingSize === 16;
+      document.getElementById('font-smaller').disabled = readingSize === 10;
       document.getElementById('font-larger').disabled = readingSize === 24;
       try { localStorage.setItem('personal-html-workspace-font-size', readingSize); } catch (_) {}
     };
@@ -62,7 +62,7 @@
         } else range = document.caretRangeFromPoint?.(left, y);
         if (range?.startContainer.nodeType === Node.TEXT_NODE && article.contains(range.startContainer)) {
           const box = range.getBoundingClientRect();
-          if (box.height) return {range, top: box.top};
+          if (box.height && y >= box.top && y <= box.bottom) return {range, top: box.top};
         }
       }
       // 图面、公式或段间留白没有文字插入点时，按当前块的相对位置保持阅读。
@@ -212,7 +212,100 @@
   const tocButton = document.getElementById('toc-toggle');
   const isReport = document.body.classList.contains('scene-report');
   const compactLayout = matchMedia('(max-width: 1000px)');
-  const updateTocState = () => tocButton.setAttribute('aria-expanded', String(isReport || compactLayout.matches ? toc.classList.contains('open') : !document.body.classList.contains('toc-hidden')));
+  const isCompact = () => compactLayout.matches || root.classList.contains('reader-compact');
+  const updateTocState = () => tocButton.setAttribute('aria-expanded', String(isReport || isCompact() ? toc.classList.contains('open') : !document.body.classList.contains('toc-hidden')));
+  window.updateContentTocLayout = () => {
+    if (isReport) return;
+    const zoom = Number(getComputedStyle(root).zoom) || 1;
+    const ratio = Number(getComputedStyle(root).getPropertyValue('--reading-width-ratio'));
+    root.style.setProperty('--reading-zoom', zoom);
+    const available = root.clientWidth / zoom;
+    const tocWidth = parseFloat(getComputedStyle(root).getPropertyValue('--toc-preferred-width')) || 200;
+    const compact = compactLayout.matches || available * ratio + tocWidth + 160 > available;
+    if (root.classList.contains('reader-compact') !== compact) toc.classList.remove('open');
+    root.classList.toggle('reader-compact', compact);
+    updateTocState();
+  };
+  window.updateContentTocLayout();
+  if (!isReport) {
+    const grip = document.createElement('span');
+    grip.className = 'toc-resize-handle';
+    grip.tabIndex = 0;
+    grip.setAttribute('role', 'slider');
+    grip.setAttribute('aria-label', '调整目录宽度');
+    grip.setAttribute('aria-orientation', 'horizontal');
+    grip.setAttribute('data-export-ui', '');
+    grip.title = '左右拖动调整目录宽度；双击恢复';
+    document.querySelector('.document-layout').append(grip);
+    let preferredWidth = 200, drag;
+    try { preferredWidth = Math.max(160, Math.min(360, Number(localStorage.getItem('content-toc-width')) || 200)); } catch (_) {}
+    root.style.setProperty('--toc-preferred-width', preferredWidth + 'px');
+    window.updateContentTocLayout();
+    const syncGrip = () => {
+      grip.hidden = !toc.getClientRects().length;
+      if (grip.hidden) return;
+      const box = toc.getBoundingClientRect();
+      const zoom = Number(getComputedStyle(root).zoom) || 1;
+      grip.style.setProperty('--toc-handle-height', box.height / zoom + 'px');
+      grip.setAttribute('aria-valuemin', '160');
+      grip.setAttribute('aria-valuemax', '360');
+      grip.setAttribute('aria-valuenow', String(Math.round(box.width / zoom)));
+      grip.setAttribute('aria-valuetext', Math.round(box.width / zoom) + 'px');
+    };
+    const setTocWidth = (value, anchor) => {
+      const expanded = tocButton.getAttribute('aria-expanded') === 'true';
+      preferredWidth = Math.max(160, Math.min(360, Math.round(value)));
+      preserveReadingPosition(() => {
+        root.style.setProperty('--toc-preferred-width', preferredWidth + 'px');
+        window.updateContentTocLayout();
+        if (expanded && isCompact()) toc.classList.add('open');
+        else if (expanded) document.body.classList.remove('toc-hidden');
+        updateTocState();
+      }, anchor);
+      syncGrip();
+    };
+    const saveWidth = () => { try { localStorage.setItem('content-toc-width', preferredWidth); } catch (_) {} };
+    grip.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      grip.focus({preventScroll: true});
+      const zoom = Number(getComputedStyle(root).zoom) || 1;
+      drag = {id: event.pointerId, x: event.clientX, width: toc.getBoundingClientRect().width / zoom,
+        previous: preferredWidth, zoom, factor: isCompact() ? 1 : 2, anchor: captureReadingPosition()};
+      grip.setPointerCapture(event.pointerId);
+      grip.classList.add('is-resizing');
+    });
+    grip.addEventListener('pointermove', event => {
+      if (drag && event.pointerId === drag.id) setTocWidth(drag.width + (event.clientX - drag.x) / drag.zoom * drag.factor, drag.anchor);
+    });
+    const finish = event => {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (event.type === 'pointercancel') setTocWidth(drag.previous, drag.anchor);
+      else saveWidth();
+      drag = undefined;
+      grip.classList.remove('is-resizing');
+    };
+    grip.addEventListener('pointerup', finish);
+    grip.addEventListener('pointercancel', finish);
+    grip.addEventListener('dblclick', () => { setTocWidth(200); saveWidth(); });
+    grip.addEventListener('keydown', event => {
+      const value = {ArrowLeft: preferredWidth - 16, ArrowRight: preferredWidth + 16, Home: 160, End: 360}[event.key];
+      if (value === undefined) return;
+      event.preventDefault();
+      setTocWidth(value);
+      saveWidth();
+    });
+    new ResizeObserver(syncGrip).observe(toc);
+    new ResizeObserver(syncGrip).observe(document.querySelector('.document-layout'));
+    addEventListener('scroll', syncGrip, {passive: true});
+    addEventListener('resize', syncGrip);
+    tocButton.addEventListener('click', () => requestAnimationFrame(syncGrip));
+    new MutationObserver(syncGrip).observe(toc, {attributes: true, attributeFilter: ['class']});
+    new MutationObserver(syncGrip).observe(document.body, {attributes: true, attributeFilter: ['class']});
+    syncGrip();
+  }
+  addEventListener('resize', window.updateContentTocLayout);
+  if (!isReport) new ResizeObserver(window.updateContentTocLayout).observe(document.body);
   updateTocState();
   compactLayout.addEventListener('change', updateTocState);
   const toolbar = document.getElementById('reading-toolbar');
@@ -243,21 +336,22 @@
     reveal.addEventListener('click', () => toggleToolbar(false));
   }
   tocButton.addEventListener('click', () => {
-    if (isReport || compactLayout.matches) toc.classList.toggle('open');
+    if (isReport) toc.classList.toggle('open');
+    else if (isCompact()) preserveReadingPosition(() => toc.classList.toggle('open'));
     else preserveReadingPosition(() => document.body.classList.toggle('toc-hidden'));
     updateTocState();
   });
   const slides = [...document.querySelectorAll('[data-export-page]')];
   if (!slides.length) {
     tocLinks.addEventListener('click', event => {
-      if (compactLayout.matches && event.target.closest('a')) {
-        toc.classList.remove('open');
+      if (isCompact() && event.target.closest('a')) {
+        preserveReadingPosition(() => toc.classList.remove('open'));
         updateTocState();
       }
     });
     addEventListener('keydown', event => {
       if (event.key === 'Escape' && toc.classList.contains('open') && !document.querySelector('dialog[open]')) {
-        toc.classList.remove('open');
+        preserveReadingPosition(() => toc.classList.remove('open'));
         updateTocState();
         tocButton.focus({preventScroll: true});
       }

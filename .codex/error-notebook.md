@@ -2,6 +2,488 @@
 
 记录已确认并验证修复的项目问题；后续操作前先检查相关 Prevention check。
 
+历史证据在2026-10-03集中归档：旧 `output/_work/` 对应 `archive/work/`，旧 `output/blogs/` 对应 `archive/legacy-runs/`；其他路径按本地 `archive/manifest.json` 的目录前缀映射查找。原检查记录与来源快照保持不变，归档不随 Git 分发。
+
+## ERR-20261005-087 — 文本规范化后的哈希与原始文件哈希混用
+
+- Fingerprint: `publish:normalized-text-hash-compared-with-raw-bytes`
+- Status: active
+- First seen: 2026-10-05
+- Last seen: 2026-10-05
+- Occurrences: 1
+- Scope: 本轮总览发布前的并发修改检查
+- Symptom: 总览预检后没有编辑，发布却报告 Overview changed after preflight。
+- Root cause: 预检对 read_text 规范化换行后的文本计算哈希，发布对含 CRLF 的原始字节计算哈希，两边不是同一对象。
+- Wrong assumption/action: 认为字符串 UTF-8 编码必然等于磁盘原字节。
+- Correct approach: 总览并发检查两侧使用同一文本规范化方法；HTML 成品与 QA 绑定继续一致使用原始字节 SHA-256。
+- Prevention check: 为哈希明确原字节或规范化文本契约，生成与复核使用相同读取方式；不要用换行规范化后的字符串哈希校验原始文件字节。
+- Verification: 修正后总览预检和发布通过；四份最终入口与对应成品原字节哈希一致。
+- Evidence: `output/_work/Infra系统学习-学习/20261004-215619-235257-learning-html/work/finalize_delivery.py`、`published-html.json`。
+
+## ERR-20261005-086 — 隐藏 SVG 组被子元素显式可见性覆盖
+
+- Fingerprint: `animation:svg-child-visibility-overrides-hidden-parent`
+- Status: active
+- First seen: 2026-10-05
+- Last seen: 2026-10-05
+- Occurrences: 1
+- Scope: Hot100 保留节点的逐帧 SVG 播放器
+- Symptom: 394 的补充解法切换至不含指针的状态后，数组右上仍有孤立蓝色三角。
+- Root cause: 旧帧的父组设置 visibility=hidden，但内部三角有 visibility=visible，覆盖了继承的隐藏值。
+- Wrong assumption/action: 只按帧标记设置父节点 visibility，没有核对显式可见的后代。
+- Correct approach: 保留 visibility 标记供核验，并对未参与当前帧的整个节点设置 display:none；再次激活时清除 display。
+- Prevention check: 保留节点式动画需检查从有指针到无指针以及回退两种转换；对停用组使用不能被后代 visibility 覆盖的整组隐藏方式。
+- Verification: 199 段动画全帧、回退和控件复测通过；394-v1 最终浅色截图不再有孤立三角。
+- Evidence: `output/_work/LeetCode-Hot100-学习/20261004-221141-493868-learning-html/work/algorithm-player.js`、`animation-qa.json`、`review/light/394-v1.png`。
+
+## ERR-20261005-085 — 富内容混入 Markdown 转换破坏脚本和公式
+
+- Fingerprint: `content:raw-runtime-and-math-caption-cross-markdown-escaping`
+- Status: active
+- First seen: 2026-10-05
+- Last seen: 2026-10-05
+- Occurrences: 1
+- Scope: CS336 旧交互脚本与新数学图注整合
+- Symptom: 原始脚本经过 Markdown 后出现 Unexpected token '&'；图注中的 LaTeX 撇号被变成 HTML 实体后触发 KaTeX 错误。
+- Root cause: JavaScript 与受保护的数学片段进入了普通文本转义流程，脚本运算符及数学记号的原字节被改变。
+- Wrong assumption/action: 把完整 script 当 Markdown 正文附入；先对整段图注调用 HTML escape，再暂存公式。
+- Correct approach: Markdown 构建完成后再注入原始运行时；图注先保留数学片段，再对普通文字做 HTML 转义。
+- Prevention check: 脚本、数学和普通文本使用明确的转换边界；构建后在离线浏览器同时检查 pageerror、KaTeX 错误和真实交互，不能只检查输出文件存在。
+- Verification: 四主题 21 页无脚本或 KaTeX 错误；CS336 交互与数学图注明暗检查通过，247 个 Python 代码块与优化稿一致。
+- Evidence: `output/_work/Infra系统学习-学习/20261004-215619-235257-learning-html/work/stage_longforms.py`、`final-integrity.json`。
+
+## ERR-20261005-084 — 下载事件超时被当成文件未落盘
+
+- Fingerprint: `browser:download-event-timeout-confused-with-missing-local-file`
+- Status: active
+- First seen: 2026-10-05
+- Last seen: 2026-10-05
+- Occurrences: 1
+- Scope: 网页版 6 Pro 改稿文件回收
+- Symptom: waitForEvent(download) 超时，但 Infra 学习路线已实际保存到下载目录。
+- Root cause: 该次浏览器工具没有返回下载事件，流程却只用事件结果判断文件是否保存，未同时核对页面和本地目标文件。
+- Wrong assumption/action: 将工具事件超时等同于实际下载失败；下载卡片暂时移除按钮时又按原顺序选择其他下载按钮。
+- Correct approach: 重新观察页面，按确切文件名定位；核对预期文件的修改时间、大小和内容，已落盘的文件不重复下载。剩余附件通过已加载的文件预览内置下载保存。
+- Prevention check: 下载后分别核对 UI 结果与本地文件；不要依靠固定按钮序号，也不要因事件未返回盲目重复。预览下载需待文件加载完成后操作，并逐份确认落盘。
+- Verification: 四项任务的 16 份主稿和说明已收回并生成逐文件 SHA-256 清单；最终交付副本与暂存包哈希一致。
+- Evidence: `output/_work/Infra系统学习-学习/20261004-215619-235257-learning-html/work/web-original/received-manifest.json`；其余三项同批次 web-original 清单；`work/manuscript-delivery.json`。
+
+## ERR-20261005-083 — 外部 Markdown 被假定采用统一标题与代码围栏
+
+- Fingerprint: `content:external-markdown-assumed-uniform-syntax`
+- Status: active
+- First seen: 2026-10-05
+- Last seen: 2026-10-05
+- Occurrences: 1
+- Scope: 四份 6 Pro 改稿的图位、代码及拆分文件链接核验
+- Symptom: Hot100 图规格首次只识别 96/203 项，分章标题未识别齐；BlueLM 的波浪线代码围栏未计入，正则链接检查又把 kernel[grid](*kernel_args) 误当链接。
+- Root cause: 将不同章节的标题后缀和围栏写法视为同一格式，并用文本正则代替 Markdown 链接语义。
+- Wrong assumption/action: 图规格标题按整行精确匹配；只识别反引号围栏；直接从原 Markdown 匹配所有方括号加圆括号结构。
+- Correct approach: 以稳定图位 ID 和章节编号匹配，再核对全集；同时识别反引号与波浪线围栏；链接经过项目 Markdown 转换器和 HTMLParser 提取。拆分后的相对链接按实际新目录修正。
+- Prevention check: 外部稿件先抽查各部分的实际语法，再设覆盖断言；检查编号集合、代码内容和渲染后的真实链接，不能以单一排版形式代表结构契约。
+- Verification: 309 个图位/说明核对完成；247 个 Python 代码块通过静态语法检查；Hot100 100 题和 200 份代码保全，分章恢复后全部本地文稿链接有效。
+- Evidence: `output/_work/Infra系统学习-学习/20261004-215619-235257-learning-html/work/check_received.py`、`package_manuscripts.py`；四项任务的 `work/received-check.json` 和 `work/manuscript-package-check.json`。
+
+## ERR-20261004-082 — 总览制作记录链接的格式被假定为统一
+
+- Fingerprint: `delivery:overview-record-links-have-mixed-file-types`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 五篇学习改版的总览同步与封存
+- Symptom: 五项成品发布成功后，总览更新因 Softmax 的制作记录指向 run.json 而断言失败；其他条目使用 delivery.md。
+- Root cause: 同步脚本只接受 delivery.md，未在发布前核对历史条目的实际记录格式。
+- Wrong assumption/action: 将同一总览中的旧记录链接视为统一契约，发布后才执行结构断言。
+- Correct approach: 同时识别现有 run.json 与 delivery.md；从已完成阶段恢复总览和封存，不重复发布、不覆盖已保存的原旧版。
+- Prevention check: 发布前解析全部目标条目并预构建总览；同步失败按已完成阶段恢复，不能从头重复执行有副作用的发布链。
+- Verification: 五项最终HTML与暂存哈希一致，五份旧版保留；总览57个本地链接、成品394个本地链接核对通过。
+- Evidence: `archive/checks/学习内容优化-20261004/finalize.py`、`resume_finalize.py`、`published-check.json`。
+
+## ERR-20261004-081 — 滚动数组别名写入没有映射到实际存储行
+
+- Fingerprint: `trace:rolling-array-alias-write-not-mapped-to-storage-row`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: Hot100 两行 DP 的执行轨迹与初值标记
+- Symptom: current[j] 已写入，但 rows 中对应单元仍被标成尚未逐格写入的初值；隐藏重复别名面板后该问题更明显。
+- Root cause: 写入元数据仅记录变量名 current，没有记录它实际引用 rows 的哪一行；下标求值也未支持真实使用的取模表达式。
+- Wrong assumption/action: 将变量名等同于独立存储，靠按名累计写入标记区分初值与已计算状态。
+- Correct approach: 用 Python 对象身份将别名写入映射到 rows[row_index][j]，保留原写入；支持实际行切换使用的取模下标。
+- Prevention check: 滚动数组同时核对变量名、当前存储身份和行切换；相同初值不能靠值相等猜别名，写入相同数值也需准确标记已经计算。
+- Verification: 1143-v3的15处与72-v3的12处别名写入逐项核对；重新生成200份教学轨迹、199动画，全帧及明暗和原生缩放检查通过。
+- Evidence: `archive/work/LeetCode-Hot100-学习/20261004-145729-004365-learning-html/work/execution_trace.py`、`alias-check.json`、`animation-qa.json`。
+
+## ERR-20261004-080 — 紧凑动画过滤了补充解法的真实状态
+
+- Fingerprint: `animation:compact-filter-reuses-primary-method-focus`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: Hot100 默认图面与控件布局优化
+- Symptom: 删除重复面板后，70-v1的SVG全帧不变化；其递归参数steps不在主迭代解法的previous/current重点列表中。
+- Root cause: 不同解法共用主解法变量选择规则，默认精简时移除了补充解法的实际变化对象。
+- Wrong assumption/action: 认为缩短图面只需统一过滤变量和缩小尺寸，没有先逐解法确认保留下来的运算对象。
+- Correct approach: 递归与记忆化分别显示真实调用栈、参数和返回值，矩阵快速幂显示实际乘法输入与产出；完整变量保留在折叠区，控件紧邻图面；尺寸基准同步到SVG而非只改CSS。
+- Prevention check: 精简动画逐个解法检查运算对象和关键变化；无图面变化时补正确机制，不放松断言。实际测量默认尺寸与控件距离，并查看代表性窗口图。
+- Verification: 最终199段动画逐帧变化、回退、控件及六配色通过；默认宽640px，课程表图高从1338.875降到497.266px，控制台距图10px，完整变量可展开。
+- Evidence: `archive/work/LeetCode-Hot100-学习/20261004-145729-004365-learning-html/work/algorithm-player.js`、`algorithm-mechanics.js`、`viewing-after.json`、`animation-qa.json`。
+
+## ERR-20261004-079 — 网格邻居连线穿过格内数值
+
+- Fingerprint: `animation:cell-center-connection-obscures-grid-values`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: Hot100 200 显式栈动画的当前格与邻居关系
+- Symptom: 入栈中间态的蓝色箭头终点位于格子中心，覆盖目标格内的数值 2；边界检查仍通过。
+- Root cause: 使用单元格中心作为连线两端，只验证画布边界，没有为格内文字保留空间。
+- Wrong assumption/action: 认为中心到中心的箭头可以直接表达邻居关系而不影响数据读取。
+- Correct approach: 水平关系用格上方弧线，垂直关系从格侧面连接；保留当前格、待展开成员和本步写入的标记。
+- Prevention check: 网格关系箭头从文字区外进出；实际查看首次写入、入栈与终态，画布不越界不能代替文字遮挡检查。
+- Verification: 修正后入栈明暗原尺寸截图中两个数值均清晰；图论章五段动画全部帧、回退、控件与六配色复查通过。
+- Evidence: `archive/work/LeetCode-Hot100-学习/20261004-145729-004365-learning-html/work/algorithm-player.js`；同目录 `animation-qa-chapter09.json`、`revision-visuals/200-21-light.png`；本次迁移见 `archive/checks/学习内容优化-20261004/archive-manifest.json`。
+
+## ERR-20261004-078 — 标题文字包含定位按钮导致目录测试找错文本
+
+- Fingerprint: `qa:heading-innertext-includes-permalink-control`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 学习成品改版的章节直达核验
+- Symptom: 测试使用 h2 的 inner_text 查目录，查找字符串带有末尾定位符号 #，等待超时。
+- Root cause: 标题节点包含模板追加的定位控件；可见文字并不等于目录使用的语义标题。
+- Wrong assumption/action: 未区分标题内容与附属控件，直接将整节点文本作为目录匹配键。
+- Correct approach: 按标题稳定 ID 与解码后的目录 href 片段建立对应，再真实触发导航并核对 location.hash。
+- Prevention check: 标题含复制或定位控件时，导航验证优先使用 ID/URL 对应；不以整节点 inner_text 代替标题，也不以 first 掩盖文本歧义。
+- Verification: 五篇改版的定向交互检查通过；四篇连续长文末章导航与解码后的目标 ID 一致，Hot100跨章链接另行核对。
+- Evidence: `archive/checks/学习内容优化-20261004/browser_review.py`；同目录 `browser-review.json`。
+
+## ERR-20261004-080 — 窄栏公式的隐藏 MathML 缺少局部定位边界
+
+- Fingerprint: `math:absolute-mathml-without-local-positioning-container`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 长文目录展开后的窄栏与 KaTeX
+- Symptom: 720px窗口叠加CSS200%时，Softmax页面scrollWidth为768；可见元素矩形没有越过窗口。
+- Root cause: KaTeX的绝对定位隐藏MathML缺少就近定位容器，溢出范围归到更外层的table-block；窄栏行内公式也可能超出自身盒子。
+- Wrong assumption/action: 仅核对可见图元矩形，认为局部滚动与隐藏内容不会扩大文档滚动范围。
+- Correct approach: 给.katex设置position:relative；目录展开的紧凑栏中，过长行内公式允许局部横向滚动。
+- Prevention check: 同时检查文档scrollWidth和公式实际图面；没有可见越界却出现滚动时检查绝对定位隐藏内容的包含块，不裁切整个正文掩盖问题。
+- Verification: 单变量探测只设置.katex局部定位即使scrollWidth从768恢复720；最终23页92组布局检查及23项相关测试通过。
+- Evidence: `assets/content/content.css`；`archive/work/目录留白/20261004-toc-spacing/work/overflow.py`；同run的`work/checks.json`。
+
+## ERR-20261004-079 — 图片缩小后偏左且图注没有跟随图面
+
+- Fingerprint: `typography:left-aligned-media-with-full-column-caption`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 学习/博客图片、SVG、图注与缩放手柄
+- Symptom: 用户指出图片没有居中，并明确图注应居中且与图片对齐。
+- Root cause: resizable-media图片的左右margin被固定为0，SVG缺少自动水平边距；图注仍按正文栏宽排布。
+- Wrong assumption/action: 将正文容器对齐要求延伸为缩小后的图面与图注都靠左。
+- Correct approach: 图面居中；图注居中并跟随实际图宽，max-width限制在容器内；居中图面横向拖动按两倍指针位移计算宽度变化。
+- Prevention check: 同时核对默认尺寸、40%手动尺寸、刷新记忆、重置和缩放后的图面中心及图注左右边界；图注尺寸缓存必须立即受100%容器上限约束。
+- Verification: SVG/PNG尺寸和图注回归通过；23个真实阅读页的明暗首屏和调图截图已查看，图面及图注几何检查通过。
+- Evidence: `assets/content/content.css`；`assets/content/image-size.js`；`tests/test_image_size.py`；`archive/work/目录留白/20261004-toc-spacing/work/review/`。
+
+## ERR-20261004-078 — 展开的浮层目录贴边并遮挡正文
+
+- Fingerprint: `navigation:compact-toc-overlay-without-article-separation`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 学习/博客目录布局与目录宽度
+- Symptom: Infra正文调到80%后，目录left为12px、宽320px，正文从144px开始；目录遮住标题和段落。
+- Root cause: 空间不足时只打开固定浮层，没有为目录与正文预留独立空间。
+- Wrong assumption/action: 用靠窗口左侧的浮层替代两栏布局，认为不改变正文宽度就能改善展开体验。
+- Correct approach: 按用户新约定，展开目录让正文临时让位，两栏保留24–64px留白，关闭后恢复所选宽度；右边缘支持拖动、键盘调节、双击恢复和宽度记忆。
+- Prevention check: 检查目录与正文不相交、距窗口边缘的留白和当前阅读锚点；缩窄正文后同时检查代码操作换行、公式局部滚动、图注边界及目录滚动，不只检查目录本身。
+- Verification: 23页92组窗口/CSS缩放检查及23项回归通过，明暗图面已查看；正文原字节保持，旧版保留。
+- Evidence: `assets/content/content.js`；`assets/content/content.css`；`tests/test_navigation.py::NavigationTests.test_directory_resize_keeps_gap_position_and_saved_width`；`archive/work/目录留白/20261004-toc-spacing/`。
+
+## ERR-20261004-077 — 归档演示副本被用作当前 Prompt 入口
+
+- Fingerprint: `workflow:archived-demonstration-confused-with-active-prompt-source`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 四场景制作路线说明与 Prompt 查看入口
+- Symptom: 用户要过一遍当前制作流程、查看存储的 Prompt，回复却链接 archive 中隔离演示生成的任务副本，使用户怀疑优化只修改了归档。
+- Root cause: 将验证准备脚本的隔离演示路径作为日常流程的展示入口，混淆公共规则源文件、本次任务快照与历史证据。
+- Wrong assumption/action: 为查看现有 Prompt 新建演示工作区，并以其绝对路径解释本地制作路线。
+- Correct approach: 直接链接当前 prompts 源文件；明确日常制作在 output/_work 进行，任务Prompt 只记录本次规则与上下文，archive 保存历史。当前规则是否落实通过与最终优化快照比对确认。
+- Prevention check: 用户查看现有规则或制作路线时先展示项目当前源文件；不为说明规则额外生成归档任务副本，不将历史记录作为当前执行入口。
+- Verification: 当前5份Prompt正文及另外7份规则与最终快照全文一致；3份说明仅有本次入口澄清差异。Prompt索引8个本地链接有效，既有准备与发布拒绝过期HTML的回归通过。
+- Evidence: `prompts/README.md`；`scripts/prepare_content.py:48`；`references/content-workflow.md:3`；`tests/test_content.py::ContentTests.test_prepare_keeps_original_and_publish_rejects_stale_html`。
+
+## ERR-20261004-076 — 提示词维护偏向持续返修样例
+
+- Fingerprint: `prompt-maintenance:sample-polishing-displaces-generation-workflow`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 内容 Prompt 优化与稿件到 HTML 的制作流程
+- Symptom: 用户指出优化对象应是 Prompt，样例问题应反馈到生成约束，不能持续纠结例子；要求完整成稿、多轮优化后再制作 HTML。
+- Root cause: 将验证用样例的局部返修当成持续优化的主要交付，未优先把可复用问题落实到稿前修订流程。
+- Wrong assumption/action: 外部审查建议返修样例后，继续准备样例制作，而没有先核对当前任务仍是维护公共提示词。
+- Correct approach: 停止样例返修，将完整稿、内容修订、独立读者修订、图文分工与退出条件写回原 Prompt 和对应流程；单篇执行遗漏不扩成共享规则。
+- Prevention check: 提示词维护中，样例用于定位和验证规则缺口，不用持续润色样例替代规则优化；内容任务先完成有明确目标的改稿，再做最终图解与 HTML，不机械重复遍数或逐轮要求用户确认。
+- Verification: 六份公共规则完成顺序对齐，四场景实际准备均加载新 Prompt 且来源快照不变，差异检查通过；本轮未继续渲染样例。
+- Evidence: `prompts/common.txt:2`、`:8`；`references/content-workflow.md:15`；`archive/checks/prompt-quality-20261004-round3/local-review.md` 与 `prompt-checks.json`。
+
+## ERR-20261004-075 — 分批卡片源页合并到不受支持的子目录
+
+- Fingerprint: `rednote:batch-html-sources-outside-canonical-pages-directory`
+- Status: active
+- First seen: 2026-10-04
+- Last seen: 2026-10-04
+- Occurrences: 1
+- Scope: 提示词验证样例的分批小红书页汇总
+- Symptom: 将源页放入 `html/page-1/pages/` 后，检查器拒绝，要求 HTML 源页在 `html/pages/` 下。
+- Root cause: 合并脚本假定清单允许任意相对 HTML 路径，未核对 `load_pages` 对源页父目录的限制。
+- Wrong assumption/action: 为保留分批资源相对路径而复制每批完整 HTML 目录，并直接把嵌套路径写入清单。
+- Correct approach: 将源页统一命名到 `html/pages/card_N.html`，复用已核对的共同 KaTeX 资源，按最终 PNG 与源页生成清单并重新检查。
+- Prevention check: 分批汇总前核对源页路径契约；既检查资源相对引用，也检查源页父目录、页序及文件集合，不以路径存在代替契约符合。
+- Verification: 三张最终图片与扁平源页配对后，`check_rednote.py` 通过，全部原图与390px预览已查看。
+- Evidence: `scripts/rednote_artifacts.py:37-39`；`archive/checks/prompt-quality-20261004/make_samples.py`；同目录 `rednote-checked/qa-rednote.json`。
+
+## ERR-20261003-074 — CSS缩放检查早于布局观察器完成
+
+- Fingerprint: `qa:css-zoom-measured-before-resize-observer-layout-sync`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: Infra学习HTML的CSS200%与10px组合验收
+- Symptom: 检查器在更改zoom与字号后立即报告文档横向溢出；独立稳定页面的scrollWidth与视口均为1440。
+- Root cause: 模板通过ResizeObserver同步--reading-zoom、紧凑目录与工具栏高度，直接改style后的首轮测量早于这一步。
+- Wrong assumption/action: 将程序设置样式后的瞬时几何当作稳定阅读布局。
+- Correct approach: 工作目录的render_check.py在原inspect_page前等待两次requestAnimationFrame，仍执行全部原断言；不修改公共脚本和QA字段。
+- Prevention check: 程序化CSS缩放/字号验证先等待模板布局观察器完成，再测稳定边界；另需验证瞬态时应单独记录，不能与最终版式混为一谈。
+- Verification: 同一最终HTML无正文改动，经稳定布局检查明暗全部CSS缩放与字号组合通过；Chrome原生100/150/200%另行通过。
+- Evidence: `assets/content/content.js:218`；`archive/work/Infra系统学习-学习/20261003-232907-406159-learning-html/work/render_check.py`；同run的`delivery/qa.json`。
+
+## ERR-20261003-073 — 交互验证继承了上一项的状态
+
+- Fingerprint: `qa:sequential-interaction-checks-inherit-player-and-fragment-state`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: Infra 学习 HTML 的明暗动画与续读检查
+- Symptom: 第二主题点击已禁用的下一步超时；章节跳转后刷新未出现续读提示。
+- Root cause: 前一轮留下动画终态和 URL 片段，后续检查却假设为初态、普通打开；带片段打开本应优先定位章节。
+- Wrong assumption/action: 将同一页面里的多个交互测试视为互不影响。
+- Correct approach: 每主题先真实点击重置；普通续读用例先清除 URL 片段，另保留章节直达用例。
+- Prevention check: 交互验证显式建立播放器、URL、折叠和存储前提，不用上一个用例留下的状态判断下一项功能。
+- Verification: 明暗全状态前后步、播放暂停、打印恢复和普通续读均通过，字号锚点位移为 0.469px。
+- Evidence: `archive/work/Infra系统学习-学习/20261003-232907-406159-learning-html/work/review_all.py`；`work/review/interactions.json`。
+
+## ERR-20261003-072 — 固定滚轮次数被当成目录已到底
+
+- Fingerprint: `qa:fixed-wheel-count-assumes-toc-height`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 长讲义的 Chrome 原生 200% 缩放检查
+- Symptom: 明暗两轮报目录末项不可见，但继续滚动即可正常到达。
+- Root cause: 检查器固定执行两次 1600 的滚轮操作，未覆盖长目录在高倍缩放下的剩余滚动距离。
+- Wrong assumption/action: 用固定输入次数代替滚动终态。
+- Correct approach: 本次工作目录的检查副本按目录高度增加滚轮次数，保留正文位置和末项可见断言；未修改公共脚本或 QA 通过字段。
+- Prevention check: 长列表滚动验证按 scrollHeight/clientHeight 和实际终态判断；到边界后继续滚动以检查滚动链隔离，不预设两次足够。
+- Verification: 相同 HTML 用任务内检查副本重跑，100/150/200% 明暗均通过，200% 末项目视可见。
+- Evidence: `scripts/check_chrome_zoom.py:131`；`archive/work/Infra系统学习-学习/20261003-232907-406159-learning-html/work/native_check.py`；`work/native-verified/qa-chrome-zoom.json`。
+
+## ERR-20261003-071 — 长距离目录跳转的滚动动画造成眩晕
+
+- Fingerprint: `navigation:global-smooth-scroll-for-long-distance-anchors`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 学习/博客共享模板及已交付的自包含HTML
+- Symptom: 用户指出点击远处目录章节时，跨越大量正文的滚动动画令人头晕。
+- Root cause: 根元素统一设置scroll-behavior:smooth，原生锚点和scrollIntoView均继承该行为；旧导航测试又主动改为auto，未覆盖默认体验。
+- Wrong assumption/action: 将平滑滚动当作所有跳转距离下的通用阅读改善。
+- Correct approach: 默认改为auto，直接定位目标；保留顶部避让、折叠内容展开和当前章节高亮，同步现有成品内嵌样式。
+- Prevention check: 目录跳转采用直接定位；检查默认样式和默认运动偏好下的远距离前后跳转，不先在测试里覆盖滚动行为。自包含成品需同步更新并保留旧版。
+- Verification: 现有两项导航回归通过，默认目录点击立即到达顶部避让位置；暂存真实长文的五帧位置采样没有持续滚动。
+- Evidence: `assets/content/content.css:32`；`tests/test_navigation.py`；`archive/checks/instant-navigation-20261003/update.py`。
+
+## ERR-20261003-064 — 静态步骤淡入被当成算法执行动画
+
+- Fingerprint: `animation:step-reveal-substitutes-for-algorithm-state-transitions`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 2
+- Scope: Hot100 学习 HTML、算法动画生成约束与内容验收
+- Symptom: 用户指出 SVG 动态图只是四个流程框依次展示；Hot100 的 100 个动画均为四步，播放仅改变步骤组透明度。
+- Root cause: 生成器把执行过程压成固定四条状态摘要，套用只控制透明度的累积揭示接口；验收检查控件与步号，没有核对算法对象的真实状态转移。
+- Wrong assumption/action: 将有播放控件、步骤说明和数值的静态流程图视为算法执行动画。
+- Correct approach: 共同 Prompt 与视觉规则进一步排除仅展示变量的面板；Hot100 按原代码执行生成 199 段动画，用柱高/面积、水位、区间、温度跨度、容器进出、连接和 DP 前驱表达实际机制，纯公式保留静态说明。
+- Prevention check: 先实际查看代表性的核心运算，再批量生成；逐步对照代码核对操作、条件、前后状态和输出。流程框淡入、变量轮播、代码高亮或按钮/步号变化不代替机制图示；DP 初值与已更新状态要可区分，实际查看图层遮挡及标签重叠。
+- Verification: 原版只改变 opacity 的问题已确认；新版全部解法独立执行并核对预期结果，199 段动画逐帧状态与回退检查通过。另独立核对面积49、积水7、温度等待天数和DP前驱，实际播放/暂停及明暗图面已检查。
+- Evidence: `assets/content/animation.js:21`；`archive/work/LeetCode-Hot100-学习/20261003-161025-890378-learning-html/work/assemble.py:29`；同目录 `lessons.py:361`；`SKILL.md`；`prompts/common.txt`；`references/visual-system.md`；`references/content-workflow.md`。
+
+## ERR-20261003-070 — SVG 校验误用 HTML 文字接口与外框比例
+
+- Fingerprint: `qa:svg-text-and-content-box-assumptions`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 算法SVG的语义与原生缩放检查
+- Symptom: 对g调用inner_text报非HTMLElement；直接比较外框宽高比与viewBox误报图形变形。
+- Root cause: SVG不提供HTMLElement的innerText语义，且模板在SVG内容区外添加内边距和边框。
+- Wrong assumption/action: 把SVG当普通HTML文字盒，忽略盒模型差异。
+- Correct approach: 收集可见text节点的textContent；宽高比扣除计算样式中的边框和内边距，原生截图另核对DPR与像素尺寸。
+- Prevention check: SVG验证分别核对DOM可见性、内容坐标和外框，不以HTML文本接口或含内边距的比例判断图面。
+- Verification: 6组算法语义与播放检查通过；17章原生三档缩放共51组通过。
+- Evidence: 本轮Hot100的`work/check_semantics.py`、`work/check_native_mechanics.py`。
+
+## ERR-20261003-069 — 稳定图形复用未保留绘制层次与容器长度
+
+- Fingerprint: `animation:stable-svg-allocation-confused-with-live-state`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 算法播放器的面积图层与栈读取定位
+- Symptom: 后创建的水面遮住柱子；stack[-1]按预留最大长度落在空位，栈顶说明又与容器下标重叠。
+- Root cause: 将DOM创建顺序当作固定绘制层次，将布局容量当作运行时容器长度。
+- Wrong assumption/action: 复用节点时只更新属性，没有独立处理图层和当前成员身份。
+- Correct approach: 面积与积水固定放在背景组；负下标按当前容器长度解析；栈只保留元素自身下标和独立栈顶说明。序列与字典包装通过Array.isArray明确区分，避免把数组map方法误当数据。
+- Prevention check: 同一图必须查看初态与后创建对象的中间态；动态容器同时核对布局容量、当前长度、元素身份和标注位置，不能只验边界。
+- Verification: 面积49截图保留全部柱子，每日温度的栈顶读取指向2:61，等待天数2的箭头及栈顶说明可辨。
+- Evidence: 本轮Hot100的`work/algorithm-mechanics.js`、`work/algorithm-player.js`与`work/mechanism-review/`。
+
+## ERR-20261003-068 — 树布局混入后续链表边
+
+- Fingerprint: `animation:tree-layout-unions-future-rewired-edges`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 二叉树展开为链表的固定节点布局
+- Symptom: 114及114-v1节点被排成纵列，引用与left/right标签重叠。
+- Root cause: 布局合并整个执行期间出现的边，原树叶子被后来加入的right链串起来。
+- Wrong assumption/action: 将未来拓扑并入初始布局，却宣称节点位置代表原树。
+- Correct approach: 已有输入树只按初始边布局；构造新树时才补齐新节点关系，执行时单独更新真实连接。
+- Prevention check: 改变拓扑的算法区分初始布局图与当前状态图，检查初态、断边/接边和终态，不把全帧边的并集当树。
+- Verification: 114与114-v1原尺寸明暗图恢复原树分支，节点身份与引用可辨；全帧回退与边界检查通过。
+- Evidence: 本轮Hot100的`work/algorithm-player.js`和`work/mechanism-review/114*.png`。
+
+## ERR-20261003-067 — 读取钩子绕过教学范围限制
+
+- Fingerprint: `trace:read-hook-bypasses-precomputation-capture-limit`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 完全平方数的全局预计算轨迹
+- Symptom: 新增读取观测后，生成器停留在大范围TABLE预计算，耗时显著增加。
+- Root cause: 状态快照限制为教学输入前缀，但新的读取钩子仍序列化范围外的预计算读取。
+- Wrong assumption/action: 只在快照入口限制范围，未同步新增观测入口。
+- Correct approach: 在读取钩子同样应用预计算范围，原算法仍完整执行，仅保存影响n=13的轨迹。
+- Prevention check: 新增观测层时共用采集范围，并核对运行时间、轨迹体量和原输出；不能先完整序列化再丢弃。
+- Verification: 修正后全200种解法约5秒生成，全部预期输出通过，保留9058个教学状态。
+- Evidence: 本轮Hot100的`work/execution_trace.py::Recorder.read`与`trace-integrity.json`。
+
+## ERR-20261003-066 — 原生缩放测试使用不存在的选项值
+
+- Fingerprint: `qa:rounded-native-zoom-value-does-not-match-option`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: Chrome外观设置的原生页面缩放回归
+- Symptom: select_option('0.67')等待30秒后报告找不到选项。
+- Root cause: 测试把近似缩放比例直接用作select的option值，当前Chrome没有精确值0.67。
+- Wrong assumption/action: 未区分显示的百分比与控件提交值。
+- Correct approach: 使用当前控件支持的0.8、0.5和1完成缩小及恢复回归。
+- Prevention check: 选择原生缩放档位前核对option值，用精确值或可见标签；缩放验证仍检查DPR和屏幕图面，不把控件等待超时归因于SVG逻辑。
+- Verification: 使用80%和50%后原生缩放、手动尺寸及刷新回归通过。
+- Evidence: `tests/test_svg_zoom.py`。
+
+## ERR-20261003-065 — 成品合并脚本被当成单个模块替换
+
+- Fingerprint: `migration:replace-merged-runtime-as-single-script-module`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 自包含HTML内嵌image-size.js的局部更新
+- Symptom: 暂存成品运行检查时setContentTheme不是函数；正式入口未被替换。
+- Root cause: 构建器将多个模块拼入同一script标签，按包含storageKey的script替换时删掉了其他模块。
+- Wrong assumption/action: 认为每个源JS文件对应一个独立script标签，未先核对build_content.py的runtime组装。
+- Correct approach: 从正式入口重新复制暂存文件，仅按image-size.js独有开头和完整IIFE边界替换；用逆向替换断言其余原字节保持，再执行真实页面检查。
+- Prevention check: 更新内嵌模块前核对构建器如何合并脚本；替换边界限定模块本体，除次数和逆向字节比对外，验证邻接模块的主题、阅读就绪及交互仍可用。
+- Verification: 精确替换后同一暂存首页的明暗、字体与布局检查通过；13项尺寸、原生缩放、查看器及工具栏相关回归通过。
+- Evidence: `scripts/build_content.py:145`；`archive/checks/svg-zoom-20261003/stage.py`。
+
+## ERR-20261003-064 — SVG百分比铺满抵消浏览器缩小
+
+- Fingerprint: `svg:viewport-relative-width-cancels-native-browser-zoom`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 学习/博客正文SVG尺寸、手动调图和浏览器原生缩放
+- Symptom: Chrome从100%缩到80%时，Hot100图面屏幕宽度仍约851px；正文文字已经缩小。
+- Root cause: SVG的width:100%铺满使用vw比例的正文栏，缩小时CSS视口变宽，SVG的CSS宽度增长，抵消浏览器缩放。
+- Wrong assumption/action: 用SVG/正文栏宽度比和无溢出判断缩放正确，未核对原生缩放后的屏幕图面尺寸。
+- Correct approach: SVG以viewBox宽度作为CSS像素基准，超过正文栏时适配；手动尺寸按该基准和栏宽两者中较小值计算，保存、恢复及手柄位置共用这一尺寸含义。
+- Prevention check: 用真实浏览器缩放控件检查缩小档位，比较SVG矩形宽度乘devicePixelRatio的实际变化；同时验证手动调图、刷新记忆、恢复、宽栏及窄栏，不以CSS zoom或图面不越界代替。
+- Verification: 回归修复前80%档位宽度误差170px，修复后80%与50%按比例缩小；手动40%图面刷新后保持，默认恢复和窄栏适配通过，13项相关回归通过。Hot100的18页、123幅SVG在Chrome原生50/80/100/125/200%下通过尺寸、等比和边界检查，17章明暗对照截图已查看并更新原入口。
+- Evidence: `assets/content/image-size.js`；`tests/test_svg_zoom.py`；`archive/checks/width-jump-20261003/svg-probe.json`；本轮Hot100的work/svg-checks/。
+
+## ERR-20261003-063 — 宽度滑条所在工具栏随正文宽度移动
+
+- Fingerprint: `reading:range-track-reflows-with-controlled-width`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 学习/博客的阅读工具栏与正文宽度滑条
+- Symptom: Hot100首页中鼠标持续向右拖，滑条数值反复从40%跳到80%，页面上下重排；1920px窗口的滑条轨道横向移动384px。
+- Root cause: 工具栏max-width依赖正文--text-width，目录切为浮层时又采用另一宽度；range轨道随input移动，浏览器用新轨道解释下一次指针位置，导致数值反向变化并放大。
+- Wrong assumption/action: 只验证拖动结束的宽度和阅读锚点，没有逐步检查轨道几何及数值是否按指针方向变化。
+- Correct approach: 工具栏采用独立的1184px最大宽度，仍随窗口正常换行；删除目录状态对工具栏宽度的覆盖，正文保持百分比模型。
+- Prevention check: 控制尺寸的滑条不放在随被控尺寸变化的轨道中；逐步真实拖动检查轨道x/y/width/height固定、数值双向单调，并覆盖目录布局切换、缩放及阅读锚点；不能只检查松手终值。
+- Verification: 原始Hot100页面在1440/1920/1200px均复现；仅固定工具栏尺寸后反向跳变为0、轨道位移为0；新增回归修复前五组条件均失败、修复后通过，10项宽度/工具栏/目录/字号位置回归通过。
+- Evidence: `assets/content/content.css`；`tests/test_reader_tools.py::test_width_drag_keeps_track_fixed_and_values_monotonic`；`archive/checks/width-jump-20261003/probe.py`；本轮Hot100工作记录。
+
+## ERR-20261003-062 — 多行正文标题转换未启用逐行匹配
+
+- Fingerprint: `content:multiline-heading-rewrite-without-line-mode`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 分章学习 HTML 的题目标题与首页深链接
+- Symptom: 题目内容、代码和图数量正确，但预期的 problem-ID 锚点没有生成；检查器也没有生成对应 h2 章节截图。
+- Root cause: 对整段多行 Markdown 用带 ^/$ 的正则转换首行标题，却未启用 re.M，替换次数为零而未被检查。
+- Wrong assumption/action: 把正文和代码数量通过当作标题转换成功，未检查每个固定链接的真实目标。
+- Correct approach: 显式按行匹配标题；检查每题恰好有一个稳定 h2 ID，逐一验证本地链接与目标片段，并真实点击首页深链接。
+- Prevention check: 多行文本转换检查替换计数或结果结构；分章交付必须同时验证源题数、目标标题ID、跨文件路径和片段，不以构建退出码或截图无溢出代替。
+- Verification: 100题均有固定题目ID，18个HTML共517个本地链接通过，首页点击可直达编辑距离；重建后18页明暗及六配色检查全部通过。
+- Evidence: `archive/work/LeetCode-Hot100-学习/20261003-161025-890378-learning-html/work/assemble.py`；`verify.py`；`final-links.json`；`checks-summary.json`。
+
 ## ERR-20261003-061 — 宽度改成百分比后测试仍假定表格可容纳
 
 - Fingerprint: `qa:table-fit-fixture-assumes-old-reading-width`
@@ -49,6 +531,134 @@
 - Prevention check: 发布改动覆盖缺少/失败/旧QA、修改/增加/删除图片、任意名称残留PNG及源页/资源/清单变化；拒绝时旧入口与制作记录不变。混排不得为位图伪造HTML源页。
 - Verification: 全量测试通过；真实公式正文与独立PNG的混排QA通过，390px预览已查看。
 - Evidence: scripts/rednote_artifacts.py；tests/test_rednote.py；tests/test_publish.py；archive/checks/rednote-gates-20261003/tests.json及mixed/qa-rednote.json。
+
+## ERR-20261003-058 — 阅读字号下限过高限制用户选择
+
+- Fingerprint: `reading:font-size-floor-confused-with-default-readability`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 学习/博客字号调节
+- Symptom: 字号降至16px即禁用减小按钮，用户需要10px或12px。
+- Root cause: 模板将较保守的阅读字号当作不可突破的最小值。
+- Wrong assumption/action: 用统一字号下限代替读者自己的密度偏好。
+- Correct approach: 默认18px，允许10–24px、步长2px；记忆选择并保持重排后的阅读位置。
+- Prevention check: 默认字号与可选范围分开；保持10px与12px可达，并同步边界检查和文档。
+- Verification: 真实按钮依次达到16/14/12/10px，10px刷新后保留；最小按钮禁用正确，四次调节的阅读文字位移均小于16px，明暗截图已检查。
+- Evidence: `assets/content/content.js`；`archive/checks/font-size/result.json`及同目录明暗截图。
+
+## ERR-20261003-057 — CDP字体授权未指定页面所在浏览器上下文
+
+- Fingerprint: `qa:font-permission-granted-to-wrong-browser-context`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 隔离Chrome的本机字体枚举验证
+- Symptom: CDP授权调用成功，但页面权限仍为prompt；无头实例返回空列表，完整Chrome等待授权。
+- Root cause: Browser.grantPermissions未传browserContextId，授权默认上下文，而测试页面属于独立上下文。
+- Wrong assumption/action: 认为从页面CDP会话发起的Browser级调用会自动使用该页面的上下文。
+- Correct approach: 用Target.getTargetInfo取得页面browserContextId，显式授予该上下文权限，再核对页面Permissions API状态并点击加载。
+- Prevention check: CDP配置权限时明确目标浏览器上下文，验证页面权限确为granted后才解释空列表或超时；不把测试授权错误归因于file协议或浏览器不支持。
+- Verification: 同一离线HTML在授权修正后返回224种字体；中文搜索命中微软雅黑，CDP实际字体为Microsoft YaHei。
+- Evidence: `archive/checks/font-picker/verify_native.py`；`archive/checks/font-picker/native-enumeration.json`。
+
+## ERR-20261003-056 — 固定像素上限限制大屏正文宽度
+
+- Fingerprint: `reading:fixed-pixel-cap-instead-of-page-percentage`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 学习/博客正文宽度与侧边目录
+- Symptom: 1920px页面将滑条拉到最大，正文仍为960px，只占页面50%；用户要求最大覆盖80%，并使用百分比。
+- Root cause: 滑条与偏好保存采用固定像素上限，目录占位也可能继续挤压扩大后的正文。
+- Wrong assumption/action: 将单一桌面宽度下的阅读尺寸当作各屏幕通用上限。
+- Correct approach: 显示和保存页面宽度比例，40%–80%、默认60%；无固定像素上限。2026-10-04用户更新：空间不足时展开目录让正文临时让位，关闭恢复所选比例，见ERR-20261004-078。
+- Prevention check: 在不同视口实测正文/页面宽度比例，覆盖窗口变化、记忆、目录开合与连续拖动锚点；不能只修改滑条标签或数值上限。
+- Verification: 1920、1440、2560、960px页面在80%时分别为1536、1152、2048、768px；8项交互回归及明暗、六配色和原生缩放检查通过。
+- Evidence: `tests/test_reader_tools.py`；`archive/work/BlueLM-Muon-学习/20261003-152222-600918-learning-html/work/audit-after/checks.json`。
+
+## ERR-20261003-055 — 续读提示栏改变高度导致绝对滚动量误报
+
+- Fingerprint: qa:resume-banner-reflow-invalidates-raw-scrolly-comparison
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 连续长文续读位置验收
+- Symptom: 续读后直接比较 scrollY 的断言失败，但同一正文段落已恢复到原视口位置。
+- Root cause: 保存前页面存在续读提示栏，恢复时提示栏隐藏；文档坐标改变，原始 scrollY 不再对应相同阅读位置。
+- Wrong assumption/action: 用绝对滚动量代替当前可见内容的相对位置。
+- Correct approach: 保存同一正文段落的索引与视口位置，续读后比较该段落，保留真实 UI 行为。
+- Prevention check: 有提示栏、折叠或字号重排的恢复测试，比较同一文字或段落锚点，不以 scrollY 相等作为唯一成功条件。
+- Verification: 修正检查后明暗两套续读通过，目录直达、字号锚点与图像交互同时通过。
+- Evidence: archive/work/BlueLM-Muon-学习/20261003-144113-397294-learning-html/work/verify.py；work/interaction/qa-interaction.json。
+
+## ERR-20261003-054 — Windows剪贴板换行被误判为代码损坏
+
+- Fingerprint: `qa:windows-clipboard-crlf-compared-to-dom-lf`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 离线长文代码复制验收
+- Symptom: 复制按钮报告成功，但DOM源码与读取的剪贴板字符串不相等。
+- Root cause: Windows剪贴板将LF规范化为CRLF；399字符源码变成408字符，九处换行之外内容一致。
+- Wrong assumption/action: 使用innerText或不规范化换行的字符串比较来判定复制保真。
+- Correct approach: 从code.textContent取完整源码，等复制完成，再只规范化CRLF后比较；空格、缩进和逻辑行仍严格保持。
+- Prevention check: Windows复制检查分别验证文本内容与平台换行，不能用innerText代替源码或将CRLF当作损坏。
+- Verification: 实际浏览器复制内容在只规范化CRLF后逐字符一致。
+- Evidence: `output/_work/CS336-Assignment2-学习/20261003-142355-548527-learning-html/work/verify.py`及`work/review/interactions.json`。
+
+## ERR-20261003-053 — 合并图解面板时删除了同级交互控件
+
+- Fingerprint: `migration:drop-panel-tree-removes-sibling-controls`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 旧学习HTML的多面SVG迁移
+- Symptom: 图解仍显示，但三个key块切换按钮不再存在。
+- Root cause: 将SVG移到新外层后删除整个figure-panels子树，同时删掉了其内部的非SVG控件。
+- Wrong assumption/action: 假定图形容器只含SVG，没有检查其按钮和说明节点。
+- Correct approach: 只解包旧容器，保留非SVG子节点；再用真实按钮点击验证图面状态。
+- Prevention check: 迁移多面图前清点SVG、控件、说明及事件依赖；迁移后核对数量与实际交互，不只核对figure数量。
+- Verification: 三个按钮恢复；点击key块3后图面标签和选中状态更新。
+- Evidence: 同批次`work/migrate.py`、`work/verify.py`与`work/review/interactions.json`。
+
+## ERR-20261003-052 — 旧图片懒加载阻塞阅读初始化
+
+- Fingerprint: `migration:lazy-image-decode-blocks-reading-ready`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 旧HTML迁入当前离线学习模板
+- Symptom: 页面可见且无脚本错误，但contentReadingReady一直为false，配色与原生缩放检查超时。
+- Root cause: 旧正文三个屏外图片保留loading=lazy；当前reading.js初始化会等待全部图片decode，屏外图片未开始加载。
+- Wrong assumption/action: 直接迁移旧媒体属性，未核对新模板的就绪条件。
+- Correct approach: 本篇自包含HTML将这些原图设为eager；保持公共模板不变。
+- Prevention check: HTML迁移后先核对全部图片加载完成、contentReadingReady和续读初始化；旧懒加载策略不能原样套入等待全图解码的模板。
+- Verification: 同页运行对照中，三个图片由complete=false变为true，contentReadingReady随即变为true；重建后明暗和六套配色检查通过。
+- Evidence: 同批次`work/migrate.py`；`delivery/qa.json`及`delivery/checks/palettes/`。
+
+## ERR-20261003-051 — PowerShell路径拼接混入数组运算
+
+- Fingerprint: `maintenance:powershell-concatenation-in-path-pair`
+- Status: active
+- First seen: 2026-10-03
+- Last seen: 2026-10-03
+- Occurrences: 1
+- Scope: 本地归档迁移清单
+- Symptom: 预检将源路径与目标路径拼成一个字符串，Resolve-Path报告路径不存在；尚未移动文件。
+- Root cause: 在数组中直接混用字符串加法与逗号，未限定每个路径表达式的边界。
+- Wrong assumption/action: 认为数组中的两个字符串拼接表达式会自然形成两个元素。
+- Correct approach: 每个路径拼接表达式单独加括号；全部解析和校验通过后才开始移动。
+- Prevention check: PowerShell构造源/目标路径对时明确表达式边界，迁移前逐对核对解析路径与工作区范围，不边解析边移动。
+- Verification: 修正后38项迁移完成，11289个文件的迁移前后SHA-256一致。
+- Evidence: `archive/maintenance/consolidate.ps1`；`archive/manifest.json`。
 
 ## ERR-20261003-050 — 固定配图数量替代了材料判断
 
@@ -173,7 +783,7 @@
 - Symptom: 用户指出图片比文字宽，图文衔接显得不协调。
 - Root cause: 借鉴Distill时把媒体自动加宽184px应用到全部图表，没有保留用户偏好的统一左右边界。
 - Wrong assumption/action: 将宽图视为默认视觉提升，而没有按本项目的阅读习惯收敛。
-- Correct approach: 所有正文内容默认同栏；单张图片由读者在栏内等比例拖动，图注仍按正文宽度排布。
+- Correct approach: 所有正文内容容器默认同栏，图片在栏内等比例拖动，不自动超出正文。2026-10-04用户更新：图面与图注居中，图注跟随图面宽度，见ERR-20261004-079。
 - Prevention check: 默认核对文字、图面、图注、表格和代码的左右边界；不要再次自动引入更宽媒体栏，除非用户明确要求。
 - Verification: 默认图文宽度差小于1px；真实两篇明暗图解拖动/放大/恢复检查通过，图注内容与宽度保持。
 - Evidence: 用户本轮图文截图；`tests/test_toolbar.py::test_media_matches_text_measure_and_zoom_bounds`；本轮`work/resizing.json`。
@@ -242,21 +852,21 @@
 - Verification: diff确认原规则恢复，重新生成四份HTML并检查工具栏位置、字形与链接样式。
 - Evidence: `assets/content/content.css`；本轮六套配色首屏截图。
 
-## ERR-20261003-038 — 多弹窗页面的测试使用不限定用途的选择器
+## ERR-20261003-038 — 多组件页面的测试使用不限定用途的选择器
 
 - Fingerprint: `qa:generic-dialog-locator-after-new-dialog-added`
 - Status: active
 - First seen: 2026-10-03
 - Last seen: 2026-10-03
-- Occurrences: 1
-- Scope: 图像放大浏览器测试
+- Occurrences: 3
+- Scope: 图像放大、字体候选与 SVG 控件浏览器测试
 - Symptom: 加入阅读设置后，`locator('dialog')`触发strict mode violation。
 - Root cause: 测试把页面只有一个dialog作为隐含前提，未按被测组件定位。
 - Wrong assumption/action: 新增弹窗后仍使用通用标签检查图像弹窗。
 - Correct approach: 将图像相关定位明确限定为`.image-viewer`，保留原有位置、引用和图注断言。
-- Prevention check: 新增同类容器时检索旧测试的通用选择器，按用途收窄，不用first掩盖歧义。
-- Verification: 20项主题、导航、字号、阅读和图像相关回归通过。
-- Evidence: `tests/test_content.py`；`tests/test_image_viewer.py`。
+- Prevention check: 正文SVG使用figure的直接子SVG，避免匹配缩放手柄内的小图标；新增同类容器或角色时，按组件限定选择器，不用first掩盖歧义；字体候选统计限定在#font-options，避免混入配色option。
+- Verification: 20项主题、导航、字号、阅读和图像相关回归通过；本轮候选数量从混入配色的612项修正为606项，字体搜索测试通过。 Hot100图像检查曾把figure内三个SVG当作唯一图像；改用直接子选择器后17章真实放大、关闭与复制通过。
+- Evidence: `tests/test_content.py`；`tests/test_image_viewer.py`；`tests/test_font_picker.py`。 本轮：`archive/work/LeetCode-Hot100-学习/20261003-161025-890378-learning-html/work/verify.py`、`interaction-results.json`。
 
 ## ERR-20261003-037 — 单篇HTML重复实现浏览器查找
 
@@ -322,21 +932,21 @@
 - Verification: 节点从rgb(0,0,0)恢复为rgb(234,231,222)，箭头由none恢复为钴蓝；字体、38px正文和底色与原版相同，原图及390px检查通过。
 - Evidence: `assets/themes/academic.css`；`tests/test_palette_bridge.py`；本轮`work/before/colors.json`及`work/colors-after.json`。
 
-## ERR-20261003-033 — 像素核验误用未安装的图像依赖
+## ERR-20261003-033 — 临时核验误用未确认安装的依赖
 
 - Fingerprint: `qa:assumed-pillow-installed-for-browser-pixel-check`
 - Status: active
 - First seen: 2026-10-03
 - Last seen: 2026-10-03
-- Occurrences: 1
-- Scope: 项目虚拟环境中的SVG配色像素核验
-- Symptom: 导入`PIL`时出现`ModuleNotFoundError`，检查在生成对照材料前停止。
-- Root cause: 假定项目虚拟环境已安装Pillow，未核对实际依赖；本次简单像素检查并不需要它。
-- Wrong assumption/action: 为读取浏览器截图中的一个像素，引入未确认可用的图像库。
-- Correct approach: 使用浏览器Canvas读取已加载图像的像素，仍用Playwright保存实际截图；未安装新依赖。
-- Prevention check: 使用库前核对实际运行环境；简单浏览器图像像素核验优先利用已有浏览器能力，不因一次检查增加不必要依赖。
-- Verification: 改用Canvas后完成明暗两套内联/独立SVG对照，得到像素值和实际填充色，并查看四张截图。
-- Evidence: `output/_work/Hyperball-汇报/20261003-063225-786989-report-html/work/iterations/20261003-svg-embedding/checks.json`及同目录对照HTML和PNG。
+- Occurrences: 2
+- Scope: 项目虚拟环境中的SVG像素核验与HTML链接核验
+- Symptom: 导入`PIL`或`lxml`出现`ModuleNotFoundError`，临时检查脚本在实际操作前停止。
+- Root cause: 假定项目虚拟环境具有其他运行时的库，未核对依赖；简单核验本不需要新增库。
+- Wrong assumption/action: 为读取像素或解析HTML链接引入未确认可用的第三方库。
+- Correct approach: 像素检查使用浏览器Canvas，链接解析使用标准库HTMLParser；未安装新依赖。
+- Prevention check: 使用库前核对实际运行环境；简单核验优先用已有浏览器能力或标准库，不因一次检查增加依赖。
+- Verification: Canvas完成明暗像素对照；本轮HTMLParser成功检查51个总览链接并核对发布和归档哈希。
+- Evidence: `archive/work/Hyperball-汇报/20261003-063225-786989-report-html/work/iterations/20261003-svg-embedding/checks.json`；`archive/maintenance/finish-width-review.py`。
 
 ## ERR-20261003-032 — 中文片段链接的编码差异被误判为导航失败
 
@@ -568,14 +1178,14 @@
 - Status: active
 - First seen: 2026-10-03
 - Last seen: 2026-10-03
-- Occurrences: 1
+- Occurrences: 3
 - Scope: 重命名后的本地仓库，在普通沙箱与提权命令间切换时的Git操作
 - Symptom: 普通命令可读Git状态，提权提交却报告dubious ownership。
 - Root cause: 仓库归属离线沙箱账户，而提权命令使用主账户；新路径没有被该账户信任。
 - Wrong assumption/action: 认为只读状态成功，就能保证另一执行账户下的写入命令通过归属检查。
 - Correct approach: 核对当前项目的绝对路径与归属后，仅对该次Git命令指定safe.directory，不写入全局通配信任。
 - Prevention check: 重命名工作区或切换执行账户后，先核对目标仓库；已授权的本地Git操作可用 `git -c safe.directory=<已核对的项目根目录>`，失败后立即停止后续命令。
-- Verification: 命令级精确路径设置后提交508ee79成功，工作区干净，全局Git安全配置未修改。
+- Verification: 命令级精确路径设置后提交508ee79成功，工作区干净，全局Git安全配置未修改。本轮普通执行器无法启动，切换账户后只读status同样触发归属检查；加入命令级safe.directory后读取成功并保留全部既有改动。
 - Evidence: 本轮本地Git提交命令与提交508ee79。
 
 ## ERR-20261003-016 — 自动阅读标记与作者ID冲突
@@ -664,15 +1274,15 @@
 - Status: active
 - First seen: 2026-10-02
 - Last seen: 2026-10-03
-- Occurrences: 4
-- Scope: 新长文模板的主题/目录切换与阅读位置检查
+- Occurrences: 6
+- Scope: 新长文模板的主题/目录/字体切换与阅读位置检查
 - Symptom: 主题切换测试将 `scrollY` 从450变化到0或89误归为主题行为；改为视口点击后，未结束的锚点平滑滚动仍使位置变化。
 - Root cause: 定位器点击会主动将控件滚入视口，且先前导航的平滑滚动尚未稳定；测试没有隔离这些位置变化。
 - Wrong assumption/action: 把定位器点击和正在执行的平滑滚动等同于用户在稳定视口中的点击。
 - Correct approach: 阅读工具栏固定在视口顶部；位置断言前先稳定滚动，在控件的真实视口坐标点击主题按钮。
 - Prevention check: 验证阅读位置不变时，导航前关闭测试中的平滑滚动或等待其完成；避免定位器额外滚动，以真实视口点击复核，并确认主题确实改变。
-- Verification: 主题视口点击保持450；目录对照中的定位器点击曾产生约512px额外位移。工具栏折叠测试在720px窗口中，打开目录的定位器点击又引入262px位移；改为真实视口点击后开合位置误差小于2px，25项相关回归通过。
-- Evidence: `tests/test_content.py`、`tests/test_navigation.py`、`tests/test_toolbar.py`；原`toc-position`迭代与本轮`output/_work/版式优化/20261003-distill/work/diagnose.py`。
+- Verification: 主题视口点击保持450；目录对照中的定位器点击曾产生约512px额外位移。工具栏折叠测试在720px窗口中，打开目录的定位器点击又引入262px位移；改为真实视口点击后开合位置误差小于2px，25项相关回归通过。字体菜单测试等待两帧滚动稳定后使用视口点击，避免延迟scroll事件关闭刚打开的菜单，实际字体及阅读锚点检查通过。
+- Evidence: 本轮学习文档的 work/verify.py 再现定位器点击引入的位置变化，改用视口坐标并稳定导航后同一阅读锚点位移 0.203px；`tests/test_content.py`、`tests/test_navigation.py`、`tests/test_toolbar.py`；原`toc-position`迭代与本轮`output/_work/版式优化/20261003-distill/work/diagnose.py`。
 
 ## ERR-20260914-011 — 封面未直接表达核心论点
 

@@ -153,7 +153,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
                 # CSS布局缩放与字号分别检查；不把截图DPR当作浏览器布局缩放。
                 for zoom in (1, 1.5, 2):
                     page.evaluate('zoom => document.documentElement.style.zoom = zoom', zoom)
-                    for size in (16, 24):
+                    for size in (10, 12, 24):
                         page.evaluate('size => document.documentElement.style.setProperty("--reading-size", size + "px")', size)
                         issues.extend(f'布局缩放{zoom}、字号{size}: {issue}' for issue in inspect_page(page, scene))
                     page.evaluate('scrollTo(0, 0)')

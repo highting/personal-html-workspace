@@ -77,7 +77,7 @@
 - **容器**：只给有意义的分组使用与页面同色的底和细框，浅色填充按需开启；无渐变、纹理、发光或厚重阴影
 - **适用场景**：机器学习、深度学习、系统设计、数学推导、技术博客小红书卡片
 
-示例：[向量几何](demos/academic/card_1.png)、[对应对比](demos/academic-comparison/card_1.png)。
+示例源稿：[向量几何](demos/academic.md)、[对应对比](demos/academic-comparison.md)。按 README 的渲染命令生成；历史图片仅在本地 `archive/demo-renders/` 保留。
 
 ## 风格选择建议
 

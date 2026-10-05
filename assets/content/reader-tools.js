@@ -5,14 +5,14 @@
   const width = document.getElementById('reading-width');
   const widthValue = document.getElementById('reading-width-value');
   try {
-    const saved = localStorage.getItem('content-reading-width');
-    if (saved === 'wide') width.value = '792';
-    else if (saved && Number.isFinite(Number(saved))) width.value = saved;
+    const saved = localStorage.getItem('content-reading-width-percent');
+    if (saved && Number.isFinite(Number(saved))) width.value = saved;
   } catch (_) {}
   const applyWidth = () => {
-    root.style.setProperty('--text-width', width.value + 'px');
-    widthValue.textContent = width.value + ' px';
-    width.setAttribute('aria-valuetext', width.value + ' 像素');
+    root.style.setProperty('--reading-width-ratio', Number(width.value) / 100);
+    widthValue.textContent = width.value + '%';
+    width.setAttribute('aria-valuetext', '页面宽度的 ' + width.value + '%');
+    window.updateContentTocLayout();
   };
   applyWidth();
   let dragAnchor;
@@ -21,11 +21,11 @@
   addEventListener('pointercancel', () => { dragAnchor = undefined; });
   const updateWidth = () => {
     window.preserveContentPosition(applyWidth, dragAnchor);
-    try { localStorage.setItem('content-reading-width', width.value); } catch (_) {}
+    try { localStorage.setItem('content-reading-width-percent', width.value); } catch (_) {}
   };
   width.addEventListener('input', updateWidth);
   document.getElementById('reset-reading-width').addEventListener('click', () => {
-    width.value = '704';
+    width.value = '60';
     updateWidth();
   });
   document.getElementById('print-article').addEventListener('click', () => window.print());

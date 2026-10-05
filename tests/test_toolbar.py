@@ -28,13 +28,15 @@ class ToolbarTests(unittest.TestCase):
                       const text = document.querySelectorAll('.prose > p')[4].firstChild;
                       window.point = document.createRange();
                       point.setStart(text, 0); point.setEnd(text, 1);
-                      scrollTo(0, point.getBoundingClientRect().top + scrollY - 112);
+                      scrollTo(0, point.getBoundingClientRect().top + scrollY - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) - 12);
                     }''')
                     before = page.evaluate('point.getBoundingClientRect().top')
                     if width == 720:
                         box = page.locator('#toc-toggle').bounding_box()
                         page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
                         self.assertTrue(page.locator('#toc').is_visible())
+                        page.evaluate('scrollBy(0, point.getBoundingClientRect().top - parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) - 12)')
+                        before = page.evaluate('point.getBoundingClientRect().top')
                     for selector, focus in (('#toolbar-collapse', 'toolbar-reveal'), ('#toolbar-reveal', 'toolbar-collapse')):
                         box = page.locator(selector).bounding_box()
                         page.mouse.click(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
