@@ -15,9 +15,9 @@
 
 | 场景 | 内容组织 | 默认成品 |
 |---|---|---|
-| `learning` 个人学习 | 概念依赖、贯穿例子、机制与必要推导 | 学习 HTML、章节目录、明暗切换 |
-| `blog` 技术博客 | 论点、证据、连续叙述与边界 | 博客 HTML、阅读目录、明暗切换 |
-| `report` 技术汇报 | 每页一个主张，证据与取舍 | 16:9 HTML、键盘翻页、讲者备注、逐页 PNG |
+| `learning` 个人学习 | 覆盖主题内相关知识，详细、直白地解释原因与过程 | 学习 HTML、章节目录、明暗切换 |
+| `blog` 技术博客 | 聚焦具体知识点，用简明解释与图解讲清原理，不主动扩展 | 博客 HTML、阅读目录、明暗切换 |
+| `report` 技术汇报 | 快速突出成果、依据与意义，图表或明确结论作为视觉重点 | 16:9 HTML、键盘翻页、默认收起的讲者备注、逐页 PNG |
 | `rednote` 小红书 | 原 academic 连续图文流程 | 3:4 PNG、HTML 源页、标题与摘要配文 |
 
 ## 学习、博客与汇报
@@ -37,7 +37,7 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 用 `--scene blog` 构建博客。汇报使用 `--scene report`，在代码围栏外以独立 `---` 分页，用 `<!-- notes: 讲者备注 -->` 添加备注；导出 PNG 可选择 `--theme light` 或 `--theme dark`。完整命令与 HTML 片段协议见[四场景流程](references/content-workflow.md)，策划见[场景规则](references/content-scenes.md)。
 
-学习与博客共用阅读模板，内容分别按概念依赖和论点—证据组织，详略服从读者目的，支持16–24px字号调节、图片/SVG点击放大、目录和阅读进度；汇报使用16:9逐页演示，支持翻页、备注和固定页导出。两类HTML面向桌面，检查缩放后的布局，不另做手机适配验收。明暗主题、SVG与配图遵循[统一视觉规则](references/visual-system.md)，普通节点使用协调的中性底色。中文字体、CSS、JavaScript、KaTeX及本地图片内嵌，可离线打开。模板源码见 `assets/content/`，示例稿见 `demos/content/`。
+学习与博客共用阅读模板，内容范围和解释深度分别按上述目标取舍，支持10–24px字号调节、图片/SVG点击放大、目录和阅读进度；汇报使用16:9逐页演示，支持翻页、备注和固定页导出。汇报的正文、图注、页脚、小字和备注都只保留实际要讲的内容，制作提醒与文档不足的解释留在工作记录；真实研究限制与必要条件仍保留。两类HTML面向桌面，检查缩放后的布局，不另做手机适配验收。明暗主题、SVG与配图遵循[统一视觉规则](references/visual-system.md)，普通节点使用协调的中性底色。中文字体、CSS、JavaScript、KaTeX及本地图片内嵌，可离线打开。模板源码见 `assets/content/`，示例稿见 `demos/content/`。
 
 布局参考 [Nextra](https://github.com/shuding/nextra)（学习导航）、[AstroPaper](https://github.com/satnaing/astro-paper)（博客阅读）和 [Slidev](https://github.com/slidevjs/slidev)（技术演示）。当前查询约 13.9k、5.1k、48.9k 星；支持明暗主题的参考与设计记录见[模板设计](references/template-design.md)。本仓库模板独立实现，无需安装这些项目。
 

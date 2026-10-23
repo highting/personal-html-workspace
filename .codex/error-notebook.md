@@ -4,6 +4,70 @@
 
 历史证据在2026-10-03集中归档：旧 `output/_work/` 对应 `archive/work/`，旧 `output/blogs/` 对应 `archive/legacy-runs/`；其他路径按本地 `archive/manifest.json` 的目录前缀映射查找。原检查记录与来源快照保持不变，归档不随 Git 分发。
 
+## ERR-20261023-091 — 学习与博客共用收窄原则，缺少明确的深度差异
+
+- Fingerprint: `content:shared-scope-trimming-blurs-learning-and-blog-depth`
+- Status: active
+- First seen: 2026-10-23
+- Last seen: 2026-10-23
+- Occurrences: 1
+- Scope: 共同与学习、博客Prompt，场景策划和内容验收
+- Symptom: 用户明确学习需要较广覆盖和详细直白解释，博客只需针对具体知识点简明讲清原理；原学习规则多次要求收窄与停止扩写，博客未明确限制扩展。
+- Root cause: 共同规则按单一目标精简，学习与博客只区分组织顺序，没有把覆盖范围、解释深度和完成标准充分分开。
+- Wrong assumption/action: 认为概念依赖或论点—证据的结构差异，足以约束两种场景的内容质量。
+- Correct approach: 学习纳入主题内重要相关知识并补足理解断点；博客只补当前原理所需前提，讲通后停止扩展；排版前按各自完成标准审读成稿。
+- Prevention check: 先以用户主题及原稿列出学习应掌握的知识，不为篇幅自行缩成少数论点；博客逐段核对是否直接回答当前问题。保留必要理由与条件，不用名词覆盖、短篇幅或页面QA代替理解判断。
+- Verification: 四场景真实准备器加载当前共同与场景Prompt，原稿及快照字节保持；独立边界复核确认系统学习保留直接相关知识、窄主题博客不顺带展开综述。仅核验规则与加载，未重制既有成品。
+- Evidence: `prompts/common.txt`、`prompts/scenes/learning.txt`、`prompts/scenes/blog.txt`；`archive/checks/prompt-scenes-20261023/verification.json`。
+
+## ERR-20261022-090 — 放大SVG丢失figure祖先限定的样式
+
+- Fingerprint: `image-viewer:svg-styles-depend-on-uncloned-figure`
+- Status: active
+- First seen: 2026-10-22
+- Last seen: 2026-10-22
+- Occurrences: 1
+- Scope: 汇报第3/4页自绘SVG及图片放大
+- Symptom: 原尺寸流程图正常，放大后连线消失，判断菱形与停止路径变成黑色填充。
+- Root cause: 样式作用域类只放在figure上，放大器只克隆SVG，后代选择器失去匹配。
+- Wrong assumption/action: 以原尺寸截图和放大边界通过代替图形样式保真检查。
+- Correct approach: 将图形作用域类放在SVG本体，保持克隆后仍匹配；同时修正同类图。
+- Prevention check: 自绘SVG的绘制样式不得只依赖外部容器；放大后比较路径fill/stroke与文字字号、锚点，并实际查看图面。
+- Verification: 两个SVG在明暗下放大前后的路径与文字样式一致，实际截图中箭头、判断分支和标签完整，原生缩放重查通过。
+- Evidence: `output/_work/野生动物视频核验-汇报/20261022-214358-061712-report-html/work/make_report.py`、`verify_report.py`、`review/viewer-before-fix.png`及修复后viewer截图。
+
+## ERR-20261022-089 — 字体核验未启用CDP的CSS域
+
+- Fingerprint: `qa:font-query-before-cdp-css-enable`
+- Status: active
+- First seen: 2026-10-22
+- Last seen: 2026-10-22
+- Occurrences: 1
+- Scope: 汇报实际字体核验脚本
+- Symptom: `CSS.getPlatformFontsForNode`返回`CSS agent was not enabled`。
+- Root cause: 新建CDP会话后直接查询字体，未启用DOM与CSS域。
+- Wrong assumption/action: 认为获取DOM节点已同时启用CSS检查。
+- Correct approach: 在同一会话依次启用DOM、CSS后查询节点字体。
+- Prevention check: CDP字体核验先调用`DOM.enable`与`CSS.enable`；资源验收结果应在启用检查工具前冻结。
+- Verification: 同页重新核验成功，标题实际使用内嵌Noto Sans SC，全部备注、导航和导出检查通过。
+- Evidence: `output/_work/野生动物视频核验-汇报/20261022-211759-448066-report-html/work/verify_report.py`、`interaction-check.json`。
+
+## ERR-20261022-088 — 汇报按逐页长解释组织，弱化图表与结论
+
+- Fingerprint: `report:prose-completeness-overrides-audience-and-evidence`
+- Status: active
+- First seen: 2026-10-22
+- Last seen: 2026-10-23
+- Occurrences: 3
+- Scope: 汇报Prompt、场景与视觉规则、导师汇报改版
+- Symptom: 用户指出字多、重点弱、无信息副标题、内容偏左和矩形卡片过重，并纠正“一页一个讲解任务”；后续指出解释文档不足的备注型小字不应出现，全部内容应属于实际汇报，图表或一段结论均可突出成果。
+- Root cause: 共同规则强调完整解释，汇报未充分明确观众页、跨页论证与讲者展开的分工，也未将制作过程说明彻底移出成品。
+- Wrong assumption/action: 以逐页解释段落和统一方框代替证据选择、视觉主次与讲解节奏。
+- Correct approach: 一个任务可跨页，尽早突出成果、依据与意义；主视觉按内容选择图表、机制图或明确结论。制作提醒与文档不足说明只留工作记录，备注只补实际讲解；真实进展、限制与必要条件简明保留。
+- Prevention check: 先审整组论证和成果重点，再逐页逐句检查标题、正文、图中标签、图注、表下注、页脚、小字及备注是否属于实际汇报。资料获取操作、会前待办和制作说明不转存备注；必要研究边界不能误删。数据不造、任务不硬塞一页，不把每个短句套进方框。
+- Verification: 四场景准备器加载当前Prompt并保留原稿；2026-10-22十页改版通过明暗、六配色、原生缩放与实际交互，逐页图面已查看。当时曾将部分背景提醒保留备注；2026-10-23按新要求收紧规则，独立复核制作残留与真实进展的边界及结论主视觉，四场景加载复查通过，本轮未重制旧成品。
+- Evidence: `prompts/scenes/report.txt`、`references/visual-system.md`、2026-10-22汇报`delivery.md`与`work/prompt-check.json`；`archive/checks/prompt-scenes-20261023/verification.json`。
+
 ## ERR-20261005-087 — 文本规范化后的哈希与原始文件哈希混用
 
 - Fingerprint: `publish:normalized-text-hash-compared-with-raw-bytes`
@@ -1305,16 +1369,16 @@
 - Fingerprint: `qa:devtools-source-request-mixed-with-page-resources`
 - Status: active
 - First seen: 2026-09-14
-- Last seen: 2026-09-14
-- Occurrences: 1
+- Last seen: 2026-10-22
+- Occurrences: 2
 - Scope: Playwright 离线 HTML 验收与 CDP 实际字体核验
 - Symptom: 全部页面及公式已通过检查，启用 CDP 检查字体后，最后一页出现 `requestfailed`，类型为 `other`，原因为 `origin`，导致资源验收误失败。
 - Root cause: 同一事件列表混入了页面资源加载与 DevTools 后续读取本地源文件的请求。
 - Wrong assumption/action: 在 CDP 检查结束后，用整个会话的请求失败列表判断页面是否缺少资源。
 - Correct approach: 所有页面完成离线加载、字体就绪及页面检查后先保存并断言资源结果，再进行 CDP 核验；其后检查工具发起的请求单独记录。
-- Prevention check: 离线资源验收与 CDP 检查分阶段记录；先确认导航成功、公式和图片已加载、资源失败列表为空，再启用检查工具。不能将后续的 DevTools 源文件请求直接归为页面加载失败，也不能忽略验收阶段的真实失败。
-- Verification: 同一组 12 页离线 HTML 的页面资源失败为零；实际字体为 Microsoft YaHei 与 KaTeX_Math；后续 CDP 的 `other/origin` 请求单独记录，交付验收通过。
-- Evidence: `output/blogs/论文阅读/Hyperball博客-图文版/20260914-224417-977640-html/work/finalize.py`；同版本 `work/qa.json`。
+- Prevention check: 离线资源验收与 CDP 检查分阶段记录；先确认导航成功、公式和图片已加载、资源失败列表为空，再启用检查工具。保存阶段结果时复制事件列表，不能保留仍会被回调追加的列表引用。不能将后续的 DevTools 源文件请求直接归为页面加载失败，也不能忽略验收阶段的真实失败。
+- Verification: 同一组 12 页离线 HTML 的页面资源失败为零；实际字体为 Microsoft YaHei 与 KaTeX_Math；后续 CDP 的 `other/origin` 请求单独记录，交付验收通过。2026-10-22十页汇报改用列表副本冻结阶段结果，离线失败为零，后续检查工具请求单列，内嵌字体核验通过。
+- Evidence: `output/blogs/论文阅读/Hyperball博客-图文版/20260914-224417-977640-html/work/finalize.py`；同版本 `work/qa.json`；本次野生动物视频核验汇报的`work/verify_report.py`与`interaction-check.json`。
 
 ## ERR-20260914-009 — 生图构造数值上图且等长约束失真
 
