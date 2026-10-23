@@ -9,11 +9,31 @@ import re
 import struct
 import sys
 import tempfile
+import time
 
 from playwright.sync_api import sync_playwright
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.render_content import inspect_page
+
+
+def scroll_menu_to_end(page, menu):
+    """用真实滚轮到达目录底部，再检查一次边界滚动；不假定固定次数足够。"""
+    box = menu.bounding_box()
+    page.mouse.move(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
+    deadline = time.monotonic() + 10
+    while menu.evaluate('node => node.scrollHeight - node.clientHeight - node.scrollTop') > 2:
+        if time.monotonic() >= deadline:
+            return False
+        before = menu.evaluate('node => node.scrollTop')
+        page.mouse.wheel(0, 1600)
+        page.wait_for_timeout(100)
+        if menu.evaluate('node => node.scrollTop') <= before + .5:
+            return False
+    # 已到底后继续滚动，用于调用方验证滚动链没有传到正文。
+    page.mouse.wheel(0, 1600)
+    page.wait_for_timeout(100)
+    return True
 
 
 def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
@@ -125,16 +145,13 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                                 if compact and expanded:
                                     menu = page.locator('#toc')
                                     original_scroll = menu.evaluate('node => node.scrollTop')
-                                    box = menu.bounding_box()
                                     position = page.evaluate('scrollY')
-                                    page.mouse.move(box['x'] + box['width'] / 2, box['y'] + box['height'] / 2)
-                                    for _ in range(2):
-                                        page.mouse.wheel(0, 1600)
-                                        page.wait_for_timeout(100)
+                                    reached_end = scroll_menu_to_end(page, menu)
                                     if abs(page.evaluate('scrollY') - position) > 2:
                                         issues.append('滚动目录带动正文')
-                                    last_visible = menu.evaluate('node => {const r=node.getBoundingClientRect();const last=node.querySelector("nav a:last-child").getBoundingClientRect();return last.top>=r.top&&last.bottom<=r.bottom}')
-                                    if not last_visible:
+                                    # 原生缩放会产生亚像素边界；与舞台检查使用相同的 2px 容差。
+                                    last_visible = menu.evaluate('node => {const r=node.getBoundingClientRect();const last=node.querySelector("nav a:last-child").getBoundingClientRect();return last.top>=r.top-2&&last.bottom<=r.bottom+2}')
+                                    if not reached_end or not last_visible:
                                         issues.append('目录末项无法滚动到可视区域')
                                     detail = f'chrome-zoom-{round(zoom * 100)}-{theme}-toc-end.png'
                                     capture(output / detail)

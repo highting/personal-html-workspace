@@ -131,8 +131,8 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
                 page = re.sub(r'<!--\s*notes:.*?-->', '', page, flags=re.S | re.I)
                 classes = 'slide slide-cover' if index == 1 and metadata.get('cover') is True else 'slide'
                 slides.append(f'<section class="{classes}" data-export-page data-notes="{escape(note.group(1).strip() if note else "", quote=True)}" id="slide-{index}">'
-                              f'<p class="eyebrow">{escape(title)}</p><div class="slide-body">{convert(page)}</div>'
-                              f'<footer class="slide-footer"><span>{escape(title)}</span><span>{index:02d} / {len(pages):02d}</span></footer></section>')
+                              f'<div class="slide-body">{convert(page)}</div>'
+                              f'<footer class="slide-footer"><span>{index:02d} / {len(pages):02d}</span></footer></section>')
             body = ''.join(slides)
     else:
         body = convert(text)
@@ -152,7 +152,8 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
         'TITLE': escape(title), 'DESCRIPTION': f'<p class="description">{escape(description)}</p>' if description else '',
         'META': escape(meta), 'LABEL': LABELS[scene], 'SCENE': scene, 'THEME': theme,
         'DOCUMENTID': hashlib.sha256(str(metadata.get('document_id', scene + ':' + title)).encode()).hexdigest()[:20],
-        'CSS': (TEMPLATES / 'content.css').read_text(encoding='utf-8'),
+        'CSS': (TEMPLATES / 'content.css').read_text(encoding='utf-8') +
+               ('\n' + (TEMPLATES / 'report.css').read_text(encoding='utf-8') if scene == 'report' else ''),
         'JS': runtime,
         'MATH': math_assets(), 'BODY': body,
         'FONT': font_css, 'FONTLICENSE': font_license,

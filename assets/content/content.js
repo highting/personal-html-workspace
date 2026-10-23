@@ -5,7 +5,8 @@
   try { preference = localStorage.getItem('personal-html-workspace-theme') || preference; } catch (_) {}
   const themeButton = document.getElementById('theme-toggle');
   const palettes = {light: ['white', 'paper', 'warm'], dark: ['graphite', 'midnight', 'ink']};
-  const selected = {light: 'warm', dark: 'midnight'};
+  const selected = document.body.classList.contains('scene-report')
+    ? {light: 'white', dark: 'graphite'} : {light: 'warm', dark: 'midnight'};
   for (const mode of ['light', 'dark']) {
     try {
       const saved = localStorage.getItem('content-palette-' + mode);

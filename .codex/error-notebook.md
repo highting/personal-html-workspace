@@ -4,6 +4,22 @@
 
 历史证据在2026-10-03集中归档：旧 `output/_work/` 对应 `archive/work/`，旧 `output/blogs/` 对应 `archive/legacy-runs/`；其他路径按本地 `archive/manifest.json` 的目录前缀映射查找。原检查记录与来源快照保持不变，归档不随 Git 分发。
 
+## ERR-20261023-093 — 原生缩放中的浮点边界被误判为目录裁切
+
+- Fingerprint: `qa:native-zoom-strict-float-edge-comparison`
+- Status: active
+- First seen: 2026-10-23
+- Last seen: 2026-10-23
+- Occurrences: 1
+- Scope: Chrome 原生150%/200%下的目录终点可见性断言
+- Symptom: 目录已到底且末项完整可见，检查仍报末项无法滚入；150%下出现576与576.083374的边界差。
+- Root cause: scrollTop/clientHeight的取整与getBoundingClientRect的亚像素精度不同，严格浮点比较把舍入差异当成裁切。
+- Wrong assumption/action: 对缩放后的可见边界要求浮点值严格包含，没有与其他几何检查统一容差。
+- Correct approach: 保留到达滚动终态和正文位置断言，仅对矩形边界采用2px容差。
+- Prevention check: 原生缩放的几何断言采用小而明确的像素容差；同时核对滚动终态和截图，不通过放宽内容安全区掩盖真实溢出。
+- Verification: Infra学习、博客、汇报在100/150/200%明暗共18组检查通过；实际查看学习200%和博客150%的目录末项。
+- Evidence: `scripts/check_chrome_zoom.py`；本轮Infra三场景归档run的`delivery/checks/native-zoom/qa-chrome-zoom.json`；学习run的`work/toc-native-probe.json`。
+
 ## ERR-20261023-092 — 制作文案扫描漏掉容器文字和隐藏备注
 
 - Fingerprint: `qa:production-copy-scanner-misses-containers-and-notes`
@@ -74,15 +90,15 @@
 - Status: active
 - First seen: 2026-10-22
 - Last seen: 2026-10-23
-- Occurrences: 3
+- Occurrences: 4
 - Scope: 汇报Prompt、场景与视觉规则、导师汇报改版
 - Symptom: 用户指出字多、重点弱、无信息副标题、内容偏左和矩形卡片过重，并纠正“一页一个讲解任务”；后续指出解释文档不足的备注型小字不应出现，全部内容应属于实际汇报，图表或一段结论均可突出成果。
 - Root cause: 共同规则强调完整解释，汇报未充分明确观众页、跨页论证与讲者展开的分工，也未将制作过程说明彻底移出成品。
 - Wrong assumption/action: 以逐页解释段落和统一方框代替证据选择、视觉主次与讲解节奏。
-- Correct approach: 一个任务可跨页，尽早突出成果、依据与意义；主视觉按内容选择图表、机制图或明确结论。制作提醒与文档不足说明只留工作记录，备注只补实际讲解；真实进展、限制与必要条件简明保留。
+- Correct approach: 一个任务可跨页，尽早突出成果、依据与意义；主视觉按内容选择图表、机制图或明确结论。汇报样式独立于长文：开放对照、数字主视觉、状态轨迹与结论页按证据分工，去掉重复课题页眉页脚和无边界含义的图框。制作提醒与文档不足说明只留工作记录，备注只补实际讲解；真实进展、限制与必要条件简明保留。
 - Prevention check: 先审整组论证和成果重点，再逐页逐句检查标题、正文、图中标签、图注、表下注、页脚、小字及备注是否属于实际汇报。资料获取操作、会前待办和制作说明不转存备注；必要研究边界不能误删。数据不造、任务不硬塞一页，不把每个短句套进方框。
-- Verification: 四场景准备器加载当前Prompt并保留原稿；2026-10-22十页改版通过明暗、六配色、原生缩放与实际交互，逐页图面已查看。当时曾将部分背景提醒保留备注；2026-10-23按新要求收紧规则，独立复核制作残留与真实进展的边界及结论主视觉，四场景加载复查通过，本轮未重制旧成品。
-- Evidence: `prompts/scenes/report.txt`、`references/visual-system.md`、2026-10-22汇报`delivery.md`与`work/prompt-check.json`；`archive/checks/prompt-scenes-20261023/verification.json`。
+- Verification: 2026-10-23完成Infra八页新版，主代理逐页查看纯白/石墨共16张PNG；边界、六配色、原生Chrome100/150/200%逐页、图像放大、备注开合与导出隐藏通过。第4页突出300组验证，第5页以同尺度条形呈现16/8MB，理论模型与实测结果边界清楚。
+- Evidence: `assets/content/report.css`、`scripts/build_content.py`、`prompts/scenes/report.txt`、`references/visual-system.md`；`archive/work/Infra系统学习-汇报/20261023-211946-741411-report-html/delivery.md`和`delivery/checks/`。
 
 ## ERR-20261005-087 — 文本规范化后的哈希与原始文件哈希混用
 
@@ -377,16 +393,16 @@
 - Fingerprint: `qa:fixed-wheel-count-assumes-toc-height`
 - Status: active
 - First seen: 2026-10-03
-- Last seen: 2026-10-03
-- Occurrences: 1
+- Last seen: 2026-10-23
+- Occurrences: 2
 - Scope: 长讲义的 Chrome 原生 200% 缩放检查
 - Symptom: 明暗两轮报目录末项不可见，但继续滚动即可正常到达。
 - Root cause: 检查器固定执行两次 1600 的滚轮操作，未覆盖长目录在高倍缩放下的剩余滚动距离。
 - Wrong assumption/action: 用固定输入次数代替滚动终态。
-- Correct approach: 本次工作目录的检查副本按目录高度增加滚轮次数，保留正文位置和末项可见断言；未修改公共脚本或 QA 通过字段。
+- Correct approach: 公共检查器按实际剩余滚动距离继续滚动，检测停滞并设总时限；到底后额外滚动验证正文隔离，不再依赖固定两次输入。
 - Prevention check: 长列表滚动验证按 scrollHeight/clientHeight 和实际终态判断；到边界后继续滚动以检查滚动链隔离，不预设两次足够。
-- Verification: 相同 HTML 用任务内检查副本重跑，100/150/200% 明暗均通过，200% 末项目视可见。
-- Evidence: `scripts/check_chrome_zoom.py:131`；`archive/work/Infra系统学习-学习/20261003-232907-406159-learning-html/work/native_check.py`；`work/native-verified/qa-chrome-zoom.json`。
+- Verification: 新增400项目录与不可滚动容器两项回归，通过；本轮Infra三场景100/150/200%明暗全部通过，学习200%末项目视可见且正文位置不变。
+- Evidence: `scripts/check_chrome_zoom.py`、`tests/test_chrome_zoom.py`；`archive/work/Infra系统学习-学习/20261023-211946-714082-learning-html/delivery/checks/native-zoom/qa-chrome-zoom.json`。
 
 ## ERR-20261003-071 — 长距离目录跳转的滚动动画造成眩晕
 
@@ -937,16 +953,16 @@
 - Fingerprint: `qa:generic-dialog-locator-after-new-dialog-added`
 - Status: active
 - First seen: 2026-10-03
-- Last seen: 2026-10-03
-- Occurrences: 3
-- Scope: 图像放大、字体候选与 SVG 控件浏览器测试
-- Symptom: 加入阅读设置后，`locator('dialog')`触发strict mode violation。
-- Root cause: 测试把页面只有一个dialog作为隐含前提，未按被测组件定位。
+- Last seen: 2026-10-23
+- Occurrences: 4
+- Scope: 图像放大、字体候选、SVG控件浏览器测试与总览成品数量
+- Symptom: 加入阅读设置后，`locator('dialog')`触发strict mode violation；总览按全页article.card计数把档案与资源卡混入，12个成品被计成26个。
+- Root cause: 以通用组件或标签代表特定用途，未按被测组件与业务区限定范围。
 - Wrong assumption/action: 新增弹窗后仍使用通用标签检查图像弹窗。
 - Correct approach: 将图像相关定位明确限定为`.image-viewer`，保留原有位置、引用和图注断言。
-- Prevention check: 正文SVG使用figure的直接子SVG，避免匹配缩放手柄内的小图标；新增同类容器或角色时，按组件限定选择器，不用first掩盖歧义；字体候选统计限定在#font-options，避免混入配色option。
+- Prevention check: 正文SVG使用figure的直接子SVG，避免匹配缩放手柄内的小图标；新增同类容器或角色时，按组件限定选择器，不用first掩盖歧义；字体候选统计限定在#font-options，成品数量限定在“正式成品”区，避免把相同组件样式当成业务归属。
 - Verification: 20项主题、导航、字号、阅读和图像相关回归通过；本轮候选数量从混入配色的612项修正为606项，字体搜索测试通过。 Hot100图像检查曾把figure内三个SVG当作唯一图像；改用直接子选择器后17章真实放大、关闭与复制通过。
-- Evidence: `tests/test_content.py`；`tests/test_image_viewer.py`；`tests/test_font_picker.py`。 本轮：`archive/work/LeetCode-Hot100-学习/20261003-161025-890378-learning-html/work/verify.py`、`interaction-results.json`。
+- Evidence: `tests/test_content.py`；`tests/test_image_viewer.py`；`tests/test_font_picker.py`；`archive/work/LeetCode-Hot100-学习/20261003-161025-890378-learning-html/work/verify.py`、`interaction-results.json`。2026-10-23：`archive/work/Infra系统学习-学习/20261023-211946-714082-learning-html/work/publish_and_archive.py`按正式成品区计算，实际DOM核对为12，74个本地链接有效。
 
 ## ERR-20261003-037 — 单篇HTML重复实现浏览器查找
 
