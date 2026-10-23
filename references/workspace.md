@@ -187,4 +187,4 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 旧的 `validation-python` 与 `validation-browsers` 已封存到 `archive/environments/`。当前环境使用 `.venv/` 与用户共享浏览器缓存；换机器按 `requirements.lock.txt` 和[环境说明](environment.md)重建，不复制本机虚拟环境。归档可以另行备份或整体移出；仓库运行不依赖其存在。
 
-`output/` 和 `archive/` 均被 Git 忽略；`inputs/` 与 `blogs/` 原稿可纳入版本管理。Git 忽略不等于备份：长期备份应覆盖原稿、必要归档和正式成品。新克隆不包含本地总览及成品；复现需要安装依赖、下载字体并重新生成。公共模板和主题统一维护，单篇材料不放进公共工具目录。
+`output/` 和 `archive/` 均被 Git 忽略；`inputs/` 与 `blogs/` 原稿可纳入版本管理。公共流程、Prompt、脚本和模板的维护先检查 Git 状态，保留已有改动，按逻辑分组修改、验证并提交到本地；提交前逐项核对差异与暂存文件，不把无关原稿或临时产物混入流程提交，推送按用户要求执行。Git 忽略不等于备份：长期备份应覆盖原稿、必要归档和正式成品。新克隆不包含本地总览及成品；复现需要安装依赖、下载字体并重新生成。公共模板和主题统一维护，单篇材料不放进公共工具目录。

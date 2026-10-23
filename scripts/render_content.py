@@ -18,6 +18,14 @@ def file_hash(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def content_text(page, selector):
+    return page.locator(selector).evaluate_all('''nodes => nodes.map(node => ({
+      text: node.innerText || node.textContent,
+      svg_labels: [...node.querySelectorAll('svg text')].map(text => text.textContent.trim()),
+      notes: node.getAttribute('data-notes') || ''
+    }))''')
+
+
 def inspect_page(page, scene):
     return page.evaluate('''scene => {
       const issues = [];
@@ -62,6 +70,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
         shutil.copy2(source, destination)
     result = {'scene': scene, 'theme': theme, 'html_sha256': file_hash(destination),
               'passed': False, 'issues': [], 'warnings': [], 'themes': {}, 'images': []}
+    review_text = {'scene': scene, 'html_sha256': result['html_sha256'], 'sections': []}
     with sync_playwright() as playwright:
         options = {'headless': True}
         if browser_executable:
@@ -125,7 +134,13 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
                 for index in range(count):
                     page.evaluate('index => window.activateContentExport({index})', index)
                     issues.extend(f'第 {index + 1} 页：{issue}' for issue in inspect_page(page, scene))
-                    visual_checks.append(inspect_visuals(page, '[data-export-page]:not([hidden])', minimum=18))
+                    visual = inspect_visuals(page, '[data-export-page]:not([hidden])', minimum=18)
+                    visual['warnings'] = [f'第 {index + 1} 页：{warning}' for warning in visual['warnings']]
+                    visual_checks.append(visual)
+                    if selected_theme == 'light':
+                        review_text['sections'].append({
+                            'page': index + 1,
+                            'content': content_text(page, '[data-export-page]:not([hidden])')})
                     image = checks / f'page-{index + 1:02d}.png'
                     page.locator('[data-export-page]:not([hidden])').screenshot(path=str(image))
                     if selected_theme == theme:
@@ -144,7 +159,9 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
                     page.screenshot(path=str(checks / f'section-{index + 1:02d}.png'))
                 page.evaluate('document.documentElement.style.scrollBehavior = "auto"')
                 page.evaluate('scrollTo(0, 0)')
-                visual_checks.append(inspect_visuals(page, '.prose'))
+                visual_checks.append(inspect_visuals(page, '.article-header, .prose'))
+                if selected_theme == 'light':
+                    review_text['sections'] = content_text(page, '.article-header, .prose')
                 page.screenshot(path=str(checks / 'full.png'), full_page=True)
                 height = page.evaluate('document.documentElement.scrollHeight')
                 for index, top in enumerate(range(0, height, 900), 1):
@@ -171,6 +188,8 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
         browser.close()
     result['passed'] = not result['issues']
     result['warnings'] = sorted(set(result['warnings']))
+    (output / 'checks/content-text.json').write_text(
+        json.dumps(review_text, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     (output / 'qa.json').write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     if not result['passed']:
         raise ValueError('检查失败，详见 qa.json：' + '; '.join(result['issues']))

@@ -4,6 +4,7 @@ VISUAL_INSPECTION = r'''({selector, scale = 1, minimum = 12}) => {
   const roots = [...document.querySelectorAll(selector)];
   const visible = node => node.getClientRects().length && getComputedStyle(node).visibility !== 'hidden';
   const issues = [], warnings = [], labels = [];
+  const draft = /稿子示例|排版示例|草稿示例|占位文案|待补充|此处插入|依据用户博客整理|按用户要求生成|资料暂缺|后续补图|仅供占位|汇报前.{0,8}确认|本轮.{0,8}(?:未|没有)(?:运行|执行)/;
   for (const root of roots.filter(visible)) {
     for (const node of root.querySelectorAll('svg text')) {
       if (!visible(node) || node.closest('.katex')) continue;
@@ -12,12 +13,25 @@ VISUAL_INSPECTION = r'''({selector, scale = 1, minimum = 12}) => {
       labels.push({text: node.textContent.trim(), px: Math.round(px * 10) / 10});
       if (px < minimum - .1) issues.push('图中文字过小: ' + node.textContent.trim() + ' (' + px.toFixed(1) + 'px)');
     }
-    for (const node of root.querySelectorAll('h1,h2,h3,p,figcaption,text,.cover-title,.cover-subtitle')) {
-      if (!visible(node) || node.closest('pre,code,.katex')) continue;
-      const text = node.textContent.trim();
-      if (/稿子示例|排版示例|草稿示例|占位文案|待补充|此处插入|依据用户博客整理|按用户要求生成/.test(text)) {
-        warnings.push('核对成品文案: ' + text.slice(0, 100));
-      }
+    // 按实际文本收集，覆盖列表、表格、页脚与任意容器，并连接被行内标记拆开的短语。
+    const blocks = new Map();
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode, parent = node.parentElement;
+      if (!node.textContent.trim() || !visible(parent) ||
+          parent.closest('script,style,pre,code,.katex,button,[hidden]')) continue;
+      const block = parent.closest('h1,h2,h3,h4,h5,h6,p,li,td,th,dt,dd,figcaption,summary,footer,div,text') || root;
+      if (!blocks.has(block)) blocks.set(block, []);
+      blocks.get(block).push(node.textContent);
+    }
+    for (const parts of blocks.values()) {
+      const text = parts.join('').replace(/\s+/g, ' ').trim();
+      if (draft.test(text)) warnings.push('核对成品文案: ' + text);
+    }
+    // 导出时备注隐藏，但仍属于必须审读的交付内容。
+    for (const node of [root, ...root.querySelectorAll('[data-notes]')]) {
+      const notes = node.getAttribute('data-notes') || '';
+      if (draft.test(notes)) warnings.push('核对讲者备注: ' + notes.trim());
     }
   }
   return {issues: [...new Set(issues)], warnings: [...new Set(warnings)], labels};

@@ -10,6 +10,7 @@ from scripts.prepare_content import source_hash
 from scripts.publish_blog import publish_blog
 from scripts.publish_content import publish_content
 from scripts.rednote_artifacts import QA_VERSION, load_pages, sha256, source_files
+from scripts.content_review import record_content_review
 
 
 class PublishTests(unittest.TestCase):
@@ -48,7 +49,7 @@ class PublishTests(unittest.TestCase):
                           'pages': [{**page, 'sha256': sha256(artifacts / page['file'])}
                                     for page in load_pages(artifacts)]}
             (artifacts / 'qa-rednote.json').write_text(json.dumps(rednote_qa), encoding='utf-8')
-        qa = {'passed': True, 'scene': scene, 'images': images,
+        qa = {'passed': True, 'scene': scene, 'images': images, 'warnings': [],
               'html_sha256': hashlib.sha256((artifacts / 'index.html').read_bytes()).hexdigest()}
         (artifacts / 'qa.json').write_text(json.dumps(qa), encoding='utf-8')
         destination = root / 'output/主题'
@@ -57,8 +58,19 @@ class PublishTests(unittest.TestCase):
                     'delivery_dir': str(destination)}
         (run / 'run.json').write_text(json.dumps(manifest), encoding='utf-8')
         (run / 'delivery.md').write_text('已检查的制作记录\n', encoding='utf-8')
+        if scene in ('learning', 'blog', 'report'):
+            record_content_review(run, self.review_evidence())
         publisher = publish_blog if scene == 'legacy' else publish_content
         return root, run, artifacts, destination, publisher
+
+    def review_evidence(self):
+        return {
+            'scope': '第一节覆盖问题与方法，第二节解释适用条件。',
+            'content_review': '逐项核对第一节论断与材料，第二节保留比较条件。',
+            'reader_review': '用第一节例子跟随关键步骤，图注说明对象对应关系。',
+            'visual_review': '已查看全部明暗页与正文、图注、备注，重点和条件可辨。',
+            'warning_decisions': {},
+        }
 
     def snapshot(self, folder):
         return {p.relative_to(folder).as_posix(): p.read_bytes()
@@ -73,8 +85,10 @@ class PublishTests(unittest.TestCase):
     def assert_no_staging(self, root, run):
         self.assertEqual({p.name for p in (root / 'output').iterdir()},
                          {'_work', '主题'} if (root / 'output/主题').exists() else {'_work'})
-        self.assertEqual({p.name for p in run.iterdir()} - {'previous-deliveries'},
-                         {'source', 'delivery', 'run.json', 'delivery.md'})
+        expected = {'source', 'delivery', 'run.json', 'delivery.md'}
+        if json.loads((run / 'run.json').read_text(encoding='utf-8'))['scene'] in ('learning', 'blog', 'report'):
+            expected.add('content-review.json')
+        self.assertEqual({p.name for p in run.iterdir()} - {'previous-deliveries'}, expected)
 
     def assert_no_backup(self, run):
         backups = run / 'previous-deliveries'
@@ -184,6 +198,78 @@ class PublishTests(unittest.TestCase):
                 self.assertEqual([(run / name).read_bytes() for name in ('run.json', 'delivery.md')], records)
                 self.assert_no_backup(run)
                 self.assert_no_staging(root, run)
+
+    def test_content_review_is_required_current_and_complete_before_publication(self):
+        for scene in ('learning', 'blog', 'report'):
+            for change in ('missing', 'schema', 'scene', 'source', 'html', 'scope',
+                           'content_review', 'reader_review', 'visual_review', 'warning'):
+                with self.subTest(scene=scene, change=change):
+                    root, run, artifacts, destination, publisher = self.ready(scene)
+                    old = self.old_delivery(destination)
+                    review_path = run / 'content-review.json'
+                    review = json.loads(review_path.read_text(encoding='utf-8'))
+                    qa_path = artifacts / 'qa.json'
+                    qa = json.loads(qa_path.read_text(encoding='utf-8'))
+                    if change == 'missing':
+                        review_path.unlink()
+                    elif change == 'html':
+                        # 即使重新通过页面 QA，旧内容审读也不能用于新 HTML。
+                        (artifacts / 'index.html').write_text('<html>new claim</html>', encoding='utf-8')
+                        qa['html_sha256'] = hashlib.sha256((artifacts / 'index.html').read_bytes()).hexdigest()
+                    elif change == 'warning':
+                        qa['warnings'] = ['核对成品文案: 待补充']
+                    else:
+                        if change in ('scope', 'content_review', 'reader_review', 'visual_review'):
+                            review['evidence'][change] = ''
+                        else:
+                            key = {'schema': 'schema_version', 'scene': 'scene', 'source': 'source_sha256'}[change]
+                            review[key] = 'outdated'
+                        review_path.write_text(json.dumps(review), encoding='utf-8')
+                    qa_path.write_text(json.dumps(qa), encoding='utf-8')
+                    before = self.snapshot(run)
+                    with self.assertRaisesRegex(ValueError, '审读|警告'):
+                        publisher(str(run), root)
+                    self.assertEqual(self.snapshot(destination), old)
+                    self.assertEqual(self.snapshot(run), before)
+                    self.assert_no_backup(run)
+
+    def test_review_requires_reason_for_retained_warning_and_stays_out_of_delivery(self):
+        root, run, artifacts, destination, publisher = self.ready('blog')
+        qa_path = artifacts / 'qa.json'
+        qa = json.loads(qa_path.read_text(encoding='utf-8'))
+        warning = '核对成品文案: 本节对照两种排版示例'
+        qa['warnings'] = [warning]
+        qa_path.write_text(json.dumps(qa), encoding='utf-8')
+        evidence = self.review_evidence()
+        before = (run / 'content-review.json').read_bytes()
+        for decisions in ({}, {warning: ''}, {warning: '正文讨论对象', '旧警告': '过期'}):
+            evidence['warning_decisions'] = decisions
+            with self.assertRaises(ValueError):
+                record_content_review(run, evidence)
+            self.assertEqual((run / 'content-review.json').read_bytes(), before)
+        evidence['warning_decisions'] = {warning: '本文主题就是排版方法；这两份示例是论证对象，已核对没有占位内容。'}
+        record_content_review(run, evidence)
+        publisher(str(run), root)
+        self.assertFalse((destination / 'content-review.json').exists())
+        self.assertEqual((destination / 'index.html').read_bytes(), (artifacts / 'index.html').read_bytes())
+
+    def test_review_cannot_stamp_unchecked_or_changed_html(self):
+        for change in ('qa-failed', 'scene', 'html'):
+            with self.subTest(change=change):
+                _, run, artifacts, _, _ = self.ready('learning')
+                before = (run / 'content-review.json').read_bytes()
+                qa_path = artifacts / 'qa.json'
+                qa = json.loads(qa_path.read_text(encoding='utf-8'))
+                if change == 'qa-failed':
+                    qa['passed'] = False
+                elif change == 'scene':
+                    qa['scene'] = 'report'
+                else:
+                    (artifacts / 'index.html').write_bytes(b'changed')
+                qa_path.write_text(json.dumps(qa), encoding='utf-8')
+                with self.assertRaises(ValueError):
+                    record_content_review(run, self.review_evidence())
+                self.assertEqual((run / 'content-review.json').read_bytes(), before)
 
     def test_rednote_rejects_missing_failed_and_stale_checks_without_touching_delivery(self):
         for scene in ('legacy', 'rednote'):

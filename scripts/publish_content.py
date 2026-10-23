@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.prepare_content import ROOT, SCENES, source_hash
 from scripts.publish_blog import publish_blog
 from scripts.publish_utils import replace_delivery
+from scripts.content_review import validate_content_review
 
 
 def publish_content(run_dir, project_root=ROOT):
@@ -50,6 +51,7 @@ def publish_content(run_dir, project_root=ROOT):
         path = (artifacts / image['file']).resolve()
         if path.parent != artifacts or hashlib.sha256(path.read_bytes()).hexdigest() != image['sha256']:
             raise ValueError('交付图片与检查记录不一致')
+    validate_content_review(run, manifest, qa)
     replace_delivery(artifacts, destination, run)
     manifest['published_at'] = datetime.now().astimezone().isoformat()
     manifest['published_html'] = str(destination / 'index.html')

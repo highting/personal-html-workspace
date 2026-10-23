@@ -36,4 +36,4 @@ description: Turn source material into personal learning documents, technical bl
 
 小红书日常新建工作目录统一用 `prepare_content.py --scene rednote` 准备，兼容 `inputs/` 和已有 `blogs/`，记录共同与场景Prompt；调用原 `rednote_render.py`，通过 `publish_content.py` 汇总。`prepare_blog.py` 与 `publish_blog.py` 仅兼容历史调用和工作目录。规则见[小红书流程](references/rednote-scene.md)，不将新阅读模板套入卡片。明暗阅读模板不会改变既有 PNG 默认效果。
 
-脚本负责准备、排版、检查、截图和本地汇总，不调用生成模型、不发布社交平台。检查完成后才标记 `run.json` 为 `completed`；未验证事项如实记录。源码变更不表示已安装到个人技能目录。
+脚本负责准备、排版、检查、截图和本地汇总，不调用生成模型、不发布社交平台。学习、博客、汇报在 `work/content-review.json` 逐步记录实际审读依据，成稿审读先于排版，成品核对后用 `content_review.py` 绑定最终HTML；发布器核对记录是否完整、是否对应当前版本及当前文案警告。该记录不能代替实际审读，HTML改变后重新检查并记录。全部完成后才标记 `run.json` 为 `completed`；未验证事项如实记录。源码变更不表示已安装到个人技能目录。

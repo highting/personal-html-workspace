@@ -16,7 +16,7 @@
 2. 从 `inputs/<分类>/<主题>/` 或已有 `blogs/<分类>/<主题>/` 运行 `prepare_content.py`，显式指定已知主稿和成品名；当前工作目录建立在 `output/_work/<成品名>/<批次>/`。
 3. 在本次 `work/` 完成完整场景稿、内容修订、独立读者视角修订和图文分工；依据共同与场景 Prompt 的完成标准判断能否学懂主题、理解具体原理或快速看懂成果，未达到就继续改稿。
 4. 稿件稳定后制作最终图解和页面。学习、博客、汇报用 `build_content.py` 与 `render_content.py`；小红书用 `rednote_render.py` 与 `check_rednote.py`。
-5. 完成内容审核和实际呈现验收，通过后用 `publish_content.py` 更新 `output/<成品名>/`，保留旧版并同步总览。
+5. 完成内容审核和实际呈现验收。学习、博客、汇报在 `work/content-review.json` 保存具体依据，用 `content_review.py` 绑定最终HTML及当前文案警告；随后标记完成，用 `publish_content.py` 更新 `output/<成品名>/`，保留旧版并同步总览。小红书沿用原验收记录。
 
 具体参数、页面协议和检查要求见[四场景工作流](../references/content-workflow.md)；材料、目录和版本管理见[工作区约定](../references/workspace.md)。本页只提供读取入口，不另存一套重复的 Prompt 正文。
 

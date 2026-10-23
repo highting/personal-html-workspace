@@ -31,7 +31,9 @@ python -X utf8 scripts/prepare_content.py "inputs/机器学习/Softmax" --scene 
 # 在返回的 work/ 中制作本次正文；也可传入可信 HTML 片段
 python -X utf8 scripts/build_content.py "<work_entry>" --scene learning --output "<run_dir>/work/index.html"
 python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene learning --output-dir "<artifact_dir>"
-# 实际查看两种主题、内容与交互，记录检查并标记 completed 后
+# 在 work/content-review.json 完成内容、读者、呈现审读及文案警告处理
+python -X utf8 scripts/content_review.py "<run_dir>" --review "<run_dir>/work/content-review.json"
+# 全部实际审读与检查完成后，标记 completed 并汇总
 python -X utf8 scripts/publish_content.py "<run_dir>"
 ```
 
@@ -258,6 +260,7 @@ personal-html-workspace/
     ├── prepare_content.py     # 四场景工作副本与任务规则
     ├── build_content.py       # 学习/博客/汇报的自包含明暗 HTML
     ├── render_content.py      # 明暗检查、离线检查与汇报逐页 PNG
+    ├── content_review.py      # 记录内容审读并绑定最终 HTML，交付前核对
     ├── publish_content.py     # 四场景短路径汇总与版本保留
     ├── download_content_fonts.py # 下载离线中文字体缓存
     ├── check_content_palettes.py # 六套配色检查

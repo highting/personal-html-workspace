@@ -10,6 +10,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.prepare_blog import select_entry
+from scripts.content_review import review_template
 
 ROOT = Path(__file__).resolve().parent.parent
 SCENES = ('learning', 'blog', 'report', 'rednote')
@@ -48,6 +49,9 @@ def prepare_content(input_path, scene, mode='html', entry=None, output_name=None
     prompt = (root / 'prompts/common.txt').read_text(encoding='utf-8') + '\n\n' + (root / f'prompts/scenes/{scene}.txt').read_text(encoding='utf-8')
     prompt += f'\n\n主题：{source.name}\n场景：{scene}\n辅助图模式：{mode}\n工作稿：{run / "work" / selected}\n原始快照只读。先阅读真实材料，再完成对应场景成品。\n'
     (run / 'work/任务Prompt.txt').write_text(prompt, encoding='utf-8')
+    if scene != 'rednote':
+        (run / 'work/content-review.json').write_text(
+            json.dumps(review_template(), ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     manifest = {
         'scene': scene, 'mode': mode, 'status': 'prepared', 'input_dir': str(source), 'entry': selected.as_posix(),
         'created_at': datetime.now().astimezone().isoformat(), 'run_dir': str(run),
@@ -57,7 +61,13 @@ def prepare_content(input_path, scene, mode='html', entry=None, output_name=None
         'title_file': str(run / 'delivery/标题.txt'), 'caption_file': str(run / 'delivery/配文.txt'),
     }
     (run / 'run.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-    (run / 'delivery.md').write_text(f'# {source.name}\n\n状态：已准备，尚未制作。\n\n记录来源、内容主线、图解位置、实际检查与未验证事项。\n', encoding='utf-8')
+    record = f'# {source.name}\n\n状态：已准备，尚未制作。\n\n记录来源、内容主线、图解位置、实际检查与未验证事项。\n'
+    if scene != 'rednote':
+        record += ('\n内容审读：在 work/content-review.json 记录范围与章节/页序对应、内容修订、'
+                   '读者理解检验和实际呈现检查，写明具体位置与依据。图解说明所解疑问和读出的关系，'
+                   '不以图数代替效果。成稿审读在排版前完成，成品检查后补齐最终核对，'
+                   '再运行 content_review.py 绑定最终 HTML；记录不进入成品正文。\n')
+    (run / 'delivery.md').write_text(record, encoding='utf-8')
     return manifest
 
 

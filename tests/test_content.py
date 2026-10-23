@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 import struct
+import shutil
 import tempfile
 import unittest
 
@@ -52,6 +53,33 @@ class ContentTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'HTML 已改变'):
                 publish_content(manifest['run_dir'], project_root=root)
             self.assertFalse(Path(manifest['delivery_dir']).exists())
+
+    def test_prepare_loads_current_scene_rules_and_initializes_only_applicable_review(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / 'inputs/技术/主题'
+            source.mkdir(parents=True)
+            original = '# 原稿\r\n正文不修改。\r\n'.encode('utf-8')
+            (source / 'main.md').write_bytes(original)
+            shutil.copytree(ROOT / 'prompts', root / 'prompts')
+            common = (ROOT / 'prompts/common.txt').read_text(encoding='utf-8')
+            for scene in ('learning', 'blog', 'report', 'rednote'):
+                with self.subTest(scene=scene):
+                    manifest = prepare_content('inputs/技术/主题', scene, entry='main.md',
+                                               output_name=f'主题-{scene}', project_root=root)
+                    work = Path(manifest['work_dir'])
+                    prompt = (work / '任务Prompt.txt').read_text(encoding='utf-8')
+                    scene_prompt = (ROOT / f'prompts/scenes/{scene}.txt').read_text(encoding='utf-8')
+                    self.assertTrue(prompt.startswith(common + '\n\n' + scene_prompt))
+                    self.assertEqual((source / 'main.md').read_bytes(), original)
+                    self.assertEqual((Path(manifest['source_dir']) / 'main.md').read_bytes(), original)
+                    self.assertEqual((work / 'main.md').read_bytes(), original)
+                    self.assertEqual((work / 'content-review.json').exists(), scene != 'rednote')
+                    self.assertFalse((Path(manifest['run_dir']) / 'content-review.json').exists())
+                    if scene != 'rednote':
+                        review = json.loads((work / 'content-review.json').read_text(encoding='utf-8'))
+                        self.assertEqual(review['reader_review'], '')
+                        self.assertEqual(review['warning_decisions'], {})
 
 
 class ContentBrowserTests(unittest.TestCase):
@@ -106,6 +134,50 @@ class ContentBrowserTests(unittest.TestCase):
             self.assertEqual(len(result['warnings']), 1)
             self.assertAlmostEqual(result['labels'][0]['px'], 6)
             browser.close()
+
+    def test_copy_inspection_covers_inline_lists_tables_footer_and_hidden_notes(self):
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch()
+            page = browser.new_page()
+            page.set_content('''<article data-notes="资料暂缺，后续补图">
+              <h4>草稿示例标题</h4><div>按用户<strong>要求</strong>生成</div>
+              <ul><li><span>此处插入流程图</span></li></ul>
+              <table><tr><th>排版示例表头</th><td>待补充结果</td></tr></table>
+              <footer><span>汇报前请确认页脚</span></footer>
+              <p>本轮没有运行 GPU 基准测试</p><p>仅在当前样本验证；机制示意。</p>
+              <pre><code>待补充代码示例</code></pre><span class="katex">待补充公式</span>
+              <p hidden>待补充隐藏占位</p><button>待补充控件</button>
+              <p aria-hidden="true">排版示例可见装饰文字</p>
+              <p>正常正文<span hidden>待补充隐藏片段</span>继续解释。</p>
+            </article>''')
+            result = inspect_visuals(page, 'article')
+            warnings = '\n'.join(result['warnings'])
+            for text in ('草稿示例标题', '按用户要求生成', '此处插入流程图', '排版示例表头',
+                         '待补充结果', '汇报前请确认页脚', '本轮没有运行', '核对讲者备注: 资料暂缺',
+                         '排版示例可见装饰文字'):
+                self.assertIn(text, warnings)
+            for text in ('代码示例', '公式', '隐藏', '控件', '仅在当前样本验证', '机制示意'):
+                self.assertNotIn(text, warnings)
+            self.assertEqual(result['issues'], [])
+            browser.close()
+
+    def test_report_exports_review_text_and_reports_note_warnings(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            source = root / 'main.md'
+            source.write_text('# 完成方案设计\n\n机制示意；实验验证尚未开展。\n\n'
+                              '<ul><li>资料暂缺，后续补图</li></ul>\n\n'
+                              '<!-- notes: 汇报前请确认数据。 -->', encoding='utf-8')
+            html = build_content(source, scene='report', output=root / 'index.html')
+            result = render_content(html, scene='report', output_dir=root / 'delivery')
+            self.assertTrue(result['passed'])  # 文案由实际审读判断，不按关键词直接删除或判错。
+            self.assertTrue(any('第 1 页：核对成品文案' in warning for warning in result['warnings']))
+            self.assertTrue(any('第 1 页：核对讲者备注' in warning for warning in result['warnings']))
+            text = json.loads((root / 'delivery/checks/content-text.json').read_text(encoding='utf-8'))
+            self.assertEqual(text['html_sha256'], result['html_sha256'])
+            self.assertEqual(len(text['sections']), 1)
+            self.assertIn('完成方案设计', text['sections'][0]['content'][0]['text'])
+            self.assertIn('汇报前请确认数据', text['sections'][0]['content'][0]['notes'])
 
     def test_offline_learning_themes_math_navigation_and_position(self):
         with tempfile.TemporaryDirectory() as folder:

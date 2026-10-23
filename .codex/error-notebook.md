@@ -4,6 +4,22 @@
 
 历史证据在2026-10-03集中归档：旧 `output/_work/` 对应 `archive/work/`，旧 `output/blogs/` 对应 `archive/legacy-runs/`；其他路径按本地 `archive/manifest.json` 的目录前缀映射查找。原检查记录与来源快照保持不变，归档不随 Git 分发。
 
+## ERR-20261023-092 — 制作文案扫描漏掉容器文字和隐藏备注
+
+- Fingerprint: `qa:production-copy-scanner-misses-containers-and-notes`
+- Status: active
+- First seen: 2026-10-23
+- Last seen: 2026-10-23
+- Occurrences: 1
+- Scope: visual_qa.py、render_content.py，学习/博客/汇报文案审核
+- Symptom: 列表中的“待补充结果”、页脚中的“按用户要求生成”和讲者备注中的“资料暂缺，后续补图”均未产生警告；学习稿也存在“本轮没有运行……”的制作状态说明。
+- Root cause: 扫描器只枚举部分标题、段落和图注标签，遗漏任意容器中的文本；备注存于 data-notes，导出时隐藏且未单独检查，词表也未覆盖常见制作解释。
+- Wrong assumption/action: 把特定标签扫描与可见正文检查当作完整文案检查。
+- Correct approach: 按实际文本节点收集并连接行内片段，排除代码、公式与隐藏控件；显式检查讲者备注，汇报警告标记页序。另提取页面文字、SVG标签和备注供全量审读。
+- Prevention check: 文案检查用例覆盖列表、表格、页脚、行内拆词、隐藏备注，以及正常条件、代码和教学引用；警告只作线索，真实残留返修，合法内容给具体保留理由，全文仍须实际审读。
+- Verification: 同一隔离样例在 b8f7bf7 的扫描器中警告为0，修复后准确报告3项；相关文案、渲染、小红书和交付测试共28项通过，旧成品未改写。
+- Evidence: `scripts/visual_qa.py`、`scripts/render_content.py`、`tests/test_content.py`；`archive/checks/content-review-20261023/verification.json`。
+
 ## ERR-20261023-091 — 学习与博客共用收窄原则，缺少明确的深度差异
 
 - Fingerprint: `content:shared-scope-trimming-blurs-learning-and-blog-depth`
@@ -761,16 +777,16 @@
 - Fingerprint: `content:quality-review-confused-with-rendering-checks`
 - Status: active
 - First seen: 2026-10-03
-- Last seen: 2026-10-03
-- Occurrences: 1
-- Scope: 内容生成prompt、两篇正文改稿与delivery.md
+- Last seen: 2026-10-23
+- Occurrences: 2
+- Scope: 内容生成Prompt、正文改稿与内容审读交付记录
 - Symptom: 用户指出质量还包含解释、知识组织、语言、覆盖和配图；旧稿存在步骤与样本混淆、核心比较只有局部例子。
-- Root cause: 复核偏重可截图和可机器检查的呈现，没有沿读者应形成的判断核对正文证据。
+- Root cause: 复核偏重可截图和可机器检查的呈现，没有沿读者应形成的判断核对正文证据；发布器又只校验completed与页面QA，未要求可定位、绑定当前成品的内容审读记录。
 - Wrong assumption/action: 把呈现通过当成内容已得到充分复核，或把既有要求未落实一律变成新增规则。
-- Correct approach: 完整阅读原材料与成稿，区分引导不足、落实缺口和写作取舍；以实质段落改稿、数值与来源核对完成内容审核，呈现另记。
-- Prevention check: 先检验文章主题范围内的依赖和核心解释，抽查例子是否支持核心判断；规则已有时直接返修正文，不扩成固定清单。
-- Verification: 两篇本轮新稿完成全文审核、数值核算及真实渲染；改前/改后和边界分别记录。
-- Evidence: 两篇20261003-122841工作版本的work/content-review.md；prompts/common.txt；references/content-workflow.md
+- Correct approach: 完整阅读原材料与成稿，区分引导不足、落实缺口和写作取舍；以实质段落改稿、数值与来源核对完成内容审核，呈现另记。学习/博客/汇报的范围、内容、读者与呈现依据由content_review.py绑定最终HTML和原稿快照，发布前验证记录及当前警告处理。
+- Prevention check: 先检验主题范围内的依赖和核心解释，用具体章节、例子与图文关系支持判断；不以图数、截图或记录文件存在代替理解审核。缺失、空白、过期或未处理警告的记录不能发布；HTML变化后重审，机器只验证记录与版本。规则已有时直接返修正文。
+- Verification: 2026-10-03两篇新稿完成全文审核、数值核算及真实渲染；改前/改后和边界分别记录。2026-10-23隔离样例证实旧发布器接受无内容审读的成品，新发布器拒绝且旧入口不变；30组缺失/空白/过期/警告用例及相关渲染、小红书回归通过。
+- Evidence: 两篇20261003-122841工作版本的work/content-review.md；`scripts/content_review.py`、`tests/test_publish.py`、`references/content-workflow.md`；`archive/checks/content-review-20261023/verification.json`。
 
 ## ERR-20261003-047 — 发布复制失败使旧入口变成不完整的新版本
 
