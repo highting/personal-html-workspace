@@ -30,6 +30,7 @@
 
 |ID|Fingerprint|Root cause|Prevention check|Verification / Evidence|
 |---|---|---|---|---|
+|ERR-20261025-102|`svg:text-boxes`|文字框替代对象。|向量用分格条，矩阵用网格；形态先表达关系。|四场景实看；`demos/content/README.md`。|
 |ERR-20261025-101|`build:yaml-date-json`|新增JSON序列化不能处理YAML日期对象。|核对既有元数据类型；日期保持原显示字符串。|日期构建/重建通过；`tests/test_content_editor.py`。|
 |ERR-20261025-100|`editor:preview-palette-reset`|冷启动快照未包含当前配色，预览恢复默认。|进入编辑时传当前配色，重绘后恢复；核对iframe实际主题与截图。|明暗编辑及原生三档通过；`tests/test_content_editor.py`、`qa-editor.json`。|
 |ERR-20261025-099|`editor:stale-authoring-payload`|旧正文覆盖外部修订HTML。|冷启动按文件实际正文建编辑模型；导出时同步payload，不以旧payload覆盖文件。|后处理正文与图片宽度保存通过；`test_content_editor.py::test_launcher_preserves_postbuild_edits_and_image_width`。|

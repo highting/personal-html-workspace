@@ -13,8 +13,7 @@ cover: true
 
 ## 均值给出相同的中心位置
 
-<div class="report-split report-table-layout">
-<div><h3>两组均值都是 4</h3><p>总和与数量相同，得到的平均数也相同。</p><p class="report-detail">均值没有保留每个数偏离中心的程度。</p></div>
+<div class="report-table-layout">
 <div><table><thead><tr><th>指标</th><th class="report-value">A 组</th><th class="report-value">B 组</th></tr></thead><tbody><tr><td>数据</td><td class="report-value">2，4，6</td><td class="report-value">0，4，8</td></tr><tr><td>总和</td><td class="report-value">12</td><td class="report-value">12</td></tr><tr><td>数量</td><td class="report-value">3</td><td class="report-value">3</td></tr><tr class="report-highlight"><td>均值</td><td class="report-value">4</td><td class="report-value">4</td></tr></tbody></table><p class="report-detail">教学数据；每个数等权计入。</p></div>
 </div>
 
@@ -25,17 +24,21 @@ cover: true
 ## 同一坐标下，B 组更分散
 
 <figure class="report-figure">
-<svg viewBox="0 0 1080 290" style="height:270px" role="img" aria-label="A组位于2、4、6，B组位于0、4、8；共用0到8的坐标，均值都在4">
-<path d="M180 90H1000M180 210H1000" fill="none" stroke="var(--line)" stroke-width="2"/>
-<path d="M590 28V248" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 7"/>
-<g fill="var(--text)" font-size="26"><text x="30" y="99">A 组</text><text x="30" y="219">B 组</text><text x="610" y="30">均值 4</text></g>
-<g fill="var(--accent)"><circle cx="385" cy="90" r="12"/><circle cx="590" cy="90" r="12"/><circle cx="795" cy="90" r="12"/></g>
-<g fill="var(--compare)"><circle cx="180" cy="210" r="12"/><circle cx="590" cy="210" r="12"/><circle cx="1000" cy="210" r="12"/></g>
-<g fill="var(--muted)" font-size="24" text-anchor="middle"><text x="180" y="280">0</text><text x="385" y="280">2</text><text x="590" y="280">4</text><text x="795" y="280">6</text><text x="1000" y="280">8</text></g>
+<svg style="font-family:var(--default-font)" viewBox="0 0 1080 330" role="img" aria-label="A组2、4、6，极差4；B组0、4、8，极差8。两组共用0到8的尺度，均值4。">
+<path d="M180 95H1000M180 240H1000" fill="none" stroke="var(--line)" stroke-width="2"/>
+<path d="M590 42V270" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 7"/>
+<path d="M385 95H795" stroke="var(--accent)" stroke-width="6"/>
+<path d="M180 240H1000" stroke="var(--compare)" stroke-width="6"/>
+<g fill="var(--text)" font-size="26"><text x="30" y="104">A 组</text><text x="30" y="249">B 组</text><text x="610" y="30">均值 4</text></g>
+<g fill="var(--accent)"><circle cx="385" cy="95" r="11"/><circle cx="590" cy="95" r="11"/><circle cx="795" cy="95" r="11"/></g>
+<g fill="var(--compare)"><circle cx="180" cy="240" r="11"/><circle cx="590" cy="240" r="11"/><circle cx="1000" cy="240" r="11"/></g>
+<g fill="var(--text)" font-size="26" text-anchor="middle"><text x="385" y="76">2</text><text x="590" y="76">4</text><text x="795" y="76">6</text><text x="180" y="221">0</text><text x="590" y="221">4</text><text x="1000" y="221">8</text></g>
+<path d="M385 116V139H795V116M180 261V284H1000V261" fill="none" stroke="var(--muted)" stroke-width="1.5"/>
+<g fill="var(--text)" font-size="25" text-anchor="middle"><text x="590" y="172">极差 4 · 最远偏离均值 2</text><text x="590" y="320">极差 8 · 最远偏离均值 4</text></g>
 </svg>
-<figcaption>两行使用相同尺度；虚线标出共同均值。</figcaption>
+<figcaption>教学数据 · 两行共用尺度；线段长度表示最大值与最小值之差。</figcaption>
 </figure>
-<div class="report-comparison"><div><h3>A 组：极差 4</h3><p>6 − 2 = 4，最远偏离均值 2。</p></div><div><h3>B 组：极差 8</h3><p>8 − 0 = 8，最远偏离均值 4。</p></div></div>
+<p class="report-detail">极差只看两端；这里同时保留原始点，不将它当作完整的分布描述。</p>
 
 <!-- notes: 图中位置按数值线性映射，没有截轴或错开坐标。极差只使用最大值与最小值，这个例子不把极差当作完整的分布描述。 -->
 

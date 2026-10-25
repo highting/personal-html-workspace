@@ -20,23 +20,33 @@ math: katex
 </div>
 
 <div class="card-page">
-<h2>把中心和离散分开看</h2>
-<p>两组数的总和都是 12，数量都是 3，所以均值同为 \(12/3=4\)。再比较最大值与最小值之差：</p>
-<div class="card-comparison">
-<div><h3>A 组</h3><p>2，4，6</p><p>极差：6 − 2 = 4</p><p>最远偏离均值 2。</p></div>
-<div><h3>B 组</h3><p>0，4，8</p><p>极差：8 − 0 = 8</p><p>最远偏离均值 4。</p></div>
-</div>
-<p>在这组数里，B 的两端离中心更远。这个差别在平均数中消失了，却能从原始点和极差中看出来。</p>
-<p class="card-claim">极差只看两端。它能帮助发现差别，也不能代替完整分布。</p>
+<h2>同一尺度，直接看出差距</h2>
+<p>两组均值同为 \(12/3=4\)。把最小值与最大值连起来，线段长度就是极差。</p>
+<figure>
+<svg viewBox="0 0 900 540" role="img" aria-label="共同尺度对照：A组从2到6，极差4；B组从0到8，极差8。虚线为均值4。">
+<path d="M110 130H810M110 355H810" fill="none" stroke="var(--node-line)" stroke-width="2"/>
+<path d="M460 65V400" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="6 9"/>
+<path d="M285 130H635" stroke="var(--accent)" stroke-width="8"/>
+<path d="M110 355H810" stroke="var(--compare)" stroke-width="8"/>
+<g><text x="0" y="142" style="font-size:38px">A</text><text x="0" y="367" style="font-size:38px">B</text><text x="488" y="48" style="font-size:36px">均值 4</text></g>
+<g fill="var(--accent)"><circle cx="285" cy="130" r="14"/><circle cx="460" cy="130" r="14"/><circle cx="635" cy="130" r="14"/></g>
+<g fill="var(--compare)"><circle cx="110" cy="355" r="14"/><circle cx="460" cy="355" r="14"/><circle cx="810" cy="355" r="14"/></g>
+<g text-anchor="middle"><text x="285" y="104" style="font-size:38px">2</text><text x="460" y="104" style="font-size:38px">4</text><text x="635" y="104" style="font-size:38px">6</text><text x="110" y="329" style="font-size:38px">0</text><text x="460" y="329" style="font-size:38px">4</text><text x="810" y="329" style="font-size:38px">8</text></g>
+<path d="M285 158V185H635V158M110 383V410H810V383" fill="none" stroke="var(--muted)" stroke-width="2"/>
+<g text-anchor="middle"><text x="460" y="237" style="font-size:38px">极差 4</text><text x="460" y="462" style="font-size:38px">极差 8</text><text x="460" y="524" style="font-size:36px">B 的范围是 A 的 2 倍</text></g>
+</svg>
+<figcaption>教学数据；原始点与上一页一致。</figcaption>
+</figure>
+<p class="card-claim">极差只看两端，不能描述完整分布。</p>
 </div>
 
 <div class="card-page">
 <h2>遇到平均数，继续问三件事</h2>
-<p>先看这个数字回答了什么，再补足它没有告诉你的信息。</p>
+<p>先看中心，再看分散程度，最后核对比较条件。</p>
 <ol class="card-steps">
-<li><strong>数据围绕哪里？</strong><p>先明确均值表示的中心。这个例子里，两组都是 4。</p></li>
-<li><strong>数据散得多开？</strong><p>把原始点画在同一尺度上，再结合合适的离散指标。</p></li>
-<li><strong>比较条件一致吗？</strong><p>核对样本数量、单位和统计口径，避免把不同问题混在一起。</p></li>
+<li><strong>数据围绕哪里？</strong><p>两组中心相同，均值都是 4。</p></li>
+<li><strong>数据散得多开？</strong><p>共用尺度画原始点，比较离散程度。</p></li>
+<li><strong>比较条件一致吗？</strong><p>核对样本数量、单位与统计口径。</p></li>
 </ol>
 <p class="card-claim"><strong>看均值，也看它背后的数据。</strong></p>
 </div>
