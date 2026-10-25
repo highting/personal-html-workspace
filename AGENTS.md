@@ -1,6 +1,6 @@
 # 内容制作工作区
 
-本目录维护个人学习、博客、技术汇报和小红书卡片。先读取根目录 `SKILL.md`、`references/workspace.md` 和 `.codex/error-notebook.md`（若存在）；学习/博客/汇报再读 `references/content-workflow.md` 与 `content-scenes.md`，小红书读 `references/rednote-scene.md` 和所选模式说明。
+本目录维护个人学习、博客、技术汇报和小红书卡片。先读取根目录 `SKILL.md`、`references/workspace.md`；错题本若存在，按 `$project-error-notebook` 先检查长度，超过20,000字符时先用Luna压缩一次，再完整读取 `.codex/error-notebook.md`。学习/博客/汇报再读 `references/content-workflow.md` 与 `content-scenes.md`，小红书读 `references/rednote-scene.md` 和所选模式说明。
 
 - 输入：日常统一拖入 `inputs/待分类/`，用户发出“处理新材料”后，代理识别主稿和主题，将本次材料归入 `inputs/<内容分类>/<主题>/`；单文件建立主题目录，完整文件夹保留相对路径。不改正文、不覆盖重名文件、不迁移其他已归档原稿；归属不明时留在待分类。用户直接放入分类也可使用，已有 `blogs/` 原地兼容。同一原稿可生成多种场景；按任务记录辨认已处理材料，避免重复制作。拖入不自动唤起会话。
 - 交付入口：新成品用 `output/<主题短名>-<学习|博客|汇报|小红书>/`，重名加分类限定，两套方案再加方案后缀；已有成品改版沿用原入口。准备时显式传 `--name`，准备与交付前核对输入、场景和目标路径，禁止不同内容或场景互相覆盖。学习/博客共用明暗连续HTML；汇报交16:9演示HTML、备注和PNG；小红书保留图片、`标题.txt`、`配文.txt`、`预览.html`。`html/images` 仅决定辅助图工具，不改变场景。
