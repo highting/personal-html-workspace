@@ -1,4 +1,4 @@
-"""将学习稿、博客或汇报稿组装为可切换明暗主题的单文件 HTML。"""
+"""组装离线单文件 HTML：学习/博客支持明暗，汇报使用纯白或纸白背景。"""
 
 import argparse
 import base64
@@ -133,6 +133,8 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
         raise ValueError('小红书继续使用 rednote_render.py；此构建器用于 learning、blog、report')
     if theme not in ('light', 'dark', 'system'):
         raise ValueError('主题必须为 light、dark 或 system')
+    if scene == 'report' and theme != 'light':
+        raise ValueError('汇报仅使用浅色背景，可在页面选择纯白或纸白')
     source = Path(source).resolve()
     is_html = source.suffix.lower() in ('.html', '.htm')
     parsed = {'metadata': {}, 'body': source.read_text(encoding='utf-8')} if is_html else parse_markdown_file(str(source))

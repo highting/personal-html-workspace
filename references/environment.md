@@ -57,7 +57,7 @@ python -X utf8 scripts/download_content_fonts.py
 
 普通主题使用 **MiSans 字体**，从[小米官方下载页](https://hyperos.mi.com/font/zh/download/)获取，解压后安装 `MiSans/ttf` 中需要的字重。在 Windows 中选择“安装”可安装到当前用户；重新启动渲染进程即可使用。字体应按下载页的许可使用，本仓库不分发 MiSans 字体文件。
 
-本机已安装官方包的十个静态字重；普通主题曾通过 Chromium `CSS.getPlatformFontsForNode` 验证正文使用 `MiSans`、代码使用 `Consolas`。`academic` 的 HTML 导出会将中文覆盖为 `Microsoft YaHei`；基础主题中的宋体栈不代表最终生效字体。生图辅助图可按其既有 prompt 使用宋体／serif。字体是否生效应检查实际渲染，不因参考截图使用某种字体就改变当前设置。
+本机已安装官方包的十个静态字重；普通主题曾通过 Chromium `CSS.getPlatformFontsForNode` 验证正文使用 `MiSans`、代码使用 `Consolas`。`academic` 的HTML封面和正文由主题CSS统一使用 `Microsoft YaHei`。生图辅助图按既有prompt使用宋体／serif。字体是否生效应检查实际渲染，不因参考截图使用某种字体就改变当前设置。
 
 另一台机器缺少上述字体时，浏览器会使用系统可用的后备字体，中文外观和分页可能变化。需要保持小红书效果时，自行按许可准备相同字体并重新查看全部卡片；仓库不分发微软雅黑、Consolas 或 MiSans。不要仅凭 CSS 字体列表认定与原机器相同。
 

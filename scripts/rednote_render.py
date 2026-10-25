@@ -66,23 +66,10 @@ KATEX_DIR = ASSETS_DIR / "vendor" / "katex"
 
 DEFAULT_WIDTH = 1080
 DEFAULT_HEIGHT = 1440
-ACADEMIC_BACKGROUND = '#F7F4ED'
+ACADEMIC_BACKGROUND = '#FAF9F6'
 MI_SANS_STACK = "'MiSans', 'Microsoft YaHei', 'Source Han Sans CN', 'PingFang SC', sans-serif"
 MATH_MODES = ('off', 'katex')
 KATEX_VERSION = '0.16.11'
-HTML_DOCUMENT_CSS = '''<style>
-    .card-container { padding: 36px; }
-    .card-inner {
-        --font-heading: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
-        --font-body: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
-        border: 0; border-radius: 0; box-shadow: none;
-        padding: 48px; min-height: calc(100% - 72px);
-    }
-    .cover-container { font-family: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif; }
-    .card-content img { display: block; max-width: 100%; height: auto; }
-    .card-content .katex-display { overflow: visible; }
-    .page-number { font-size: 24px; bottom: 14px; right: 50px; }
-</style>'''
 
 # 可用主题
 AVAILABLE_THEMES = [
@@ -351,7 +338,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
 
     # 固定标题字号，让长标题自然换行
     title_size = int(width * (0.075 if theme == 'academic' else 0.095))
-    subtitle_size = int(width * (0.045 if theme == 'academic' else 0.067))
+    subtitle_size = int(width * (0.037 if theme == 'academic' else 0.067))
 
     bg = COVER_BACKGROUNDS.get(theme, COVER_BACKGROUNDS['default'])
     title_gradient = TITLE_GRADIENTS.get(theme, TITLE_GRADIENTS['default'])
@@ -364,9 +351,10 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
             background-clip: text;'''
 
     font_stack = (
-        "'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif"
+        "'Microsoft YaHei', 'Source Han Sans CN', sans-serif"
         if theme == 'academic' else MI_SANS_STACK
     )
+    theme_css = load_theme_css(theme) if theme == 'academic' else ''
     # 所有尺寸按比例计算，保证不同 width/height 下版面一致
     return f'''<!DOCTYPE html>
 <html lang="zh-CN">
@@ -385,6 +373,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
         }}
 
         .cover-container {{
+            --cover-inset: {int(width * 0.078)}px;
             width: {width}px;
             height: {height}px;
             background: {bg};
@@ -435,6 +424,7 @@ def generate_cover_html(metadata: dict, theme: str, width: int, height: int) -> 
             margin-top: auto;
             flex-shrink: 0;
         }}
+        {theme_css}
     </style>
 </head>
 <body>
@@ -477,6 +467,7 @@ def generate_card_html(content: str, theme: str, page_number: int,
         }}
 
         .card-container {{
+            --card-height: {height}px;
             width: {width}px;
             min-height: {height}px;
             background: {bg};
@@ -1024,8 +1015,6 @@ async def render_markdown_to_cards(
     render_options = _normalize_render_options(metadata, math_mode)
     source_base = Path(md_file).resolve().parent.as_uri() + '/'
     extra_head = f'<base href="{escape(source_base, quote=True)}">'
-    if theme == 'academic':
-        extra_head += HTML_DOCUMENT_CSS
     print(f"\n🎨 开始渲染: {md_file}")
     print(f"  📐 主题: {theme}")
     print(f"  📐 尺寸: {width}x{height}")

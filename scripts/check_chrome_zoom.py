@@ -88,7 +88,7 @@ def check_chrome_zoom(source, *, scene, output_dir, browser_executable):
                     current = metrics()
                     if current['css_zoom'] != '1' or abs(current['width'] * zoom - baseline['width']) > 2:
                         result['issues'].append(f'{zoom}: 缩放指标不符合Chrome原生缩放')
-                    for theme in ('light', 'dark'):
+                    for theme in (('light',) if scene == 'report' else ('light', 'dark')):
                         page.evaluate('theme => setContentTheme(theme)', theme)
                         if scene == 'report':
                             page.locator('#next-slide').focus()

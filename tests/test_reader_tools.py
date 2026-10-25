@@ -219,9 +219,29 @@ class ReaderToolsTests(unittest.TestCase):
                 browser = p.chromium.launch(); page = browser.new_page(offline=True)
                 page.add_init_script('Object.defineProperty(window,"localStorage",{get(){throw Error("blocked")}})')
                 page.goto(html.as_uri()); page.click('#next-slide')
-                page.select_option('#palette-select', 'ink')
+                page.select_option('#palette-select', 'paper')
+                page.evaluate("setContentPalette('ink');setContentTheme('dark')")
                 self.assertEqual(page.locator('#slide-counter').inner_text(), '2 / 2')
-                self.assertEqual(page.evaluate('document.documentElement.dataset.palette'), 'ink')
+                self.assertEqual(page.evaluate('document.documentElement.dataset.palette'), 'paper')
+                self.assertEqual(page.evaluate('document.documentElement.dataset.theme'), 'light')
+                browser.close()
+
+    def test_report_background_is_independent_of_reading_preferences(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder); source = root / 'main.md'
+            source.write_text('# 汇报\n\n正文', encoding='utf-8')
+            html = build_content(source, scene='report', output=root / 'index.html')
+            with sync_playwright() as p:
+                browser = p.chromium.launch(); page = browser.new_page(offline=True)
+                page.add_init_script("localStorage.setItem('personal-html-workspace-theme','dark');localStorage.setItem('content-palette-light','warm')")
+                page.goto(html.as_uri())
+                self.assertEqual(page.evaluate('document.documentElement.dataset.palette'), 'white')
+                page.select_option('#palette-select', 'paper')
+                page.reload()
+                self.assertEqual(page.evaluate('document.documentElement.dataset.palette'), 'paper')
+                self.assertEqual(page.evaluate('document.documentElement.dataset.theme'), 'light')
+                self.assertEqual(page.evaluate("localStorage.getItem('personal-html-workspace-theme')"), 'dark')
+                self.assertEqual(page.evaluate("localStorage.getItem('content-palette-light')"), 'warm')
                 browser.close()
 
 

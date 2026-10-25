@@ -1,39 +1,45 @@
 (() => {
   const root = document.documentElement;
+  const isReport = document.body.classList.contains('scene-report');
   const systemTheme = matchMedia('(prefers-color-scheme: dark)');
-  let preference = root.dataset.defaultTheme || 'light';
-  try { preference = localStorage.getItem('personal-html-workspace-theme') || preference; } catch (_) {}
+  let preference = isReport ? 'light' : (root.dataset.defaultTheme || 'light');
+  if (!isReport) {
+    try { preference = localStorage.getItem('personal-html-workspace-theme') || preference; } catch (_) {}
+  }
   const themeButton = document.getElementById('theme-toggle');
-  const palettes = {light: ['white', 'paper', 'warm'], dark: ['graphite', 'midnight', 'ink']};
-  const selected = document.body.classList.contains('scene-report')
-    ? {light: 'white', dark: 'graphite'} : {light: 'warm', dark: 'midnight'};
-  for (const mode of ['light', 'dark']) {
+  const palettes = isReport ? {light: ['white', 'paper']}
+    : {light: ['white', 'paper', 'warm'], dark: ['graphite', 'midnight', 'ink']};
+  const selected = isReport ? {light: 'white'} : {light: 'warm', dark: 'midnight'};
+  const paletteKey = mode => isReport ? 'content-report-palette' : 'content-palette-' + mode;
+  for (const mode of Object.keys(palettes)) {
     try {
-      const saved = localStorage.getItem('content-palette-' + mode);
+      const saved = localStorage.getItem(paletteKey(mode));
       if (palettes[mode].includes(saved)) selected[mode] = saved;
     } catch (_) {}
   }
   const paletteSelect = document.getElementById('palette-select');
   window.setContentTheme = (theme, save = false) => {
-    preference = theme;
-    const actual = theme === 'system' ? (systemTheme.matches ? 'dark' : 'light') : theme;
+    preference = isReport ? 'light' : theme;
+    const actual = preference === 'system' ? (systemTheme.matches ? 'dark' : 'light') : preference;
     root.dataset.theme = actual;
     root.dataset.palette = selected[actual];
     if (paletteSelect) paletteSelect.value = selected[actual];
-    themeButton.setAttribute('aria-label', actual === 'dark' ? '切换到浅色主题' : '切换到深色主题');
-    themeButton.title = actual === 'dark' ? '切换到浅色主题' : '切换到深色主题';
-    if (save) { try { localStorage.setItem('personal-html-workspace-theme', theme); } catch (_) {} }
+    if (themeButton) {
+      themeButton.setAttribute('aria-label', actual === 'dark' ? '切换到浅色主题' : '切换到深色主题');
+      themeButton.title = actual === 'dark' ? '切换到浅色主题' : '切换到深色主题';
+    }
+    if (save && !isReport) { try { localStorage.setItem('personal-html-workspace-theme', theme); } catch (_) {} }
   };
   window.setContentPalette = (palette, save = false) => {
     const mode = Object.keys(palettes).find(mode => palettes[mode].includes(palette));
     if (!mode) return;
     selected[mode] = palette;
-    if (save) { try { localStorage.setItem('content-palette-' + mode, palette); } catch (_) {} }
+    if (save) { try { localStorage.setItem(paletteKey(mode), palette); } catch (_) {} }
     setContentTheme(mode, save);
   };
   paletteSelect?.addEventListener('change', () => setContentPalette(paletteSelect.value, true));
   setContentTheme(preference);
-  themeButton.addEventListener('click', () => setContentTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true));
+  themeButton?.addEventListener('click', () => setContentTheme(root.dataset.theme === 'dark' ? 'light' : 'dark', true));
   systemTheme.addEventListener('change', () => { if (preference === 'system') setContentTheme('system'); });
 
   const fontOutput = document.getElementById('font-size');
@@ -211,7 +217,6 @@
   const toc = document.getElementById('toc');
   const tocLinks = document.getElementById('toc-links');
   const tocButton = document.getElementById('toc-toggle');
-  const isReport = document.body.classList.contains('scene-report');
   const tocBackdrop = document.getElementById('toc-backdrop');
   const compactLayout = matchMedia('(max-width: 1000px)');
   const isCompact = () => compactLayout.matches || root.classList.contains('reader-compact');

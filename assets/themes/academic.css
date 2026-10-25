@@ -1,6 +1,7 @@
 /* Academic — 学术技术卡片。SPDX-License-Identifier: MIT */
 
-.card-container { --academic-background: #F7F4ED; background: var(--academic-background); }
+.card-container, .cover-container { --academic-background: #FAF9F6; background: var(--academic-background); }
+.card-container { padding: 36px; }
 
 .card-inner {
   --academic-blue: #3B5BDB;
@@ -12,7 +13,7 @@
   --academic-ink: #263238;
   --academic-muted: #586571;
   --academic-reference: #B8C1CB;
-  /* 内嵌SVG共用语义配色，原卡片的字体与版式继续沿用。 */
+  /* 内嵌SVG共用语义配色；HTML封面和正文沿用微软雅黑。 */
   --bg: var(--academic-background);
   --figure-bg: var(--academic-background);
   --text: var(--academic-ink);
@@ -25,13 +26,15 @@
   --compare-soft: var(--academic-orange-soft);
   --node-bg: #EAE7DE;
   --node-line: #C8C5BB;
-  --font-heading: 'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif;
-  --font-body: 'Cambria', 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'SimSun', serif;
+  --font-heading: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
+  --font-body: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif;
   --font-mono: 'SF Mono', 'Consolas', 'Liberation Mono', monospace;
   background: var(--academic-background);
   color: var(--academic-ink);
-  border: 1px solid var(--academic-reference);
-  border-radius: 14px;
+  border: 0;
+  border-radius: 0;
+  padding: 48px;
+  min-height: calc(var(--card-height) - 72px);
   box-shadow: none;
   backdrop-filter: none;
 }
@@ -40,7 +43,7 @@
   font-family: var(--font-body);
   color: var(--academic-ink);
   font-size: 38px;
-  line-height: 1.5;
+  line-height: 1.45;
   overflow-wrap: break-word;
 }
 
@@ -55,11 +58,12 @@
   border: 0;
 }
 
-.card-content h1 { font-size: 48px; margin: 0 0 28px; }
-.card-content h2 { font-size: 44px; margin: 32px 0 24px; }
-.card-content h3 { font-size: 40px; margin: 28px 0 20px; }
-.card-content p { margin-bottom: 28px; }
-.card-content > :last-child { margin-bottom: 0; }
+.card-content h1 { font-size: 60px; line-height: 1.35; letter-spacing: -.025em; margin: 0 0 36px; text-wrap: pretty; }
+.card-content h2 { font-size: 48px; margin: 40px 0 24px; }
+.card-content h3 { font-size: 44px; margin: 32px 0 20px; }
+.card-content p { margin: 0 0 32px; }
+.card-content > :first-child, .card-content .card-page > :first-child { margin-top: 0; }
+.card-content > :last-child, .card-content .card-page > :last-child { margin-bottom: 0; }
 .card-content strong, .card-content b { font-weight: 600; }
 .card-content em, .card-content i { color: inherit; }
 
@@ -85,9 +89,35 @@
   overflow-wrap: anywhere;
 }
 .card-content code { font-family: var(--font-mono); }
-.card-content table { color: var(--academic-ink); background: var(--academic-background); }
-.card-content th { background: var(--academic-blue-soft); }
-.card-content .katex-display { margin: 0.6em 0; }
+.card-content table { margin: 32px 0; color: var(--academic-ink); background: var(--academic-background); font-size: 34px; font-variant-numeric: tabular-nums; }
+.card-content :is(th,td) { padding: 18px 20px; border: 0; border-bottom: 1px solid var(--node-line); }
+.card-content th { background: transparent; border-bottom-color: var(--academic-ink); }
+.card-content .katex-display { margin: 0.6em 0; padding: 0.35em 0; overflow: visible; }
+.card-content img { display: block; max-width: 100%; height: auto; }
+.card-content figure { margin: 36px 0; }
+.card-content figure > svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+.card-content figcaption { margin-top: 20px; color: var(--academic-muted); font-size: 34px; line-height: 1.4; }
+
+/* 开篇、对照、过程按内容选用，普通段落不自动套容器。 */
+.card-content .card-lead { font-size: 40px; line-height: 1.45; }
+.card-content .card-claim { margin: 36px 0 0; padding-top: 28px; border-top: 1px solid var(--node-line); }
+.card-content .card-comparison { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 40px; margin: 36px 0; }
+.card-content .card-comparison > * { min-width: 0; padding-top: 24px; border-top: 2px solid var(--node-line); }
+.card-content .card-comparison h3 { margin: 0 0 20px; }
+.card-content .card-comparison > * > :last-child { margin-bottom: 0; }
+.card-content .card-steps { margin: 36px 0; padding-left: 1.3em; }
+.card-content .card-steps li { padding-left: 12px; margin-bottom: 32px; }
+.card-content .card-steps li::marker { color: var(--academic-blue); font-weight: 600; }
+.card-content .card-steps strong { display: block; margin-bottom: 12px; }
+.card-content .card-steps p { margin: 0; }
+
+/* 独立封面：标题与导语成组，避免标题和副标题分居两端。 */
+.cover-container { font-family: 'Microsoft YaHei', 'Source Han Sans CN', sans-serif; }
+.cover-container .cover-inner { inset: 0; width: 100%; height: 100%; padding: var(--cover-inset); justify-content: center; gap: 40px; }
+.cover-container .cover-title { flex: 0 0 auto; font-weight: 600; line-height: 1.35; letter-spacing: -.025em; overflow: visible; text-wrap: balance; }
+.cover-container .cover-subtitle { margin: 0; font-weight: 400; color: #586571; line-height: 1.45; }
+.cover-container .cover-subtitle:empty { display: none; }
+.cover-container .cover-emoji { margin-bottom: 0; }
 
 /* 颜色标识对象；普通说明仍保持墨灰。 */
 .card-content .proposed,
@@ -186,4 +216,4 @@
 
 .tags-container { margin-top: 24px; }
 .tag { color: var(--academic-muted); margin-right: 0.8em; }
-.page-number { color: var(--academic-muted); }
+.page-number { color: #586571; font-size: 24px; font-weight: 400; bottom: 32px; right: 84px; font-variant-numeric: tabular-nums; }

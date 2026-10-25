@@ -37,7 +37,7 @@ python -X utf8 scripts/content_review.py "<run_dir>" --review "<run_dir>/work/co
 python -X utf8 scripts/publish_content.py "<run_dir>"
 ```
 
-用 `--scene blog` 构建博客。汇报使用 `--scene report`，在代码围栏外以独立 `---` 分页，用 `<!-- notes: 讲者备注 -->` 添加备注；导出 PNG 可选择 `--theme light` 或 `--theme dark`。完整命令与 HTML 片段协议见[四场景流程](references/content-workflow.md)，策划见[场景规则](references/content-scenes.md)。
+用 `--scene blog` 构建博客。汇报使用 `--scene report`，在代码围栏外以独立 `---` 分页，用 `<!-- notes: 讲者备注 -->` 添加备注；默认白底，只提供纯白/纸白背景选择，导出仅支持 `--theme light`，不生成深色样张。学习/博客保留明暗两套，小红书固定纸白、不用纯白。完整命令与HTML片段协议见[四场景流程](references/content-workflow.md)，策划见[场景规则](references/content-scenes.md)。
 
 学习与博客共用阅读模板，内容范围和解释深度分别按上述目标取舍，支持10–24px字号调节、图片/SVG点击放大、目录和阅读进度；汇报使用16:9逐页演示，支持翻页、备注和固定页导出。汇报的正文、图注、页脚、小字和备注都只保留实际要讲的内容，制作提醒与文档不足的解释留在工作记录；真实研究限制与必要条件仍保留。两类HTML面向桌面，检查缩放后的布局，不另做手机适配验收。明暗主题、SVG与配图遵循[统一视觉规则](references/visual-system.md)，普通节点使用协调的中性底色。中文字体、CSS、JavaScript、KaTeX及本地图片内嵌，可离线打开。模板源码见 `assets/content/`，示例稿见 `demos/content/`。
 
@@ -137,7 +137,7 @@ Linux 若提示缺少浏览器系统库，执行 `.venv/bin/python -m playwright
 - **默认技术风格**：直接使用 `academic`，不要求每次选择主题；其他主题仅显式选择，详见 [STYLES.md](STYLES.md)
 - **自动分页**：根据内容渲染高度拆分为多张卡片，代码块、表格和 SVG 尽量保持完整
 - **技术内容支持**：内置 KaTeX 数学公式资源，并支持表格和内嵌 SVG
-- **academic 主题**：浅暖米色卡片（`#F7F4ED`），钴蓝／青蓝／琥珀橙，轻量几何和短标签；HTML 渲染中文优先微软雅黑，生图按 prompt 使用宋体／serif
+- **academic 主题**：纸白色卡片（`#FAF9F6`），钴蓝／青蓝／琥珀橙，轻量几何和短标签；HTML 渲染中文优先微软雅黑，生图按 prompt 使用宋体／serif
 - **Playwright 渲染**：高质量 HTML → PNG 输出
 - **保留制作源文件**：可随 PNG 保存分页 HTML 与离线数学资源，便于后续修改和复现
 - **独立生图流程**：正文仍由 HTML 排版，辅助解释图等非正文视觉使用 ImageGen
@@ -237,7 +237,7 @@ personal-html-workspace/
 │   ├── environment.md          # 大陆镜像安装与验证
 │   └── third-party.md          # 资源来源和许可
 ├── assets/
-│   ├── content/                # 新长文与汇报的离线明暗模板
+│   ├── content/                # 长文明暗、汇报浅色的离线模板
 │   ├── themes/                 # 各主题 CSS 文件
 │   │   ├── default.css
 │   │   ├── playful-geometric.css
@@ -258,12 +258,12 @@ personal-html-workspace/
 │       └── SKILL.md               # 插件入口，引用根目录规范
 └── scripts/
     ├── prepare_content.py     # 四场景工作副本与任务规则
-    ├── build_content.py       # 学习/博客/汇报的自包含明暗 HTML
-    ├── render_content.py      # 明暗检查、离线检查与汇报逐页 PNG
+    ├── build_content.py       # 按场景组装自包含 HTML
+    ├── render_content.py      # 场景外观、离线检查与汇报逐页 PNG
     ├── content_review.py      # 记录内容审读并绑定最终 HTML，交付前核对
     ├── publish_content.py     # 四场景短路径汇总与版本保留
     ├── download_content_fonts.py # 下载离线中文字体缓存
-    ├── check_content_palettes.py # 六套配色检查
+    ├── check_content_palettes.py # 长文六套、汇报两套配色检查
     ├── check_chrome_zoom.py   # Chrome 原生缩放检查
     ├── check_rednote.py       # 小红书源页检查与手机预览
     ├── content_markup.py     # 长文代码与图注标记

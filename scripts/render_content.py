@@ -1,4 +1,4 @@
-"""检查学习/博客/汇报 HTML 的明暗主题、离线资源与边界，并导出汇报 PNG。"""
+"""检查场景外观、离线资源与边界；学习/博客检查明暗，汇报只导出浅色 PNG。"""
 
 import argparse
 import hashlib
@@ -55,10 +55,15 @@ def inspect_page(page, scene):
 def render_content(source, *, scene, output_dir, theme='light', browser_executable=None):
     if scene not in ('learning', 'blog', 'report'):
         raise ValueError('小红书使用原 rednote_render.py；本检查器用于 learning、blog、report')
+    if scene == 'report' and theme != 'light':
+        raise ValueError('汇报仅输出浅色样张，默认纯白背景')
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
     generated = [(output, r'page-\d+\.png')]
     generated.extend((output / 'checks' / name, r'(?:page|section|screen)-\d+\.png') for name in ('light', 'dark'))
+    if scene == 'report':
+        generated.extend([(output, r'preview-dark\.png'),
+                          (output / 'checks/dark', r'window-\d+\.png')])
     for folder, pattern in generated:
         for previous in folder.glob('*.png'):
             if re.fullmatch(pattern, previous.name):
@@ -83,7 +88,7 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
         resource_failures, script_errors = [], []
         page.on('requestfailed', lambda request: resource_failures.append(request.url))
         page.on('pageerror', lambda error: script_errors.append(str(error)))
-        for selected_theme in ('light', 'dark'):
+        for selected_theme in (('light',) if scene == 'report' else ('light', 'dark')):
             page.set_viewport_size({'width': 1440, 'height': 1000})
             resource_failures.clear()
             script_errors.clear()
@@ -93,11 +98,12 @@ def render_content(source, *, scene, output_dir, theme='light', browser_executab
             if scene != 'report' and page.evaluate('typeof window.contentReadingReady !== "undefined"'):
                 page.wait_for_function('window.contentReadingReady === true')
             page.evaluate('theme => window.setContentTheme(theme)', selected_theme)
-            page.locator('#theme-toggle').click()
-            switched = page.evaluate('document.documentElement.dataset.theme')
-            if switched == selected_theme:
-                result['issues'].append('明暗主题按钮未切换')
-            page.locator('#theme-toggle').click()
+            if scene != 'report':
+                page.locator('#theme-toggle').click()
+                switched = page.evaluate('document.documentElement.dataset.theme')
+                if switched == selected_theme:
+                    result['issues'].append('明暗主题按钮未切换')
+                page.locator('#theme-toggle').click()
             page.screenshot(path=str(output / f'preview-{selected_theme}.png'))
             checks = output / 'checks' / selected_theme
             checks.mkdir(parents=True, exist_ok=True)
@@ -201,7 +207,7 @@ def main():
     parser.add_argument('html')
     parser.add_argument('--scene', choices=('learning', 'blog', 'report'), required=True)
     parser.add_argument('--output-dir', '-o', required=True)
-    parser.add_argument('--theme', choices=('light', 'dark'), default='light', help='汇报 PNG 使用的主题；两种主题都会检查')
+    parser.add_argument('--theme', choices=('light', 'dark'), default='light', help='学习/博客检查明暗；汇报仅支持light，默认纯白')
     parser.add_argument('--browser-executable')
     args = parser.parse_args()
     try:

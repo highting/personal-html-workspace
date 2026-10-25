@@ -1,9 +1,10 @@
-"""检查六套配色的实际对比度、控件可达性与内容边界，保存代表画面。"""
+"""检查场景可选配色：学习/博客六套，汇报纯白与纸白。"""
 
 import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 
 from playwright.sync_api import sync_playwright
@@ -18,6 +19,11 @@ PALETTES = ('white', 'paper', 'warm', 'graphite', 'midnight', 'ink')
 def check_content_palettes(source, *, scene, output_dir):
     source, output = Path(source).resolve(), Path(output_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
+    palettes = ('white', 'paper') if scene == 'report' else PALETTES
+    if scene == 'report':
+        for previous in output.glob('*.png'):
+            if re.fullmatch(r'(warm|graphite|midnight|ink)-(top|compact|slide-\d+)\.png', previous.name):
+                previous.unlink()
     result = {'html_sha256': hashlib.sha256(source.read_bytes()).hexdigest(), 'passed': False,
               'scene': scene, 'palettes': {}, 'issues': []}
     with sync_playwright() as p:
@@ -29,7 +35,7 @@ def check_content_palettes(source, *, scene, output_dir):
         if scene != 'report':
             page.wait_for_function('window.contentReadingReady')
         page.evaluate('document.documentElement.style.scrollBehavior="auto"')
-        for palette in PALETTES:
+        for palette in palettes:
             page.set_viewport_size({'width': 1440, 'height': 1000})
             page.select_option('#palette-select', palette)
             colors = inspect_palette(page)

@@ -68,7 +68,7 @@ class PublishTests(unittest.TestCase):
             'scope': '第一节覆盖问题与方法，第二节解释适用条件。',
             'content_review': '逐项核对第一节论断与材料，第二节保留比较条件。',
             'reader_review': '用第一节例子跟随关键步骤，图注说明对象对应关系。',
-            'visual_review': '已查看全部明暗页与正文、图注、备注，重点和条件可辨。',
+            'visual_review': '已按场景查看全部页面、正文、图注和备注，重点和条件可辨。',
             'warning_decisions': {},
         }
 

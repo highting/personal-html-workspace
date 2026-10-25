@@ -29,6 +29,8 @@
 
 |ID|Fingerprint|Root cause|Prevention check|Verification / Evidence|
 |---|---|---|---|---|
+|ERR-20261025-097|`appearance:shared-reading-theme-leaks-into-presentation`|将长文明暗偏好和双主题检查循环复用于汇报，与用户场景要求不符。|仅学习/博客保留明暗；汇报默认纯白，仅white/paper且独立保存偏好，不生成深色样张；小红书固定纸白#FAF9F6，不用纯白。模板、提示词、渲染/配色/缩放检查同步分路。|52项测试通过，覆盖阅读偏好隔离与背景记忆；`content.js`、`test_reader_tools.py`及本轮`qa.json`仅含light。|
+|ERR-20261025-096|`typography:cjk-math-ink-exceeds-tight-line-box`|收紧微软雅黑标题行高和正文行距后，实际字形/根号比布局盒低3–4px；页框未溢出仍触发文字越界。|改字号/行高后，检查独立中文标题、空副标题封面及根号分式的scroll/client尺寸；标题留足行高，展示公式增加上下内距，不放宽越界断言。|标题1.35行高、公式0.35em内距后26项回归通过，独立标题高度/滚高均81px；`archive/checks/template-focus-20261025/preview-check.json`。|
 |ERR-20261025-095|`workflow:unchecked-validation-exit-before-commit`|顺序await不因子命令非零自动中止。|提交/发布/迁移前显式检查每项exit_code；非零立即停，不能打印后继续。|许可空白清理后暂存检查为0；`assets/vendor/font-awesome/LICENSE.txt`。|
 |ERR-20261025-094|`qa:three-digit-hex-in-six-digit-palette-parser`|检查器仅解析六位色值，body覆盖未覆盖报告根节点。|语义色用`#RRGGBB`并核对根节点实际颜色；扩展语法先补解析测试。|八页明暗、六色、原生三档通过；`scripts/visual_qa.py:45`。|
 |ERR-20261023-093|`qa:native-zoom-strict-float-edge-comparison`|滚动尺寸取整与矩形亚像素精度不同。|原生缩放几何用2px容差，同时核对滚动终态和截图，不放宽内容安全区。|三场景原生三档通过；`scripts/check_chrome_zoom.py`。|

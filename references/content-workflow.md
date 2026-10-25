@@ -67,7 +67,7 @@ Markdown围栏外的独立 `---` 作为分页符，代码和公式保持完整�
 </section>
 ```
 
-同一HTML片段可包含多页；必须使用上述class和标记，正文在 `slide-body` 安全区内。有真实对照或图文分工时使用 `.columns` 两栏，单组内容不留空栏；`.metric` 只强调支持核心判断的数值。表格和内联SVG可按[视觉规则](visual-system.md)突出差异，数值只能来自真实材料或标注教学构造。固定页放不下先删冗余，再按论证关系调整或增页。
+同一HTML片段可包含多页；必须使用上述class和标记，正文在 `slide-body` 安全区内。按信息关系复用版式：`.columns` 为等宽双栏；`.report-split` 为左侧说明、右侧证据，说明标题32px且两栏顶边对齐；`.report-comparison` 按实际子项排列两到三组开放对照；`.report-timeline` 按实际步骤分栏，过多则拆页；单组内容使用完整内容区。表格中的 `.report-value` 显式右对齐数值，`.report-highlight` 只强调关键行或单元格；不自动猜测指标含义。数值来自真实材料或标注教学构造，图表的尺度和条件按[视觉规则](visual-system.md)核对。可复用源稿见[版式样例](../demos/content/README.md)。固定页放不下先删冗余，再按论证关系调整或增页。
 
 ```bash
 python -X utf8 scripts/build_content.py "<work_entry>" --scene report --output "<run_dir>/work/index.html"
@@ -78,7 +78,7 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene rep
 
 ## 检查与汇总
 
-检查器离线加载HTML，输出 `qa.json`、明暗首屏与 `checks/` 的全篇、分屏、章节或逐页截图；汇报另交所选主题 `page-01.png` 等。`checks/content-text.json` 提取页面文字、SVG标签与讲者备注并标记HTML哈希，供代理核对完整文案；位图文字、公式含义与代码仍须结合原页审读，文本提取不能代替实际查看。长文检查10/12/24px字号、100/150/200% CSS布局缩放，另按实际浏览器条件验证原生缩放；不把CSS缩放或DPR记录为原生浏览器操作。学习/博客/汇报不单独验收手机适配。实际查看全部内容，测试目录、主题、字号、图像放大与备注；逐项处理 `warnings` 中的可疑制作文案，覆盖列表、表格、页脚和备注。关键词只提供线索，不自动删除内容，也不能覆盖所有说法；没有警告仍须全量审读，存在警告则必须在最终记录中逐项说明保留理由。QA不能证明内容或审美已通过。
+检查器离线加载HTML，输出 `qa.json` 与 `checks/` 截图。学习/博客生成明暗首屏、全篇与分屏截图；汇报只生成浅色检查图和白底 `page-01.png` 等，不生成深色样张。`checks/content-text.json` 提取页面文字、SVG标签与讲者备注并标记HTML哈希，供代理核对完整文案；位图文字、公式含义与代码仍须结合原页审读，文本提取不能代替实际查看。长文检查10/12/24px字号、100/150/200% CSS布局缩放，另按实际浏览器条件验证原生缩放；不把CSS缩放或DPR记录为原生浏览器操作。学习/博客/汇报不单独验收手机适配。实际查看全部内容，测试目录、主题、字号、图像放大与备注；逐项处理 `warnings` 中的可疑制作文案，覆盖列表、表格、页脚和备注。关键词只提供线索，不自动删除内容，也不能覆盖所有说法；没有警告仍须全量审读，存在警告则必须在最终记录中逐项说明保留理由。QA不能证明内容或审美已通过。
 
 已有完整桌面Chrome时，可运行 `check_chrome_zoom.py` 验证100/150/200%的原生页面缩放，传入 `--scene`、`--output-dir` 和 `--browser-executable`。脚本使用独立临时普通配置，通过Chrome外观设置的Page zoom控件操作，核对DPR、CSS视口和CSS zoom，输出 `qa-chrome-zoom.json` 与截图；不修改日常浏览器配置。Headless Shell不提供该设置界面。原生zoom下CSS视口与浏览器图面像素不同，截图直接捕获完整表面并分屏覆盖内容，不用CSS坐标裁图。键盘快捷键与其他浏览器需另行验证，记录必须写明实际方法。
 
@@ -94,7 +94,7 @@ python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene rep
 
 四个文字字段由代理填写实际依据，用户不需要填写表单。保留来源与未验证事项；真实研究边界仍在正文准确表达，制作过程未执行的检查留在记录。算法动画逐步对照代码核对输入、条件、操作、前后状态和结果，实际查看关键分支与更新，并验证回退与重置；流程框淡入或仅检查按钮、步号变化不算通过。
 
-六套配色另运行 `check_content_palettes.py <artifact_dir>/index.html --scene <scene> --output-dir <artifact_dir>/checks/palettes`。它逐套检查语义文字对比度、桌面三档窗口的控件与内容边界，并保存首屏、图表/代码或逐页画面；长文另保存外置阅读工具栏、打印样式和动画步骤。原生缩放仍使用上述独立检查，不能将六套窗口检查记作六套原生缩放检查。实际查看正文、各配色代表画面和动画状态后交付。
+配色检查运行 `check_content_palettes.py <artifact_dir>/index.html --scene <scene> --output-dir <artifact_dir>/checks/palettes`。学习/博客检查六套配色，汇报只检查纯白与纸白；逐套核对语义文字对比度、桌面三档窗口的控件与内容边界，并保存代表画面。长文另保存外置阅读工具栏、打印样式和动画步骤。原生缩放使用上述独立检查，学习/博客覆盖明暗，汇报仅浅色；不能将窗口检查记作原生缩放检查。实际查看后交付，不额外生成汇报深色或小红书明暗样张。
 
 ```bash
 python -X utf8 scripts/content_review.py "<run_dir>" --review "<run_dir>/work/content-review.json"
