@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>网页编辑器</title>
+<style id="content-editor-style">@@EDITORCSS@@</style>
+</head>
+<body class="editor-launcher">
+<main class="editor-welcome">
+  <p class="editor-kicker">HTML CRAFT</p>
+  <h1>编辑生成的网页</h1>
+  <p>打开本项目的学习、博客或汇报 HTML，直接修改文字、样式和图片，另存为可继续编辑的网页。</p>
+  <label class="editor-open">打开 HTML<input id="open-edit-document" type="file" accept=".html,.htm,text/html"></label>
+  <p class="editor-help">文件在本机处理。保存会下载修改后的副本，原文件保留。</p>
+  <p id="editor-open-status" role="status"></p>
+</main>
+<script id="content-editor-runtime">@@EDITORJS@@</script>
+</body>
+</html>

@@ -17,6 +17,7 @@ from fontTools.ttLib import TTFont
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from scripts.rednote_render import KATEX_DIR, convert_markdown_to_html, parse_markdown_file
 from scripts.content_markup import enhance_code_blocks, group_figure_captions
+from scripts.content_editor import authoring_json, read_authoring_data
 
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATES = ROOT / 'assets/content'
@@ -138,11 +139,18 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
     source = Path(source).resolve()
     is_html = source.suffix.lower() in ('.html', '.htm')
     parsed = {'metadata': {}, 'body': source.read_text(encoding='utf-8')} if is_html else parse_markdown_file(str(source))
+    edited = read_authoring_data(parsed['body']) if is_html else None
+    if edited:
+        if edited['scene'] != scene:
+            raise ValueError('编辑稿场景与 --scene 不一致，请沿用原场景')
+        parsed = {'metadata': edited['metadata'], 'body': edited['body']}
     metadata, text = parsed['metadata'], parsed['body']
     heading = re.search(r'^#\s+(.+)$', text, re.M)
     title = title or str(metadata.get('title') or (heading.group(1) if heading else source.stem))
     convert = lambda body: body if is_html else convert_markdown_to_html(body, 'katex')
-    if scene == 'report':
+    if edited:
+        body = text
+    elif scene == 'report':
         pages = [text] if is_html else split_slides(text)
         if is_html and 'data-export-page' in text:
             body = text
@@ -163,24 +171,33 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
     body = inline_images(body, source)
     description = str(metadata.get('description', ''))
     meta = ' · '.join(str(metadata[key]) for key in ('author', 'date') if metadata.get(key))
+    description_html = f'<p class="description">{escape(description)}</p>' if description else ''
+    header = (edited or {}).get('header') or f'<h1>{escape(title)}</h1>{description_html}<p class="article-meta">{escape(meta)}</p>'
+    if edited and title != metadata.get('title'):
+        header = re.sub(r'(<h1\b[^>]*>).*?(</h1>)', lambda match: match[1] + escape(title) + match[2], header, count=1, flags=re.S)
+    document_id = (edited or {}).get('documentId') or hashlib.sha256(str(metadata.get('document_id', scene + ':' + title)).encode()).hexdigest()[:20]
     template = (TEMPLATES / ('report.html' if scene == 'report' else 'document.html')).read_text(encoding='utf-8')
     runtime = '\n'.join((TEMPLATES / name).read_text(encoding='utf-8') for name in
                         (['content.js', 'animation.js'] if scene == 'report' else
                          ['content.js', 'font-picker.js', 'image-size.js', 'reading.js', 'reader-tools.js', 'animation.js']))
+    editor_runtime = (TEMPLATES / 'editor.js').read_text(encoding='utf-8')
     # 控件文案和动态步骤使用同一个离线字形子集。
-    body_font_text = unescape(body) + template + runtime
+    body_font_text = unescape(body + header) + template + runtime + editor_runtime
     font_css, font_license = font_assets(body_font_text + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图图解适合窗口放大关闭正文字号减小增大点击复制代码已复制复制失败请手动选择复制章节链接展开全部收起行上次读到继续阅读忽略补充说明向左右滚动查看完整表格前面的列→←↑−#')
     if scene == 'report':
         report_css, report_license = report_font_assets()
         font_css += report_css
         font_license += report_license
     values = {
-        'TITLE': escape(title), 'DESCRIPTION': f'<p class="description">{escape(description)}</p>' if description else '',
+        'TITLE': escape(title), 'DESCRIPTION': description_html, 'HEADER': header,
         'META': escape(meta), 'LABEL': LABELS[scene], 'SCENE': scene, 'THEME': theme,
-        'DOCUMENTID': hashlib.sha256(str(metadata.get('document_id', scene + ':' + title)).encode()).hexdigest()[:20],
+        'DOCUMENTID': document_id,
         'CSS': (TEMPLATES / 'content.css').read_text(encoding='utf-8') +
                ('\n' + (TEMPLATES / 'report.css').read_text(encoding='utf-8') if scene == 'report' else ''),
         'JS': runtime,
+        'EDITORCSS': (TEMPLATES / 'editor.css').read_text(encoding='utf-8'), 'EDITORJS': editor_runtime,
+        'AUTHORING': authoring_json({'version': 1, 'scene': scene, 'metadata': dict(metadata, title=title),
+                                    'documentId': document_id, 'body': body, 'header': header if scene != 'report' else ''}),
         'MATH': math_assets(), 'BODY': body,
         'FONT': font_css, 'FONTLICENSE': font_license,
     }
@@ -193,7 +210,7 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('source', help='已整理好的 Markdown 或可信 HTML 正文片段')
+    parser.add_argument('source', help='已整理好的 Markdown、可信 HTML 正文片段或网页编辑器导出的 HTML')
     parser.add_argument('--scene', choices=LABELS, default='learning')
     parser.add_argument('--output', '-o', required=True)
     parser.add_argument('--title')

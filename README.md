@@ -45,6 +45,8 @@ python -X utf8 scripts/publish_content.py "<run_dir>"
 
 可查看[四场景示例源稿与生成方法](demos/content/README.md)。生成截图保留在本地 `archive/demo-renders/`。
 
+生成后需要手动微调时，点击网页工具栏的“编辑”。已有网页可双击根目录的 [编辑网页.cmd](编辑网页.cmd)，选择本项目的 HTML 后修改；支持文字、样式、替换图片、上下移动与删除内容块、撤销和重做。“另存 HTML”下载可继续编辑的副本，原文件保留。公式、代码和 SVG 内部结构暂按整体处理。编辑副本重新进入正式交付的方式见[手动编辑 HTML](references/content-workflow.md#手动编辑-html)。
+
 ## 小红书日常入口
 
 小红书新材料也先拖入 `inputs/待分类/`，保留正文与配图的相对路径，再说“处理新材料，做成小红书图文”。已有主题可以点名：

@@ -7,17 +7,20 @@
 <title>@@TITLE@@</title>
 <style>@@FONT@@
 @@CSS@@</style>
+<style id="content-editor-style">@@EDITORCSS@@</style>
 @@FONTLICENSE@@
 @@MATH@@
 </head>
-<body class="scene-report">
-<header class="toolbar" aria-label="汇报工具" data-export-ui><div class="tools"><button id="toc-toggle" aria-label="目录" title="目录（M）" aria-controls="toc" aria-expanded="false"><span class="report-icon" aria-hidden="true">&#xf0c9;</span></button><button id="notes-toggle" aria-controls="speaker-notes" aria-expanded="false" title="讲者备注（N）">备注</button><select id="palette-select" aria-label="页面背景"><option value="white">纯白</option><option value="paper">纸白</option></select></div></header>
+<body class="scene-report" data-document-id="@@DOCUMENTID@@">
+<header class="toolbar" aria-label="汇报工具" data-export-ui><div class="tools"><button id="toc-toggle" aria-label="目录" title="目录（M）" aria-controls="toc" aria-expanded="false"><span class="report-icon" aria-hidden="true">&#xf0c9;</span></button><button id="notes-toggle" aria-controls="speaker-notes" aria-expanded="false" title="讲者备注（N）">备注</button><select id="palette-select" aria-label="页面背景"><option value="white">纯白</option><option value="paper">纸白</option></select><button id="edit-page" type="button" title="编辑文字、样式和图片">编辑</button></div></header>
 <button id="toc-backdrop" class="toc-backdrop" aria-label="关闭目录遮罩" hidden tabindex="-1" data-export-ui></button>
 <aside id="toc" class="toc report-toc" aria-label="汇报目录" data-export-ui><div class="toc-heading"><p class="toc-label">汇报目录</p><button id="toc-close" aria-label="关闭目录"><span class="report-icon" aria-hidden="true">&#xf00d;</span></button></div><nav id="toc-links"></nav></aside>
 <main class="presentation" id="content"><div class="slide-stage">@@BODY@@</div></main>
 <footer class="slide-controls" data-export-ui><button id="previous-slide" aria-label="上一页" title="上一页（←）"><span class="report-icon" aria-hidden="true">&#xf104;</span></button><span id="slide-counter" aria-live="polite"></span><button id="next-slide" aria-label="下一页" title="下一页（→）"><span class="report-icon" aria-hidden="true">&#xf105;</span></button></footer>
 <div class="report-progress" aria-hidden="true" data-export-ui><span></span></div>
 <aside id="speaker-notes" class="speaker-notes" hidden data-export-ui><p class="toc-label">讲者备注</p><div id="notes-content"></div></aside>
-<script>@@JS@@</script>
+<script id="content-authoring-data" type="application/json">@@AUTHORING@@</script>
+<script id="content-editor-runtime">@@EDITORJS@@</script>
+<script id="content-runtime">@@JS@@</script>
 </body>
 </html>
