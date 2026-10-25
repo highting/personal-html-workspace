@@ -12,35 +12,35 @@ description: 用同一组 token，看清候选、验证和缓存回退之间的�
 <path d="M590 40V350" stroke="var(--muted)" stroke-dasharray="6 6" fill="none"/>
 <text x="610" y="30" font-size="25" text-anchor="start" fill="var(--text)">首个分歧</text>
 <text x="25" y="102" font-size="26" text-anchor="start" fill="var(--text)">草稿</text>
-<rect x="200" y="60" width="100" height="62" rx="6" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="200" y="60" width="100" height="62" rx="10" fill="var(--node-bg)" stroke="var(--node-line)"/>
 <text x="250" y="102" font-size="30" text-anchor="middle" fill="var(--text)">P</text>
-<rect x="335" y="60" width="100" height="62" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="335" y="60" width="100" height="62" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
 <text x="385" y="102" font-size="30" text-anchor="middle" fill="var(--text)">a</text>
-<rect x="470" y="60" width="100" height="62" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="470" y="60" width="100" height="62" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
 <text x="520" y="102" font-size="30" text-anchor="middle" fill="var(--text)">b</text>
-<rect x="605" y="60" width="100" height="62" rx="6" fill="var(--compare-soft)" stroke="var(--compare)"/>
+<rect x="605" y="60" width="100" height="62" rx="10" fill="var(--compare-soft)" stroke="var(--compare)"/>
 <text x="655" y="102" font-size="30" text-anchor="middle" fill="var(--text)">c</text>
 <path d="M615 70L695 112" stroke="var(--compare)" stroke-width="2"/>
-<rect x="740" y="60" width="100" height="62" rx="6" fill="var(--compare-soft)" stroke="var(--compare)"/>
+<rect x="740" y="60" width="100" height="62" rx="10" fill="var(--compare-soft)" stroke="var(--compare)"/>
 <text x="790" y="102" font-size="30" text-anchor="middle" fill="var(--text)">e</text>
 <path d="M750 70L830 112" stroke="var(--compare)" stroke-width="2"/>
 <text x="25" y="212" font-size="26" text-anchor="start" fill="var(--text)">验证</text>
-<rect x="200" y="170" width="100" height="62" rx="6" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="200" y="170" width="100" height="62" rx="10" fill="var(--node-bg)" stroke="var(--node-line)"/>
 <text x="250" y="212" font-size="30" text-anchor="middle" fill="var(--text)">P</text>
-<rect x="335" y="170" width="100" height="62" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="335" y="170" width="100" height="62" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
 <text x="385" y="212" font-size="30" text-anchor="middle" fill="var(--text)">a</text>
-<rect x="470" y="170" width="100" height="62" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="470" y="170" width="100" height="62" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
 <text x="520" y="212" font-size="30" text-anchor="middle" fill="var(--text)">b</text>
-<rect x="605" y="170" width="100" height="62" rx="6" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="605" y="170" width="100" height="62" rx="10" fill="var(--node-bg)" stroke="var(--node-line)"/>
 <text x="655" y="212" font-size="30" text-anchor="middle" fill="var(--text)">d</text>
 <text x="25" y="322" font-size="26" text-anchor="start" fill="var(--text)">输出</text>
-<rect x="200" y="280" width="100" height="62" rx="6" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="200" y="280" width="100" height="62" rx="10" fill="var(--node-bg)" stroke="var(--node-line)"/>
 <text x="250" y="322" font-size="30" text-anchor="middle" fill="var(--text)">P</text>
-<rect x="335" y="280" width="100" height="62" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="335" y="280" width="100" height="62" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
 <text x="385" y="322" font-size="30" text-anchor="middle" fill="var(--text)">a</text>
-<rect x="470" y="280" width="100" height="62" rx="6" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="470" y="280" width="100" height="62" rx="10" fill="var(--accent-soft)" stroke="var(--accent)"/>
 <text x="520" y="322" font-size="30" text-anchor="middle" fill="var(--text)">b</text>
-<rect x="605" y="280" width="100" height="62" rx="6" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="605" y="280" width="100" height="62" rx="10" fill="var(--node-bg)" stroke="var(--node-line)"/>
 <text x="655" y="322" font-size="30" text-anchor="middle" fill="var(--text)">d</text>
 <text x="335" y="390" font-size="24" text-anchor="start" fill="var(--text)">接受连续匹配的 a、b</text>
 <text x="650" y="390" font-size="24" text-anchor="start" fill="var(--text)">用 d 纠正</text>
@@ -58,56 +58,56 @@ description: 用同一组 token，看清候选、验证和缓存回退之间的�
 <svg viewBox="0 0 900 490" style="font-family:var(--default-font)" role="img" aria-label="每个token画为上下K和V两格。三行中前缀P与a b保留；c e对应列被清空；处理d后第三列写入新的KV。">
 <text x="25" y="30" font-size="25" text-anchor="start" fill="var(--text)">每列对应一个 token；上格 K，下格 V</text>
 <text x="24" y="127" font-size="25" text-anchor="start" fill="var(--text)">验证后</text>
-<rect x="200" y="90" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
-<rect x="200" y="120" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="200" y="90" width="100" height="58" rx="8" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<path d="M200 119H300" stroke="var(--node-line)"/>
 <text x="250" y="75" font-size="25" text-anchor="middle" fill="var(--text)">P</text>
-<rect x="335" y="90" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
-<rect x="335" y="120" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="335" y="90" width="100" height="58" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<path d="M335 119H435" stroke="var(--accent)"/>
 <text x="385" y="75" font-size="25" text-anchor="middle" fill="var(--text)">a</text>
-<rect x="470" y="90" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
-<rect x="470" y="120" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="470" y="90" width="100" height="58" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<path d="M470 119H570" stroke="var(--accent)"/>
 <text x="520" y="75" font-size="25" text-anchor="middle" fill="var(--text)">b</text>
-<rect x="605" y="90" width="100" height="28" fill="var(--compare-soft)" stroke="var(--compare)"/>
-<rect x="605" y="120" width="100" height="28" fill="var(--compare-soft)" stroke="var(--compare)"/>
+<rect x="605" y="90" width="100" height="58" rx="8" fill="var(--compare-soft)" stroke="var(--compare)"/>
+<path d="M605 119H705" stroke="var(--compare)"/>
 <text x="655" y="75" font-size="25" text-anchor="middle" fill="var(--text)">c</text>
 <path d="M613 97L697 141" stroke="var(--compare)" stroke-width="2"/>
-<rect x="740" y="90" width="100" height="28" fill="var(--compare-soft)" stroke="var(--compare)"/>
-<rect x="740" y="120" width="100" height="28" fill="var(--compare-soft)" stroke="var(--compare)"/>
+<rect x="740" y="90" width="100" height="58" rx="8" fill="var(--compare-soft)" stroke="var(--compare)"/>
+<path d="M740 119H840" stroke="var(--compare)"/>
 <text x="790" y="75" font-size="25" text-anchor="middle" fill="var(--text)">e</text>
 <path d="M748 97L832 141" stroke="var(--compare)" stroke-width="2"/>
 <text x="24" y="257" font-size="25" text-anchor="start" fill="var(--text)">逻辑回退</text>
-<rect x="200" y="220" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
-<rect x="200" y="250" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="200" y="220" width="100" height="58" rx="8" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<path d="M200 249H300" stroke="var(--node-line)"/>
 <text x="250" y="205" font-size="25" text-anchor="middle" fill="var(--text)">P</text>
-<rect x="335" y="220" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
-<rect x="335" y="250" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="335" y="220" width="100" height="58" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<path d="M335 249H435" stroke="var(--accent)"/>
 <text x="385" y="205" font-size="25" text-anchor="middle" fill="var(--text)">a</text>
-<rect x="470" y="220" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
-<rect x="470" y="250" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="470" y="220" width="100" height="58" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<path d="M470 249H570" stroke="var(--accent)"/>
 <text x="520" y="205" font-size="25" text-anchor="middle" fill="var(--text)">b</text>
-<rect x="605" y="220" width="100" height="28" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
-<rect x="605" y="250" width="100" height="28" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
+<rect x="605" y="220" width="100" height="58" rx="8" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
+<path d="M605 249H705" stroke="var(--muted)" stroke-dasharray="5 5"/>
 <text x="655" y="205" font-size="25" text-anchor="middle" fill="var(--text)">c</text>
-<text x="655" y="310" font-size="22" text-anchor="middle" fill="var(--text)">d 待计算</text>
-<rect x="740" y="220" width="100" height="28" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
-<rect x="740" y="250" width="100" height="28" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
+<text x="655" y="306" font-size="22" text-anchor="middle" fill="var(--text)">d 待计算</text>
+<rect x="740" y="220" width="100" height="58" rx="8" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
+<path d="M740 249H840" stroke="var(--muted)" stroke-dasharray="5 5"/>
 <text x="790" y="205" font-size="25" text-anchor="middle" fill="var(--text)">e</text>
 <text x="25" y="310" font-size="22" text-anchor="start" fill="var(--text)">保留前缀，失效后缀</text>
 <text x="24" y="387" font-size="25" text-anchor="start" fill="var(--text)">处理 d 后</text>
-<rect x="200" y="350" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
-<rect x="200" y="380" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="200" y="350" width="100" height="58" rx="8" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<path d="M200 379H300" stroke="var(--node-line)"/>
 <text x="250" y="335" font-size="25" text-anchor="middle" fill="var(--text)">P</text>
-<rect x="335" y="350" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
-<rect x="335" y="380" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="335" y="350" width="100" height="58" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<path d="M335 379H435" stroke="var(--accent)"/>
 <text x="385" y="335" font-size="25" text-anchor="middle" fill="var(--text)">a</text>
-<rect x="470" y="350" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
-<rect x="470" y="380" width="100" height="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<rect x="470" y="350" width="100" height="58" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+<path d="M470 379H570" stroke="var(--accent)"/>
 <text x="520" y="335" font-size="25" text-anchor="middle" fill="var(--text)">b</text>
-<rect x="605" y="350" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
-<rect x="605" y="380" width="100" height="28" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<rect x="605" y="350" width="100" height="58" rx="8" fill="var(--node-bg)" stroke="var(--node-line)"/>
+<path d="M605 379H705" stroke="var(--node-line)"/>
 <text x="655" y="335" font-size="25" text-anchor="middle" fill="var(--text)">d</text>
-<rect x="740" y="350" width="100" height="28" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
-<rect x="740" y="380" width="100" height="28" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
+<rect x="740" y="350" width="100" height="58" rx="8" fill="none" stroke="var(--muted)" stroke-dasharray="5 5"/>
+<path d="M740 379H840" stroke="var(--muted)" stroke-dasharray="5 5"/>
 <text x="790" y="335" font-size="25" text-anchor="middle" fill="var(--text)">e</text>
 <text x="200" y="466" font-size="22" text-anchor="start" fill="var(--text)">P 的整段缓存压缩为一列；格子表示结构，不表示实际张量维度。</text>
 </svg>
