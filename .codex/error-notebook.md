@@ -4,6 +4,38 @@
 
 历史证据在2026-10-03集中归档：旧 `output/_work/` 对应 `archive/work/`，旧 `output/blogs/` 对应 `archive/legacy-runs/`；其他路径按本地 `archive/manifest.json` 的目录前缀映射查找。原检查记录与来源快照保持不变，归档不随 Git 分发。
 
+## ERR-20261025-095 — 未检查命令返回码就继续提交
+
+- Fingerprint: `workflow:unchecked-validation-exit-before-commit`
+- Status: active
+- First seen: 2026-10-25
+- Last seen: 2026-10-25
+- Occurrences: 1
+- Scope: functions.exec中的校验与本地Git提交
+- Symptom: 暂存差异检查指出上游许可文本有行尾空格并返回1，编排仍执行了提交。
+- Root cause: 顺序await工具调用只保证顺序，不会因子命令非零退出自动中止脚本。
+- Wrong assumption/action: 将验证与提交放在同一调用内，却未判断验证结果的exit_code。
+- Correct approach: 清理不改变许可内容的行尾空格，确认检查返回0，再修订本轮未推送的本地提交。
+- Prevention check: 验证之后的提交、发布与迁移必须显式检查每个exit_code；非零立即停止，不把结果打印当成成功判断。
+- Verification: 许可文本规范化后，git diff --cached --check返回0；后续调用已加返回码判断。
+- Evidence: `assets/vendor/font-awesome/LICENSE.txt`及本轮Git校验、提交编排。
+
+## ERR-20261025-094 — 三位颜色简写不符合现有配色检查器的输入契约
+
+- Fingerprint: `qa:three-digit-hex-in-six-digit-palette-parser`
+- Status: active
+- First seen: 2026-10-25
+- Last seen: 2026-10-25
+- Occurrences: 1
+- Scope: 汇报语义配色变量与 `visual_qa.py::inspect_palette`
+- Symptom: 浏览器显示正常的深灰字，明暗检查却将多个文字配色组合判为不通过。
+- Root cause: 新变量采用合法CSS简写 `#222`，检查器按六位十六进制分组解析，最后一个通道变成NaN；早期把变量只设在body时，根节点检查也未覆盖实际报告颜色。
+- Wrong assumption/action: 认为所有浏览器支持的颜色写法都能被现有QA直接读取，并将body覆盖与根语义变量视为等价。
+- Correct approach: 将报告配色限定到含报告的根节点，用 `#222222` 保持原色，同时将原版蓝微调到满足现有最小对比度的相邻色；未放宽检查或手改QA。
+- Prevention check: 新语义颜色使用六位 `#RRGGBB`，与根节点检查器契约保持一致；同时核对实际页面颜色。若要支持其他颜色语法，应先扩展解析与对应测试。
+- Verification: 当前八页明暗、六套配色和原生100/150/200%检查通过；四项报告定向回归通过，实际字体与颜色另行核验。
+- Evidence: `assets/content/report.css`、`scripts/visual_qa.py:45`；`archive/checks/quarto-template-20261025/design-qa.md`及本轮汇报归档run。
+
 ## ERR-20261023-093 — 原生缩放中的浮点边界被误判为目录裁切
 
 - Fingerprint: `qa:native-zoom-strict-float-edge-comparison`
@@ -89,16 +121,16 @@
 - Fingerprint: `report:prose-completeness-overrides-audience-and-evidence`
 - Status: active
 - First seen: 2026-10-22
-- Last seen: 2026-10-23
-- Occurrences: 4
+- Last seen: 2026-10-25
+- Occurrences: 5
 - Scope: 汇报Prompt、场景与视觉规则、导师汇报改版
-- Symptom: 用户指出字多、重点弱、无信息副标题、内容偏左和矩形卡片过重，并纠正“一页一个讲解任务”；后续指出解释文档不足的备注型小字不应出现，全部内容应属于实际汇报，图表或一段结论均可突出成果。
-- Root cause: 共同规则强调完整解释，汇报未充分明确观众页、跨页论证与讲者展开的分工，也未将制作过程说明彻底移出成品。
+- Symptom: 用户指出字多、重点弱、内容偏左和矩形卡片过重，并纠正“一页一个讲解任务”；后续要求排除制作型小字并突出成果。参照Quarto改版后仍指出观感差，要求完全参照其风格；实看发现中文标题过大过重、字号层级竞争、双栏基线与表格断行不稳。
+- Root cause: 汇报未充分明确观众页、跨页论证与讲者展开的分工，也未将制作过程说明彻底移出成品；模板借鉴又混入其他主题，并直接套用英文字号，缺少可比图面与中文实际字面的校准。
 - Wrong assumption/action: 以逐页解释段落和统一方框代替证据选择、视觉主次与讲解节奏。
-- Correct approach: 一个任务可跨页，尽早突出成果、依据与意义；主视觉按内容选择图表、机制图或明确结论。汇报样式独立于长文：开放对照、数字主视觉、状态轨迹与结论页按证据分工，去掉重复课题页眉页脚和无边界含义的图框。制作提醒与文档不足说明只留工作记录，备注只补实际讲解；真实进展、限制与必要条件简明保留。
-- Prevention check: 先审整组论证和成果重点，再逐页逐句检查标题、正文、图中标签、图注、表下注、页脚、小字及备注是否属于实际汇报。资料获取操作、会前待办和制作说明不转存备注；必要研究边界不能误删。数据不造、任务不硬塞一页，不把每个短句套进方框。
-- Verification: 2026-10-23完成Infra八页新版，主代理逐页查看纯白/石墨共16张PNG；边界、六配色、原生Chrome100/150/200%逐页、图像放大、备注开合与导出隐藏通过。第4页突出300组验证，第5页以同尺度条形呈现16/8MB，理论模型与实测结果边界清楚。
-- Evidence: `assets/content/report.css`、`scripts/build_content.py`、`prompts/scenes/report.txt`、`references/visual-system.md`；`archive/work/Infra系统学习-汇报/20261023-211946-741411-report-html/delivery.md`和`delivery/checks/`。
+- Correct approach: 一个任务可跨页，尽早突出成果、依据与意义，主视觉按证据选择。按用户指定的Quarto默认演示统一封面、列表、图表与左说明右证据双栏；沿用相对字号比例，校准中文字重与字面，减少超大数字、重复眉题和无含义的图框。制作提醒只留工作记录，备注只补实际讲解；真实限制与必要条件简明保留。
+- Prevention check: 先审整组论证，再逐句核对全部文案与备注；资料操作、会前待办与制作说明不转存备注，必要研究边界不误删。指定视觉参照时先实看同视口源图，按比例统一校准中文，核对标题黑度、行长、两栏顶边与词组断行；用同一比较画面复核，不以“借鉴了”或无溢出代替风格判断。数据不造，任务不硬塞一页。
+- Verification: 2026-10-23完成Infra八页初版。2026-10-25按Quarto重排后逐页查看纯白/石墨共16张PNG、其他四色代表页及原生200%图面；六色、Chrome100/150/200%、图像放大、目录与备注通过。第3/4/7页统一为左说明右证据，第5页同尺度16/8MB条形就近标注差异；放大图标题也改为正式关系说明。正文、条件、全部备注已审读，理论模型与已验证结果边界保留。
+- Evidence: `assets/content/report.css`、`scripts/build_content.py`、`prompts/scenes/report.txt`、`references/visual-system.md`；2026-10-23及2026-10-25 Infra汇报归档run；`archive/checks/quarto-template-20261025/`源图、并排比较与验收记录。
 
 ## ERR-20261005-087 — 文本规范化后的哈希与原始文件哈希混用
 
@@ -185,16 +217,16 @@
 - Fingerprint: `delivery:overview-record-links-have-mixed-file-types`
 - Status: active
 - First seen: 2026-10-04
-- Last seen: 2026-10-04
-- Occurrences: 1
-- Scope: 五篇学习改版的总览同步与封存
-- Symptom: 五项成品发布成功后，总览更新因 Softmax 的制作记录指向 run.json 而断言失败；其他条目使用 delivery.md。
-- Root cause: 同步脚本只接受 delivery.md，未在发布前核对历史条目的实际记录格式。
-- Wrong assumption/action: 将同一总览中的旧记录链接视为统一契约，发布后才执行结构断言。
-- Correct approach: 同时识别现有 run.json 与 delivery.md；从已完成阶段恢复总览和封存，不重复发布、不覆盖已保存的原旧版。
-- Prevention check: 发布前解析全部目标条目并预构建总览；同步失败按已完成阶段恢复，不能从头重复执行有副作用的发布链。
-- Verification: 五项最终HTML与暂存哈希一致，五份旧版保留；总览57个本地链接、成品394个本地链接核对通过。
-- Evidence: `archive/checks/学习内容优化-20261004/finalize.py`、`resume_finalize.py`、`published-check.json`。
+- Last seen: 2026-10-25
+- Occurrences: 2
+- Scope: 总览同步、链接预检与工作版本封存
+- Symptom: 原五篇改版中，Softmax制作记录指向run.json而非delivery.md导致更新断言失败；后续预检又用is_file误拒了实际含index.html的CS336目录入口。
+- Root cause: 校验器按单一文件类型理解总览，没有区分JSON/Markdown记录与目录入口。
+- Wrong assumption/action: 将同一总览中的历史入口视为统一文件契约；早期还在发布后才执行结构断言。
+- Correct approach: 核对链接实际目标，识别现有记录与目录入口，并在发布前预检；中途失败从已完成阶段恢复，不重复发布或覆盖已保存的旧版。
+- Prevention check: 发布前解析全部目标条目并预构建总览；目录链接检查实际目录和入口，不一律要求is_file。同步失败按已完成阶段恢复，不能从头重复执行有副作用的发布链。
+- Verification: 原五篇HTML和旧版保留检查通过。2026-10-25确认CS336目录含index.html后修正预检，全部74个总览链接有效，Infra新入口与暂存哈希一致，旧交付及source快照保持。
+- Evidence: `archive/checks/学习内容优化-20261004/finalize.py`、`resume_finalize.py`、`published-check.json`；20261025 Infra汇报归档run的`work/finalize.py`及`archive/checks/quarto-template-20261025/archive-manifest.json`。
 
 ## ERR-20261004-081 — 滚动数组别名写入没有映射到实际存储行
 

@@ -212,9 +212,14 @@
   const tocLinks = document.getElementById('toc-links');
   const tocButton = document.getElementById('toc-toggle');
   const isReport = document.body.classList.contains('scene-report');
+  const tocBackdrop = document.getElementById('toc-backdrop');
   const compactLayout = matchMedia('(max-width: 1000px)');
   const isCompact = () => compactLayout.matches || root.classList.contains('reader-compact');
-  const updateTocState = () => tocButton.setAttribute('aria-expanded', String(isReport || isCompact() ? toc.classList.contains('open') : !document.body.classList.contains('toc-hidden')));
+  const updateTocState = () => {
+    const open = isReport || isCompact() ? toc.classList.contains('open') : !document.body.classList.contains('toc-hidden');
+    tocButton.setAttribute('aria-expanded', String(open));
+    if (tocBackdrop) tocBackdrop.hidden = !open;
+  };
   window.updateContentTocLayout = () => {
     if (isReport) return;
     const zoom = Number(getComputedStyle(root).zoom) || 1;
@@ -432,6 +437,7 @@
     current = Math.max(0, Math.min(slides.length - 1, index));
     slides.forEach((slide, i) => { slide.hidden = i !== current; });
     document.getElementById('slide-counter').textContent = `${current + 1} / ${slides.length}`;
+    root.style.setProperty('--report-progress', `${current / Math.max(1, slides.length - 1) * 100}%`);
     document.getElementById('notes-content').textContent = slides[current].dataset.notes || '本页未附讲者备注。';
     previous.disabled = current === 0;
     next.disabled = current === slides.length - 1;
@@ -440,12 +446,17 @@
       else link.removeAttribute('aria-current');
     });
   };
+  const closeToc = () => {
+    toc.classList.remove('open'); updateTocState(); tocButton.focus({preventScroll: true});
+  };
+  document.getElementById('toc-close')?.addEventListener('click', closeToc);
+  tocBackdrop?.addEventListener('click', closeToc);
   slides.forEach((slide, index) => {
     const link = document.createElement('a');
     link.href = `#slide-${index + 1}`;
     link.textContent = `${String(index + 1).padStart(2, '0')}  ${slide.querySelector('h1, h2, h3')?.textContent || '页面'}`;
     link.addEventListener('click', event => {
-      event.preventDefault(); showSlide(index); toc.classList.remove('open'); tocButton.setAttribute('aria-expanded', 'false');
+      event.preventDefault(); showSlide(index); closeToc();
     });
     tocLinks.append(link);
   });
@@ -460,10 +471,14 @@
     if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); showSlide(current - 1); }
     if (event.key === 'Home') { event.preventDefault(); showSlide(0); }
     if (event.key === 'End') { event.preventDefault(); showSlide(slides.length - 1); }
+    if (event.key.toLowerCase() === 'm') { event.preventDefault(); tocButton.click(); }
     if (event.key.toLowerCase() === 'n') toggleNotes();
-    if (event.key === 'Escape') { toc.classList.remove('open'); tocButton.setAttribute('aria-expanded', 'false'); notes.hidden = true; notesButton.setAttribute('aria-expanded', 'false'); }
+    if (event.key === 'Escape') { if (toc.classList.contains('open')) closeToc(); notes.hidden = true; notesButton.setAttribute('aria-expanded', 'false'); }
   });
-  const resizeSlides = () => root.style.setProperty('--slide-scale', String(Math.min((innerWidth - 48) / 1280, (innerHeight - 152) / 720)));
+  const resizeSlides = () => {
+    const frame = document.querySelector('.presentation').getBoundingClientRect();
+    root.style.setProperty('--slide-scale', String(Math.min(frame.width * .95 / 1280, frame.height * .95 / 720)));
+  };
   addEventListener('resize', resizeSlides);
   window.activateContentExport = async ({ index }) => {
     document.dispatchEvent(new Event('content-export'));

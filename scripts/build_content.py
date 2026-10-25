@@ -44,6 +44,26 @@ def font_assets(text):
 
 
 @lru_cache(maxsize=1)
+def report_font_assets():
+    """内嵌 Quarto 原版字体文件，保留原字节与许可。"""
+    vendor = ROOT / 'assets/vendor'
+    css = []
+    for family, folder, filename, weight, style in (
+        ('Source Sans Pro', 'source-sans-pro', 'source-sans-pro-regular.woff', 400, 'normal'),
+        ('Source Sans Pro', 'source-sans-pro', 'source-sans-pro-semibold.woff', 600, 'normal'),
+        ('Source Sans Pro', 'source-sans-pro', 'source-sans-pro-italic.woff', 400, 'italic'),
+        ('Report Icons', 'font-awesome', 'fa-solid-900.woff2', 900, 'normal'),
+    ):
+        path = vendor / folder / filename
+        kind = path.suffix[1:]
+        data = base64.b64encode(path.read_bytes()).decode()
+        css.append(f'@font-face{{font-family:"{family}";font-weight:{weight};font-style:{style};font-display:swap;src:url(data:font/{kind};base64,{data}) format("{kind}");}}')
+    licenses = '\n\n'.join((vendor / folder / 'OFL.txt').read_text(encoding='utf-8')
+                           for folder in ('source-sans-pro', 'font-awesome'))
+    return '\n'.join(css), '<template id="report-font-licenses">' + escape(licenses) + '</template>'
+
+
+@lru_cache(maxsize=1)
 def math_assets():
     css = (KATEX_DIR / 'katex.min.css').read_text(encoding='utf-8')
 
@@ -148,6 +168,10 @@ def build_content(source, *, scene='learning', output, title=None, theme='light'
     # 控件文案和动态步骤使用同一个离线字形子集。
     body_font_text = unescape(body) + template + runtime
     font_css, font_license = font_assets(body_font_text + title + description + meta + '学习笔记技术博客技术汇报目录本文目录备注汇报目录讲者备注本页未附讲者备注。回到开头浅色深色上一页下一页翻页切换到主题跳到正文查看大图图解适合窗口放大关闭正文字号减小增大点击复制代码已复制复制失败请手动选择复制章节链接展开全部收起行上次读到继续阅读忽略补充说明向左右滚动查看完整表格前面的列→←↑−#')
+    if scene == 'report':
+        report_css, report_license = report_font_assets()
+        font_css += report_css
+        font_license += report_license
     values = {
         'TITLE': escape(title), 'DESCRIPTION': f'<p class="description">{escape(description)}</p>' if description else '',
         'META': escape(meta), 'LABEL': LABELS[scene], 'SCENE': scene, 'THEME': theme,

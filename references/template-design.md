@@ -17,7 +17,7 @@
 | 阅读时长、相关文章、分类、归档、RSS、SEO | PaperMod 等站点功能 | 需明确阅读速度估计或多文章发布结构；当前不捏造时长与站点信息 |
 | 评论、点赞、统计、订阅 | 需要服务端或第三方账户、隐私与发布约定 | 当前离线内容不接入 |
 
-六套主题统一覆盖界面、正文、代码及内联图；固定证据原图保持原样。采用思路并独立实现，不复制上游模板代码。
+六套主题统一覆盖界面、正文、代码及内联图；固定证据原图保持原样。页面与运行时独立实现；汇报对照 Quarto 默认演示复刻排版，按许可内嵌实际使用的 Source Sans Pro 和 Font Awesome 字体，来源见[第三方资源](third-party.md)。
 
 ## 原有参考
 
@@ -35,7 +35,7 @@
 
 学习与博客共用左侧目录和连续正文模板，内容分别按概念依赖和论点—证据组织，详略服从读者目的；目录可收起，字号可调10–24px，图片和SVG可点击放大。长文顶部工具栏用小型上箭头收起、固定下箭头展开，悬停和无障碍标签说明用途；记住选择，开合保持当前阅读位置；缩小窗口及缩放时控件可换行。汇报固定16:9舞台。两类HTML以桌面与缩放使用为验收范围，不另做手机适配验收。共用CSS变量管理背景、文字、代码与图解；普通图形节点使用协调的中性底色，强调色按对象语义少量使用，详见[成品视觉规则](visual-system.md)。证据原图不反色。主题切换记住选择，不重载正文或汇报。
 
-新增HTML默认采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；构建时仅内嵌本篇实际字形的WOFF2子集及许可。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。学习/博客提供可搜索的字体下拉框：默认字体、系统界面字体、浏览器配置的无衬线/衬线/等宽类别，以及读者主动授权后由浏览器返回的本机字体；按字体家族合并字重，名称与返回的全名均可搜索。只记住所选字体，不缓存整台电脑的字体列表。切换保持当前阅读位置；工具栏、代码、KaTeX公式和固定布局的SVG图中文字保持原字体。读取失败、返回空列表或接口不支持时明确提示，保留基础选项；不承诺所有浏览器均支持枚举。接口依据[Chrome Local Font Access说明](https://developer.chrome.com/docs/capabilities/web-apis/local-fonts)及[接口规范](https://wicg.github.io/local-font-access/)。汇报与小红书不增加字体切换。实际字体以浏览器核验为准。
+学习/博客默认采用Noto Sans SC（思源黑体系列）可变字体，正文400、标题600–650字重；汇报标题采用500字重，正文英文与数字另用Source Sans Pro，按上述Quarto比例统一校准。中文构建时仅内嵌本篇实际字形的WOFF2子集及许可，汇报原版英文字体按原文件内嵌。字体来源与固定版本见[字体说明](../assets/vendor/noto-sans-sc/README.md)。学习/博客提供可搜索的字体下拉框：默认字体、系统界面字体、浏览器配置的无衬线/衬线/等宽类别，以及读者主动授权后由浏览器返回的本机字体；按字体家族合并字重，名称与返回的全名均可搜索。只记住所选字体，不缓存整台电脑的字体列表。切换保持当前阅读位置；工具栏、代码、KaTeX公式和固定布局的SVG图中文字保持原字体。读取失败、返回空列表或接口不支持时明确提示，保留基础选项；不承诺所有浏览器均支持枚举。接口依据[Chrome Local Font Access说明](https://developer.chrome.com/docs/capabilities/web-apis/local-fonts)及[接口规范](https://wicg.github.io/local-font-access/)。汇报与小红书不增加字体切换。实际字体以浏览器核验为准。
 
 长文的代码复制、折叠与续读功能参考[NexT功能文档](https://theme-next.js.org/docs/theme-settings/miscellaneous)，章节定位参考[Blowfish](https://blowfish.page/docs/configuration/)，补充内容组织参考[Material折叠内容](https://squidfunk.github.io/mkdocs-material/reference/admonitions/)。仅借鉴阅读行为，继续使用本项目单文件HTML；不引入它们的框架、评论或访问统计。代码高亮使用[Pygments](https://pygments.org/docs/quickstart/)，在构建阶段完成。
 
@@ -57,6 +57,6 @@
 
 行内数学重排依据[KaTeX选项说明](https://katex.org/docs/options.html)：其默认允许在最外层关系或二元运算符后断行。本项目让短表达式整体随段落换行，较长表达式仍在受限宽度内重排，不改变渲染模式或数学记号。
 
-汇报的可选封面借鉴[Slidev的cover与default布局分工](https://sli.dev/builtin/layouts.html)：标题页强调主标题与上下文，正文页承载证据。本项目通过一个样式修饰类及显式`cover: true`选择，不安装Slidev、不自动将所有第一页视作封面。
+汇报的封面与正文对照[Quarto 默认演示](https://quarto.org/docs/presentations/revealjs/demo/)：封面主标题和导语居中，正文从顶部左对齐，使用同一字号比例与轻量导航。通过`slide-cover`或显式`cover: true`选择封面，不自动将所有第一页视作封面。具体字号、字体、配色和页边距由`report.css`统一维护，见[成品视觉规则](visual-system.md)。
 
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

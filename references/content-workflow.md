@@ -74,7 +74,7 @@ python -X utf8 scripts/build_content.py "<work_entry>" --scene report --output "
 python -X utf8 scripts/render_content.py "<run_dir>/work/index.html" --scene report --output-dir "<artifact_dir>" --theme light
 ```
 
-`render_content.py` 使用模板的 `setContentTheme` 和 `activateContentExport({index})`，验证主题切换、键盘翻页、备注和每页边界；不猜测其他演示框架接口。实际验收须逐页逐句审读全部正文、标题、副标题、图中标签、图注、表下注、页脚、小字和讲者备注，确认每项都属于本次实际汇报且有依据，并核对成果重点、图表数据与跨页衔接。确认备注默认隐藏、主动开合有效、PNG不含备注；隐藏不等于可以省略内容审核。自定义HTML需保留模板约定。`--browser-executable` 可指定已有Chromium，默认复用Playwright共享缓存。
+`render_content.py` 使用模板的 `setContentTheme` 和 `activateContentExport({index})`，验证主题切换、键盘翻页、备注和每页边界；不猜测其他演示框架接口。汇报沿用 Quarto 默认主题的封面、正文与字体比例，目录按钮位于左下；`M`开合目录，关闭按钮、遮罩或`Esc`收起并返回目录按钮，点选章节后直达该页。页码位于右上，底边细线随翻页更新；导出隐藏工具和进度线，页内页码保留。实际验收须逐页逐句审读全部正文、标题、副标题、图中标签、图注、表下注、页脚、小字和讲者备注，确认每项都属于本次实际汇报且有依据，并核对成果重点、图表数据与跨页衔接。确认备注默认隐藏、主动开合有效、PNG不含备注；隐藏不等于可以省略内容审核。自定义HTML需保留模板约定。`--browser-executable` 可指定已有Chromium，默认复用Playwright共享缓存。
 
 ## 检查与汇总
 

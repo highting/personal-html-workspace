@@ -1,0 +1,23 @@
+[
+  {
+    "file": "source-sans-pro-regular.woff",
+    "url": "https://quarto.org/site_libs/revealjs/dist/theme/fonts/source-sans-pro/source-sans-pro-regular.woff",
+    "sha256": "d4eaa48ba450f4dd2d024ab5b0e895c73c81475718e5453fd1890254c16b7a57",
+    "bytes": 114324,
+    "version": "Version 1.050;PS Version 1.000;hotconv 1.0.70;makeotf.lib2.5.5900"
+  },
+  {
+    "file": "source-sans-pro-semibold.woff",
+    "url": "https://quarto.org/site_libs/revealjs/dist/theme/fonts/source-sans-pro/source-sans-pro-semibold.woff",
+    "sha256": "b0abd2736335424f9fd3eb27974a36d03783b3db141e0801dca7d3a635218b46",
+    "bytes": 115648,
+    "version": "Version 1.050;PS Version 1.000;hotconv 1.0.70;makeotf.lib2.5.5900"
+  },
+  {
+    "file": "source-sans-pro-italic.woff",
+    "url": "https://quarto.org/site_libs/revealjs/dist/theme/fonts/source-sans-pro/source-sans-pro-italic.woff",
+    "sha256": "05d3615fdbe7d35c62d6a1308dc48e3985016b69e65926ed37b99fe7e6b297dc",
+    "bytes": 98556,
+    "version": "Version 1.050;PS Version 1.000;hotconv 1.0.70;makeotf.lib2.5.5900"
+  }
+]
