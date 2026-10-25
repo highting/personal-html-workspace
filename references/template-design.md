@@ -59,4 +59,6 @@
 
 汇报的封面与正文对照[Quarto 默认演示](https://quarto.org/docs/presentations/revealjs/demo/)：封面主标题和导语居中，正文从顶部左对齐，使用同一字号比例与轻量导航。通过`slide-cover`或显式`cover: true`选择封面，不自动将所有第一页视作封面。具体字号、字体、配色和页边距由`report.css`统一维护，见[成品视觉规则](visual-system.md)。
 
+在这一基础上，证据页可参考[Datawrapper的文字与标注](https://www.datawrapper.de/blog/text-in-data-visualizations)和[成对差异图](https://www.datawrapper.de/academy/customizing-your-range-plot)，将名称、数值与关键差距放在读者需要的位置；常用页型比例可参考[Neversink实际演示](https://gureckis.github.io/slidev-theme-neversink/example/#/1)。连续技术图解可参考[Jay Alammar的整体到局部展开](https://jalammar.github.io/illustrated-transformer/)，卡片页序可参考[The Pudding的静态图文叙事](https://pudding.cool/process/how-to-make-dope-shit-part-3/)。这些参考用于改善信息组织与图文分工，适配建议属于本项目判断；统一到现有场景字体和配色，不直接移入彩色皮肤、贴纸或滚动效果，也不为展示页型增加内容。
+
 代码的文件名、重点行与复制操作参考[Nextra代码功能](https://nextra.site/docs/guide/syntax-highlighting)，长行可选换行借鉴[Elementor Code Highlight的Word Wrap](https://elementor.com/help/code-highlight-pro/)行为。只在出现水平溢出时提供换行入口，以控制工具栏密度；不引入相关框架或插件。

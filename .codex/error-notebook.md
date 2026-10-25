@@ -8,7 +8,8 @@
 
 |ID / Fingerprint|First seen|Last seen|Occurrences|
 |---|---|---|---|
-|ERR-20261022-088|—|2026-10-25|5|
+|ERR-20261022-088|—|2026-10-25|6|
+|ERR-20261003-050|—|2026-10-25|2|
 |ERR-20261004-082|—|2026-10-25|2|
 |ERR-20261003-072|—|2026-10-23|2|
 |ERR-20261003-064 / `animation:step-reveal-substitutes-for-algorithm-state-transitions`|—|—|2|
@@ -38,7 +39,7 @@
 |ERR-20261023-091|`content:shared-scope-trimming-blurs-learning-and-blog-depth`|共同精简未分开学习/博客深度。|学习覆盖主题内重要相关知识并补理解断点；博客只补当前原理所需前提，讲通即止，保留理由条件。|四场景加载及边界复核通过；`prompts/scenes/learning.txt`。|
 |ERR-20261022-090|`image-viewer:svg-styles-depend-on-uncloned-figure`|类只在figure，克隆SVG后失配。|SVG绘制样式不只依赖外部容器；放大后比fill/stroke、字号、锚点并实看。|两SVG放大样式一致；`verify_report.py`及viewer截图。|
 |ERR-20261022-089|`qa:font-query-before-cdp-css-enable`|字体查询前未启用CDP域。|同会话先`DOM.enable`、`CSS.enable`再查字体；启用工具前冻结资源结果。|字体、备注、导航通过；`verify_report.py`。|
-|ERR-20261022-088|`report:prose-completeness-overrides-audience-and-evidence`|混淆观众页、讲者展开与制作说明；中文视觉未校准。|先审整组论证，任务可跨页，突出成果依据；指定参照同视口比较标题、行长、双栏、断行。制作说明不入正文/备注，研究边界保留，数据不造。|16张PNG、六色、原生缩放等通过；`archive/checks/quarto-template-20261025/`。|
+|ERR-20261022-088|`report:prose-completeness-overrides-audience-and-evidence`|混淆观众页、口头展开与制作说明，默认个人成果主线不适合所有用途；中文视觉未校准。|先辨别成果/进展/方案/分享的目的与听众，再按主判断、证据、条件、口头展开审页组；视觉效果优先、文稿焦点其次。指定参照同视口比标题、行长、双栏；制作说明不入正文/备注，边界保留，数据不造。|历史16张PNG、六色、原生缩放通过；`archive/checks/quarto-template-20261025/`。本次类型规则及四场景Prompt加载通过。|
 |ERR-20261005-087|`publish:normalized-text-hash-compared-with-raw-bytes`|预检文本哈希与发布字节哈希混用。|明确规范化文本/原字节契约，两端读取一致；HTML与QA继续用原字节SHA-256。|四入口字节一致；`published-html.json`。|
 |ERR-20261005-086|`animation:svg-child-visibility-overrides-hidden-parent`|子元素visible覆盖父组hidden。|停用整组用`display:none`，再激活清除；检查有/无指针转换和回退。|199动画全帧通过；`animation-qa.json`。|
 |ERR-20261005-085|`content:raw-runtime-and-math-caption-cross-markdown-escaping`|script/数学进入普通Markdown转义。|构建后注入原始运行时；先保护公式再转义普通文字；离线查pageerror、KaTeX和交互。|21页无脚本/公式错；`final-integrity.json`。|
@@ -80,7 +81,7 @@
 |ERR-20261003-053|`migration:drop-panel-tree-removes-sibling-controls`|删除图容器连带删除按钮/说明。|先清点SVG、控件、说明及事件依赖；只解包容器保非SVG节点，迁后查数量并实点。|三按钮及状态恢复；`work/review/interactions.json`。|
 |ERR-20261003-052|`migration:lazy-image-decode-blocks-reading-ready`|旧lazy图片阻塞全图decode就绪。|迁后查图片complete、`contentReadingReady`与续读；按当前就绪契约处理旧lazy，本篇设eager。|三图及ready恢复；`delivery/qa.json`。|
 |ERR-20261003-051|`maintenance:powershell-concatenation-in-path-pair`|数组内加法与逗号边界不明。|路径拼接分别加括号；迁移前逐对解析绝对路径并核对工作区范围，不边解析边移动。|38项11289文件哈希一致；`archive/manifest.json`。|
-|ERR-20261003-050|`content:fixed-figure-count-overrides-explanatory-need`|固定图数替代材料判断。|图数按解释价值和重复度取舍，无默认数/最低数；用户指定则遵从，不为凑数配图。|四场景一/零图审核完成；`references/content-plan.md`。|
+|ERR-20261003-050|`content:fixed-figure-count-overrides-explanatory-need`|图数或全篇总量替代局部解释需求。|学习/博客优先文稿质量与有效图片密度；按重要知识段复核图解分布，补机制空档，不能以全篇图多代替覆盖。图数按解释收益取舍，无固定配额，用户指定则遵从。|历史四场景一/零图审核完成；`references/content-plan.md`。本次核实Infra末章缺图并更新共同/场景规则，四场景Prompt加载通过。|
 |ERR-20261003-049|`authoring:latex-backslashes-consumed-by-outer-script-string`|外层JS先消费LaTeX转义，内层raw无效。|数学原文单独补丁保存再读取；逐层查分隔符、反斜杠、控制字符及公式DOM/图面。|KaTeX及200%图核对通过；`Hyperball博客-图文版.md`。|
 |ERR-20261003-048|`content:quality-review-confused-with-rendering-checks`|页面QA替代理解审核，审读未绑定成品。|全读原稿/成稿，按范围核对解释、数值来源、图文和边界；审读绑定当前HTML/快照，缺失/空白/过期/未处理警告不发布，HTML改后重审。|无审读被拒，30组用例通过；`scripts/content_review.py`。|
 |ERR-20261003-047|`publish:move-old-entry-before-copy-without-rollback`|移旧再复制且无回滚。|同层完整暂存后备旧并切换，失败恢复且不写成功；临时目录注入复制/移动/安装故障，查首次发布、旧版、备份、记录及清理范围。|5测试22场景通过；`scripts/publish_utils.py::replace_delivery`。|
